@@ -1,0 +1,81 @@
+---
+title: "TestExample"
+author: "Jennifer Blanc"
+date: "2024-07-11"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(data.table)
+library(tidyverse)
+```
+
+## Sample Individuals based on PC coordinates
+
+Plot PC1 vs PC2 colored by self-identified ethnic background
+```{r}
+# Load data and combine
+dfPCA <- fread("../endpoints/ukbb/whole_biobank.eigenvec")
+dfEB <- fread("../endpoints/ukbb/EthnicBackground_21000.txt")
+df <- inner_join(dfPCA, dfEB)
+
+# Use continental labels 
+df <- df %>% mutate(continental = case_when(EthnicBackground_21000 %in% c(4, 4001, 4002, 4003) ~ "Africa", EthnicBackground_21000 %in% c(1, 1001, 1002, 1003) ~ "Europe", EthnicBackground_21000 %in% c(2, 2001, 2002, 2003, 2004) ~ "Mixed", EthnicBackground_21000 %in% c(3, 3001, 3002, 3003, 3004) ~ "Asia"))
+
+# Make PCA plot color based on self identified Ethnic backgroud
+ggplot(data = df, aes(x = PC1, y = PC2, color = continental)) + geom_point() + theme_classic()
+```
+
+Sample individuals each on opposite ends of PC1 
+```{r}
+# Sample from each end of PC1
+dfEur <- df %>% arrange(desc(PC1)) %>% slice_head(n = 11000)
+dfAfr <- df %>% arrange(PC1) %>% slice_head(n = 6000)
+
+# Plot data
+tmp <- rbind(dfEur, dfAfr)
+ggplot(data = tmp, aes(x = PC1, y = PC2, color = continental)) + geom_point() + theme_classic()
+```
+
+Make mixed panels with different amounts of overlap
+```{r}
+# Sample Test panel 
+tmpAfr <- dfAfr %>% sample_n(1000) %>% mutate(POP = "Afr")
+tmpEur <- dfEur  %>% sample_n(1000) %>% mutate(POP = "Eur")
+dfTEST <- rbind(tmpAfr, tmpEur) %>% select("#FID", "IID", "POP")
+fwrite(dfTEST,"../data/TestExample/ids/test_ids/test.text", row.names = F, col.names = T, quote = F, sep = "\t")
+
+# Sample GWAS panels
+## Complete Overlap
+tmpAfr <- dfAfr %>% filter(!IID %in% dfTEST$IID) %>% sample_n(5000) %>% mutate(POP = "Afr")
+tmpEur <- dfEur %>% filter(!IID %in% dfTEST$IID) %>% sample_n(5000) %>% mutate(POP = "Eur")
+dfGWAS <- rbind(tmpAfr, tmpEur) %>% select("#FID", "IID", "POP")
+fwrite(dfGWAS,"../data/TestExample/ids/gwas_ids/complete.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+
+## No Overlap
+dfGWAS <- dfEur %>% filter(!IID %in% dfTEST$IID) %>% sample_n(10000) %>% mutate(POP = "Eur")
+fwrite(dfGWAS,"../data/TestExample/ids/gwas_ids/none.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+
+## Half Overlap
+tmpAfr <- dfAfr %>% filter(!IID %in% dfTEST$IID) %>% sample_n(2500) %>% mutate(POP = "Afr")
+tmpEur <- dfEur %>% filter(!IID %in% dfTEST$IID) %>% sample_n(7500) %>% mutate(POP = "Eur")
+dfGWAS <- rbind(tmpAfr, tmpEur) %>% select("#FID", "IID", "POP")
+fwrite(dfGWAS,"../data/TestExample/ids/gwas_ids/half.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+
+## Quarter
+tmpAfr <- dfAfr %>% filter(!IID %in% dfTEST$IID) %>% sample_n(1250) %>% mutate(POP = "Afr")
+tmpEur <- dfEur %>% filter(!IID %in% dfTEST$IID) %>% sample_n(8750) %>% mutate(POP = "Eur")
+dfGWAS <- rbind(tmpAfr, tmpEur) %>% select("#FID", "IID", "POP")
+fwrite(dfGWAS,"../data/TestExample/ids/gwas_ids/quarter.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+
+## Three Quarters
+## GWAS
+tmpAfr <- dfAfr %>% filter(!IID %in% dfTEST$IID) %>% sample_n(3750) %>% mutate(POP = "Afr")
+tmpEur <- dfEur %>% filter(!IID %in% dfTEST$IID) %>% sample_n(6250) %>% mutate(POP = "Eur")
+dfGWAS <- rbind(tmpAfr, tmpEur) %>% select("#FID", "IID", "POP")
+fwrite(dfGWAS,"../data/TestExample/ids/gwas_ids/threequarter.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+```
+
+
+
