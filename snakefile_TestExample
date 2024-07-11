@@ -8,7 +8,7 @@ GWAS=["complete", "half", "quarter", "threequarter", "none"]
 
 rule all:
     input:
-        expand("data/TestExample/popAF/{gwas}/{contrasts}/popAF_{chr}.Afr.afreq", chr=CHR, gwas=GWAS, contrasts=CONTRASTS)
+        expand("data/TestExample/r/{gwas}/{contrasts}_chr{chr}.rvec", chr=CHR, gwas=GWAS, contrasts=CONTRASTS)
 
 # Get allele frequencies
 
@@ -93,4 +93,17 @@ rule get_popAF:
 	      --threads 8 \
         --memory 38000 \
         --out {params.prefix_out}
+        """
+
+# Compute r vectors
+
+rule compute_r:
+    input:
+        afr="data/TestExample/popAF/{gwas}/{contrasts}/popAF_{chr}.Afr.afreq",
+	      eur="data/TestExample/popAF/{gwas}/{contrasts}/popAF_{chr}.Eur.afreq"
+    output:
+        rvec="data/TestExample/r/{gwas}/{contrasts}_chr{chr}.rvec"
+    shell:
+        """
+        Rscript code/TestExample/compute_afr-eur_r.R {input.afr} {input.wbs} {output.rvec}
         """
