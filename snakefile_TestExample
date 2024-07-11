@@ -8,9 +8,7 @@ GWAS=["complete", "half", "quarter", "threequarter", "none"]
 
 rule all:
     input:
-        expand("data/TestExample/variantFreq/{gwas}_{chr}.afreq", chr=CHR, gwas=GWAS),
-        expand("data/TestExample/variantFreq/test_{chr}.afreq", chr=CHR, gwas=GWAS)
-
+        expand("data/TestExample/variants/{gwas}/{contrasts}/overlappingSNPs_chr{chr}.txt", chr=CHR, gwas=GWAS)
 
 # Get allele frequencies
 
@@ -54,4 +52,17 @@ rule get_AF_Test:
 	      --threads 8 \
         --memory 38000 \
         --out {params.prefix_out_test}
+        """
+
+# Get overlapping SNPs
+
+rule get_overlapping_snps:
+    input:
+        freq_test="data/TestExample/variantFreq/test_{chr}.afreq",
+	      freq_gwas="data/TestExample/variantFreq/{gwas}_{chr}.afreq"
+    output:
+        "data/TestExample/variants/{gwas}/{contrasts}/overlappingSNPs_chr{chr}.txt"
+    shell:
+        """
+        Rscript code/TestExample/overlapping_snps.R {input.freq_gwas} {input.freq_test} {output}
         """
