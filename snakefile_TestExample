@@ -8,7 +8,7 @@ GWAS=["complete", "half", "quarter", "threequarter", "none"]
 
 rule all:
     input:
-        expand("data/TestExample/variants/{gwas}/{contrasts}/overlappingSNPs_chr{chr}.txt", chr=CHR, gwas=GWAS, contrasts=CONTRASTS)
+        expand("data/TestExample/popAF/{gwas}/{contrasts}/popAF_{chr}.Afr.afreq", chr=CHR, gwas=GWAS, contrasts=CONTRASTS)
 
 # Get allele frequencies
 
@@ -65,4 +65,32 @@ rule get_overlapping_snps:
     shell:
         """
         Rscript code/TestExample/overlapping_snps.R {input.freq_gwas} {input.freq_test} {output}
+        """
+
+# Get allele freqeuncy contrasts
+
+rule get_popAF:
+    input:
+        test="data/TestExample/ids/test_ids/test.txt",
+        snps="data/TestExample/variants/{gwas}/{contrasts}/overlappingSNPs_chr{chr}.txt"
+    output:
+        "data/TestExample/popAF/{gwas}/{contrasts}/popAF_{chr}.Afr.afreq",
+        "data/TestExample/popAF/{gwas}/{contrasts}/popAF_{chr}.Eur.afreq"
+    params:
+        prefix_in="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
+        prefix_out="data/TestExample/popAF/{gwas}/{contrasts}/popAF_{chr}"
+    resources:
+        mem_mb=38000,
+        time="00:30:00"
+    shell:
+        """
+        plink2 --pfile {params.prefix_in} \
+	      --extract {input.snps} \
+        --keep {input.test} \
+	      --freq \
+        --within {input.test} POP \
+	      --loop-cats POP \
+	      --threads 8 \
+        --memory 38000 \
+        --out {params.prefix_out}
         """
