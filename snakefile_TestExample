@@ -8,7 +8,7 @@ GWAS=["complete", "half", "quarter", "threequarter", "none"]
 
 rule all:
     input:
-        expand("data/TestExample/variants/{gwas}/{contrasts}/overlappingSNPs_chr{chr}.txt", chr=CHR, gwas=GWAS)
+        expand("data/TestExample/variants/{gwas}/{contrasts}/overlappingSNPs_chr{chr}.txt", chr=CHR, gwas=GWAS, contrasts=CONTRASTS)
 
 # Get allele frequencies
 
