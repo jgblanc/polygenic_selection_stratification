@@ -8,7 +8,7 @@ GWAS=["complete", "half", "quarter", "threequarter", "none"]
 
 rule all:
     input:
-        expand("data/ukbb/pca/{gwas}/{chrtype_gwas}/pca.eigenvec", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test=CHRTYPE_TEST)
+        expand("data/TestExample/variantFreq/{gwas}_{chr}.afreq", chr=CHR, gwas=GWAS)
 
 
 # Get allele frequencies
