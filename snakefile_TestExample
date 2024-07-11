@@ -105,5 +105,5 @@ rule compute_r:
         rvec="data/TestExample/r/{gwas}/{contrasts}_chr{chr}.rvec"
     shell:
         """
-        Rscript code/TestExample/compute_afr-eur_r.R {input.afr} {input.wbs} {output.rvec}
+        Rscript code/TestExample/compute_afr_eur_r.R {input.afr} {input.eur} {output.rvec}
         """

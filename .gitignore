@@ -12,6 +12,7 @@ analysis/site_libs
 data/*/variantFreq/*
 data/*/variants/*
 data/*/popAF/*
+data/*/r/*
 output/*
 logs/*
 .snakemake/
