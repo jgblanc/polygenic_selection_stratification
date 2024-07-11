@@ -16,7 +16,7 @@ rule all:
 
 rule get_AF_GWAS:
     input:
-        gwas="data/TestExample/ids/gwas_ids/{gwas}.ids"
+        gwas="data/TestExample/ids/gwas_ids/{gwas}.txt"
     output:
         gwas="data/TestExample/variantFreq/{gwas}_{chr}.afreq"
     params:
@@ -37,7 +37,7 @@ rule get_AF_GWAS:
 
 rule get_AF_Test:
     input:
-        test="data/TestExample/ids/test_ids/test.ids"
+        test="data/TestExample/ids/test_ids/test.txt"
     output:
         test="data/TestExample/variantFreq/test_{chr}.afreq"
     params:
