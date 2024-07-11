@@ -1,0 +1,66 @@
+# Snakefile to run the main pipeline for any dataset
+DATASET = ["TestExample"]
+CHR =[]
+for i in range(1, 23):
+  CHR.append(str(i))
+CONTRASTS = ["Afr-Eur"]
+GWAS=["complete", "half", "quarter", "threequarter", "none"]
+
+
+rule all:
+    input:
+        expand("data/{dataset}/r/{gwas}/{contrasts}_all_standardized.rvec", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS)
+
+# Get sample variance of GWAS panel genotypes
+
+rule get_dosage_file:
+    input:
+        gwas="data/{dataset}/ids/gwas_ids/{gwas}.txt",
+        snps="data/{dataset}/variants/{gwas}/{contrasts}/overlappingSNPs_chr{chr}.txt",
+        gp_genos="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen"
+    output:
+        "/scratch/jgblanc/stratification-data_analysis/data/{dataset}/{gwas}/{contrasts}/dosages/dosages_{chr}.traw"
+    params:
+        prefix_in="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
+        prefix_out="/scratch/jgblanc/stratification-data_analysis/data/{dataset}/{gwas}/{contrasts}/dosages/dosages_{chr}"
+    resources:
+        mem_mb=38000,
+        time="00:30:00"
+    shell:
+        """
+        plink2 --pfile {params.prefix_in} \
+        --extract {input.snps} \
+        --keep {input.gwas} \
+        --recode A-transpose \
+	      --threads 8 \
+        --memory 38000 \
+        --out {params.prefix_out}
+        """
+
+rule calculate_GWAS_variance:
+    input:
+        "/scratch/jgblanc/stratification-data_analysis/data/{dataset}/{gwas}/{contrasts}/dosages/dosages_{chr}.traw"
+    output:
+        "data/{dataset}/gwas_variance/{gwas}/{contrasts}/variance_{chr}.txt"
+    resources:
+	      time="10:00:00"
+    shell:
+        """
+        Rscript code/calculate_FGr/compute_GWAS_variance.R {input} {output}
+        """
+
+# Standardize r to have length 1
+
+rule standardize_r:
+    input:
+        r=expand("data/{{dataset}}/r/{{gwas}}/{{contrasts}}_chr{chr}.rvec", chr=CHR),
+        variance = expand("data/{{dataset}}/gwas_variance/{{gwas}}/{{contrasts}}/variance_{chr}.txt", chr=CHR)
+    output:
+        "data/{dataset}/r/{gwas}/{contrasts}_all_standardized.rvec"
+    params:
+        variance_prefix = "data/{dataset}/gwas_variance/{gwas}/{contrasts}/variance_",
+        r_prefix = "data/{dataset}/r/{gwas}/{contrasts}_chr",
+    shell:
+        """
+        Rscript code/calculate_FGr/stardardize_r.R {params.r_prefix} {params.variance_prefix} {output}
+        """
