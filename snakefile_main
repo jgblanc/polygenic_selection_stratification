@@ -1,6 +1,6 @@
 # Snakefile to run the main pipeline for any dataset
 DATASET = ["TestExample"]
-CHR =["22"]
+CHR =[]
 #for i in range(1, 23):
 #  CHR.append(str(i))
 CONTRASTS = ["Afr-Eur"]
@@ -9,7 +9,7 @@ GWAS=["complete", "half", "quarter", "threequarter", "none"]
 
 rule all:
     input:
-        expand("output/calculate_FGr/{dataset}/blocks/{gwas}/FGr_{contrasts}_{chr}.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS)
+        expand("output/calculate_FGr/{dataset}/blocks/{gwas}/OverlapStats_{contrasts}.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS)
 
 
 # Get sample variance of GWAS panel genotypes
@@ -90,4 +90,23 @@ rule compute_FGr_block:
         Rscript code/calculate_FGr/calc_FGr_block.R {params.gp_prefix} {params.out_prefix} {input.r} {input.overlap_snps} {input.ldBlocks} {output.FGr} {output.snps} {input.ids} {wildcards.chr}
         """
 
+# Compute overlap statistics
+
+rule compute_FGr_error:
+    input:
+        FGr = expand("output/calculate_FGr/{{dataset}}/blocks/{{gwas}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR),
+        SNP_Counts = expand("output/calculate_FGr/{{dataset}}/blocks/{{gwas}}/{{contrasts}}_{chr}_SNPcount.txt", chr=CHR)
+    output:
+      "output/calculate_FGr/{dataset}/blocks/{gwas}/OverlapStats_{contrasts}.txt"
+    threads: 16
+    resources:
+        mem_mb=100000,
+        time="24:00:00"
+    params:
+      prefix_in = "output/calculate_FGr/{dataset}/blocks/{gwas}/FGr_{contrasts}",
+      SNP_prefix = "output/calculate_FGr/{dataset}/blocks/{gwas}/{contrasts}"
+    shell:
+      """
+      Rscript code/calculate_FGr/compute_error_jacknife_blocks.R {params.prefix_in} {output} {params.SNP_prefix}
+      """
 
