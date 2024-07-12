@@ -9,7 +9,7 @@ GWAS=["complete", "half", "quarter", "threequarter", "none"]
 
 rule all:
     input:
-        expand("data/{dataset}/r/{gwas}/{contrasts}_all_standardized.rvec", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS)
+        expand("output/calculate_FGr/{dataset}/blocks/{gwas}/FGr_{contrasts}_{chr}.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS)
 
 
 # Get sample variance of GWAS panel genotypes
