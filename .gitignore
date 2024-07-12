@@ -13,6 +13,7 @@ data/*/variantFreq/*
 data/*/variants/*
 data/*/popAF/*
 data/*/r/*
+data/*/gwas_variance/*
 output/*
 logs/*
 .snakemake/

@@ -62,5 +62,5 @@ rule standardize_r:
         r_prefix = "data/{dataset}/r/{gwas}/{contrasts}_chr",
     shell:
         """
-        Rscript code/calculate_FGr/stardardize_r.R {params.r_prefix} {params.variance_prefix} {output}
+        Rscript code/calculate_FGr/standardize_r.R {params.r_prefix} {params.variance_prefix} {output}
         """
