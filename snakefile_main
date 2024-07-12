@@ -5,11 +5,11 @@ for i in range(1, 23):
   CHR.append(str(i))
 CONTRASTS = ["Afr-Eur"]
 GWAS=["complete", "half", "quarter", "threequarter", "none"]
-
+CHRTYPE_GWAS = ["chr-even", "chr-odd", "chr-all"]
 
 rule all:
     input:
-        expand("output/calculate_FGr/{dataset}/blocks/{gwas}/OverlapStats_{contrasts}.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS)
+        expand("output/pca/{dataset}/{gwas}/{chrtype_gwas}.eigenvec", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS)
 
 
 # Get sample variance of GWAS panel genotypes
@@ -110,3 +110,58 @@ rule compute_FGr_error:
       Rscript code/calculate_FGr/compute_error_jacknife_blocks.R {params.prefix_in} {output} {params.SNP_prefix}
       """
 
+# GWAS PCA
+
+rule make_tmp_plink2:
+    input:
+        gp="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen",
+        overlap_snps="data/ukbb/ukbb_pc_snps.txt",
+        ids="data/{dataset}/ids/gwas_ids/{gwas}.txt"
+    output:
+        "/scratch/jgblanc/ukbb/plink2-files/{dataset}/{gwas}/merged/tmp_{chr}.pgen",
+        "/scratch/jgblanc/ukbb/plink2-files/{dataset}/{gwas}/merged/tmp_{chr}.pvar",
+        "/scratch/jgblanc/ukbb/plink2-files/{dataset}/{gwas}/merged/tmp_{chr}.psam"
+    params:
+        prefix_out = "/scratch/jgblanc/ukbb/plink2-files/{dataset}/{gwas}/merged/tmp_{chr}",
+        prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3"
+    threads: 16
+    resources:
+        mem_mb=38000,
+        time="00:30:00"
+    shell:
+        """
+        plink2 --pfile {params.prefix_plink} \
+        --keep {input.ids}
+        --extract {input.overlap_snps} \
+        --make-pgen \
+        --out {params.prefix_out}
+        """
+
+rule merge_GWAS_PCA:
+    input:
+        gp_genos=expand("/scratch/jgblanc/ukbb/plink2-files/{{dataset}}/{{gwas}}/merged/tmp_{chr}.pgen", chr=CHR),
+        snp="data/ukbb/{chrtype_gwas}_pc_snps.txt"
+    output:
+        vec="output/pca/{dataset}/{gwas}/{chrtype_gwas}.eigenvec",
+        val="output/pca/{dataset}/{gwas}/{chrtype_gwas}.eigenval"
+    params:
+        prefix_out = "output/pca/{dataset}/{gwas}/{chrtype_gwas}",
+        merge_prefix = expand("/scratch/jgblanc/ukbb/plink2-files/{{dataset}}/{{gwas}}/merged/tmp_{chr}", chr=CHR, newline="\n")
+    threads: 16
+    resources:
+        mem_mb=60000,
+        time="12:00:00"
+    shell:
+        """
+        echo {params.merge_prefix} > {params.prefix_out}{wildcards.gwas}-{wildcards.chrtype_gwas}-tmp.txt
+        tr ' ' '\n' < "{params.prefix_out}{wildcards.gwas}-{wildcards.chrtype_gwas}-tmp.txt" > "{params.prefix_out}{wildcards.gwas}-{wildcards.chrtype_gwas}-tmp_chrm_list.txt"
+        plink2 --pmerge-list {params.prefix_out}{wildcards.gwas}-{wildcards.chrtype_gwas}-tmp_chrm_list.txt \
+        --pca 40 approx \
+        --extract {input.snp} \
+        --memory 60000 \
+        --threads 16 \
+        --out {params.prefix_out}
+        rm {params.prefix_out}{wildcards.gwas}-{wildcards.chrtype_gwas}-tmp*
+        rm {params.prefix_out}.p*
+        rm {input.gp_genos}
+        """
