@@ -174,7 +174,7 @@ rule merge_GWAS_PCA:
 
 rule compute_PC_FGr:
     input:
-        Fgr=expand("output/calculate_FGr/{{dataset}}/blocks/{{gwas}}/FGr_{contrasts}_{chr}.txt", chr = CHR),
+        Fgr=expand("output/calculate_FGr/{{dataset}}/blocks/{{gwas}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR),
         PCs="output/pca/{dataset}/{gwas}/{chrtype_gwas}.eigenvec"
     output:
         "output/calculate_FGr/{dataset}/PC_stats/{gwas}/{chrtype_gwas}_{chrtype_test}_{contrasts}.txt"
