@@ -11,7 +11,7 @@ CHRTYPE_TEST = ["test-odd", "test-all"]
 
 rule all:
     input:
-        expand("output/calculate_FGr/{dataset}/final_FGr/{gwas}/{chrtype_gwas}_{chrtype_test}_{contrasts}.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST)
+        expand("enpoints/{dataset}/OverlapStats.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST)
 
 
 # Get sample variance of GWAS panel genotypes
@@ -100,7 +100,7 @@ rule compute_FGr_error:
         FGr=expand("output/calculate_FGr/{{dataset}}/blocks/{{gwas}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR),
         SNP_Counts=expand("output/calculate_FGr/{{dataset}}/blocks/{{gwas}}/{{contrasts}}_{chr}_SNPcount.txt", chr=CHR)
     output:
-      "output/calculate_FGr/{dataset}/blocks/{gwas}/OverlapStats_{contrasts}.txt"
+      "output/calculate_FGr/{dataset}/overlap_stats/{gwas}/{contrasts}.txt"
     threads: 16
     resources:
         mem_mb=100000,
@@ -188,3 +188,16 @@ rule compute_PC_FGr:
         """
         Rscript code/calculate_FGr/compute_PC_FGR_model.R {params.prefix_in} {input.PCs} {output.pcStats} {wildcards.chrtype_test} {output.Fgr}
         """
+
+# Summarize Results
+
+rule overlap_stats:
+    input:
+        expand("output/calculate_FGr/{{dataset}}/overlap_stats/{gwas}/{contrasts}.txt", gwas=GWAS, contrasts = CONTRASTS)
+    output:
+        "enpoints/{dataset}/OverlapStats.txt"
+    shell:
+        """
+        Rscript code/summarize/concat_OverlapStats.R {output} {input}
+        """
+
