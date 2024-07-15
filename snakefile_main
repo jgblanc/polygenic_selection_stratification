@@ -1,8 +1,8 @@
 # Snakefile to run the main pipeline for any dataset
 DATASET = ["TestExample"]
-CHR =[]
-for i in range(1, 23):
-  CHR.append(str(i))
+CHR =["22"]
+#for i in range(1, 23):
+#  CHR.append(str(i))
 CONTRASTS = ["Afr-Eur"]
 #GWAS=["complete", "half", "quarter", "threequarter", "none"]
 GWAS=["complete"]
