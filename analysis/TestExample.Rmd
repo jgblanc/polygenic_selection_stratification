@@ -16,7 +16,7 @@ library(tidyverse)
 Plot PC1 vs PC2 colored by self-identified ethnic background
 ```{r}
 # Load data and combine
-dfPCA <- fread("../endpoints/ukbb/whole_biobank.eigenvec")
+dfPCA <- fread("../endpoints/ukbb/whole_biobank.eigenvec.gz")
 dfEB <- fread("../endpoints/ukbb/EthnicBackground_21000.txt")
 df <- inner_join(dfPCA, dfEB)
 
@@ -77,5 +77,24 @@ dfGWAS <- rbind(tmpAfr, tmpEur) %>% select("#FID", "IID", "POP")
 fwrite(dfGWAS,"../data/TestExample/ids/gwas_ids/threequarter.txt", row.names = F, col.names = T, quote = F, sep = "\t")
 ```
 
+
+```{r}
+co <- fread("~/Downloads/chr-all_test-all_Afr-Eur.txt")
+
+ggplot(co, aes(x = FGr, y = FGr, color = POP)) + geom_point()
+
+plot(df$FGr, df$PC1)
+cor(df$FGr, df$PC1)
+
+df %>% filter(IID == "4513184")
+```
+```{r}
+df <- fread("~/Downloads/none.txt")
+
+ggplot(df, aes(x = FGr, y = PC1, color = POP)) + geom_point()
+
+plot(df$FGr, df$PC1)
+cor(df$FGr, df$PC1)
+```
 
 
