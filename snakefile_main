@@ -185,5 +185,5 @@ rule compute_PC_FGr:
         prefix_in="output/calculate_FGr/{dataset}/blocks/{gwas}/FGr_{contrasts}"
     shell:
         """
-        Rscript code/calculate_FGr/compute_PC_FGR_model.R {params.prefix_in} {input.PCs} {output.PCstats} {wildcards.chrtype_test} {output.Fgr}
+        Rscript code/calculate_FGr/compute_PC_FGR_model.R {params.prefix_in} {input.PCs} {output.pcStats} {wildcards.chrtype_test} {output.Fgr}
         """
