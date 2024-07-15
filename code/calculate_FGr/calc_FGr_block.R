@@ -101,13 +101,14 @@ for (i in 1:numBlocks) {
   # Read in FGr
   dfFGr = fread(paste0(out_prefix, ".gxt_tmp.sscore"))
   if (i == 1) {
-    dfIDs <- dfFGr[,1:2]
+    dfIDs <- dfFGr[,1:1]
   }
   FGr = as.matrix(dfFGr$BETA_SUM)
 
   # Format output
   col_name <- paste0("block_", block_num)
   dfIDs[[col_name]] <- FGr
+  print(head(dfIDs))
 
   # Remove tmp files
   cmd <- paste("rm", paste0(out_prefix,"_SNPs_", block_num, ".txt"), paste0(out_prefix,".gxt_tmp*") , sep = " ")
@@ -116,9 +117,10 @@ for (i in 1:numBlocks) {
 }
 
 # Combine IDs and FGr
+colnames(dfIDs)[1] <- "IID"
 dfOut <- inner_join(dfGWAS_IDs, dfIDs)
 
 # Save output
-fwrite(dfGWAS_IDs, outfile, row.names = F, col.names = T, quote = F, sep = "\t")
+fwrite(dfOut, outfile, row.names = F, col.names = T, quote = F, sep = "\t")
 fwrite(dfSNPs, outfile_snps, row.names = F, col.names = T, quote = F, sep = "\t")
 
