@@ -179,10 +179,11 @@ rule compute_PC_FGr:
         Fgr=expand("output/calculate_FGr/{{dataset}}/blocks/{{gwas}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR),
         PCs="output/pca/{dataset}/{gwas}/{chrtype_gwas}.eigenvec"
     output:
-        "output/calculate_FGr/{dataset}/PC_stats/{gwas}/{chrtype_gwas}_{chrtype_test}_{contrasts}.txt"
+        pcStats="output/calculate_FGr/{dataset}/PC_stats/{gwas}/{chrtype_gwas}_{chrtype_test}_{contrasts}.txt",
+        Fgr="output/calculate_FGr/{dataset}/final_FGr/{gwas}/{chrtype_gwas}_{chrtype_test}_{contrasts}.txt"
     params:
         prefix_in="output/calculate_FGr/{dataset}/blocks/{gwas}/FGr_{contrasts}"
     shell:
         """
-        Rscript code/calculate_FGr/compute_PC_FGR_model.R {params.prefix_in} {input.PCs} {output} {wildcards.chrtype_test}
+        Rscript code/calculate_FGr/compute_PC_FGR_model.R {params.prefix_in} {input.PCs} {output.PCstats} {wildcards.chrtype_test} {output.Fgr}
         """

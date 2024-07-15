@@ -15,6 +15,7 @@ Tm_prefix = args[1]
 PC_file = args[2]
 outfile = args[3]
 test_type = args[4]
+outfileData = args[5]
 
 # Get test type
 test_type <- strsplit(test_type, "-")[[1]][2]
@@ -96,6 +97,8 @@ dfOut <- as.data.frame(dfOut)
 colnames(dfOut) <- c("PC", "B", "B2", "lc", "uc", "r2")
 fwrite(dfOut, outfile, row.names = F, col.names = T, quote = F, sep = "\t")
 
+# Save other output
+fwrite(dfCombine, outfileData, row.names = F, col.names = T, quote = F, sep = "\t")
 
 
 
