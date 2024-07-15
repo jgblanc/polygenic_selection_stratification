@@ -24,7 +24,8 @@ print(paste0("This Chr num is ", chr_num))
 
 
 # Read in GWAS individuals
-dfGWAS_IDs <- fread(gwas_IDs)[,1:3]
+dfGWAS_IDs <- fread(gwas_IDs)
+dfGWAS_IDs <- dfGWAS_IDs %>% select("#FID", "IID", "POP")
 m <- nrow(dfGWAS_IDs)
 
 # Read in and format r
