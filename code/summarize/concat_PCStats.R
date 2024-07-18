@@ -37,15 +37,16 @@ for (i in 2:length(args)) {
   test_type <- strsplit(tmp, "-")[[1]][2]
 
   # Extract contrasts
-  tmp <- strsplit(strsplit(filename, "/")[[1]][6], "_")[[1]][2]
-  contrasts <- strsplit(strsplit(tmp, "-")[[1]][3], ".txt")[[1]][1]
+  tmp <- strsplit(strsplit(filename, "/")[[1]][6], "_")[[1]][3]
+  contrasts <- strsplit(tmp, ".txt")[[1]][1]
 
   # Read in results
-  df <- fread(filename)
+  df <- fread(filename)[,1:6]
   names_from_file <- colnames(df)
+  colnames(dfOut) <- c(names_from_file,"dataset", "gwas", "contrasts", "gwas_type", "test_type")
   df$dataset <- dataset
   df$gwas <- gwas
-  df$contrasts <- constrasts
+  df$contrasts <- contrasts
   df$gwas_type <- gwas_type
   df$test_type <- test_type
   dfOut <- rbind(dfOut, df)

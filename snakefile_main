@@ -203,7 +203,7 @@ rule concat_overlap_stats:
 
 rule concat_pc_stats:
     input:
-        expand("output/calculate_FGr/{dataset}/PC_stats/{gwas}/{chrtype_gwas}_{chrtype_test}_{contrasts}.txt", gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test=CHRTYPE_TEST ,contrasts = CONTRASTS)
+        expand("output/calculate_FGr/{{dataset}}/PC_stats/{gwas}/{chrtype_gwas}_{chrtype_test}_{contrasts}.txt", gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test=CHRTYPE_TEST ,contrasts = CONTRASTS)
     output:
         "enpoints/{dataset}/PCStats.txt"
     shell:
