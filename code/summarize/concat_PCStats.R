@@ -1,0 +1,65 @@
+# This script concatenates results from selection scan into plotting format
+
+args=commandArgs(TRUE)
+
+if(length(args)<2){stop("Rscript concat_r2.R <output file> <input files>")}
+
+suppressWarnings(suppressMessages({
+  library(data.table)
+  library(dplyr)
+  library(tidyverse)
+}))
+
+
+outfile = args[1]
+
+dfOut <- matrix(NA, nrow = 1, ncol = 11)
+
+for (i in 2:length(args)) {
+
+  print(i)
+
+  # Get results file name
+  filename = args[i]
+
+  # Extract dataset
+  dataset <- strsplit(filename, "/")[[1]][3]
+
+  # Extract gwas
+  gwas <- strsplit(filename, "/")[[1]][4]
+
+  # Extract gwas type
+  tmp <- strsplit(strsplit(filename, "/")[[1]][6], "_")[[1]][1]
+  gwas_type <- strsplit(tmp, "-")[[1]][2]
+
+  # Extract test type
+  tmp <- strsplit(strsplit(filename, "/")[[1]][6], "_")[[1]][2]
+  test_type <- strsplit(tmp, "-")[[1]][2]
+
+  # Extract contrasts
+  tmp <- strsplit(strsplit(filename, "/")[[1]][6], "_")[[1]][2]
+  contrasts <- strsplit(strsplit(tmp, "-")[[1]][3], ".txt")[[1]][1]
+
+  # Read in results
+  df <- fread(filename)
+  names_from_file <- colnames(df)
+  df$dataset <- dataset
+  df$gwas <- gwas
+  df$contrasts <- constrasts
+  df$gwas_type <- gwas_type
+  df$test_type <- test_type
+  dfOut <- rbind(dfOut, df)
+
+}
+
+# Remove first row
+dfOut <- as.data.frame(dfOut[2:nrow(dfOut),])
+colnames(dfOut) <- c(names_from_file,"dataset", "gwas", "contrasts", "gwas_type", "test_type")
+
+# Save file
+print(dfOut)
+fwrite(dfOut,outfile, row.names = F, col.names = T, quote = F, sep = "\t")
+
+
+
+
