@@ -38,6 +38,7 @@ for (i in 2:length(args)) {
   df$dataset <- dataset
   df$gwas <- gwas
   df$contrasts <- constrasts
+  colnames(dfOut) <- c(names_from_file, "dataset", "gwas", "contrasts")
   dfOut <- rbind(dfOut, df)
 
 
@@ -45,7 +46,7 @@ for (i in 2:length(args)) {
 
 # Remove first row
 dfOut <- as.data.frame(dfOut[2:nrow(dfOut),])
-colnames(dfOut) <- c(name_from_file, "dataset", "gwas", "contrasts")
+#colnames(dfOut) <- c(name_from_file, "dataset", "gwas", "contrasts")
 
 # Save file
 print(dfOut)
