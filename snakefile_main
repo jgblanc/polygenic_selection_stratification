@@ -12,7 +12,7 @@ CHRTYPE_TEST = ["test-odd", "test-all"]
 rule all:
     input:
         expand("endpoints/{dataset}/PCStats.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST),
-	expand("enpoints/{dataset}/OverlapStats.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST)
+	expand("endpoints/{dataset}/OverlapStats.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST)
 
 
 # Get sample variance of GWAS panel genotypes
@@ -196,7 +196,7 @@ rule concat_overlap_stats:
     input:
         expand("output/calculate_FGr/{{dataset}}/overlap_stats/{gwas}/{contrasts}.txt", gwas=GWAS, contrasts = CONTRASTS)
     output:
-        "enpoints/{dataset}/OverlapStats.txt"
+        "endpoints/{dataset}/OverlapStats.txt"
     shell:
         """
         Rscript code/summarize/concat_OverlapStats.R {output} {input}
