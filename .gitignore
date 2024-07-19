@@ -15,6 +15,7 @@ data/*/popAF/*
 data/*/r/*
 data/*/gwas_variance/*
 data/HGDP1KG/*
+data/*/raw/*
 output/*
 logs/*
 .snakemake/
