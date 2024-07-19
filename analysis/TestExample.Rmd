@@ -135,5 +135,16 @@ ggplot(dfOverlap, aes(x = prop_eur, y = D)) + geom_point(size = 2) + geom_hline(
 
 ```{r}
 dfPC <- fread("../endpoints/TestExample/PCStats.txt")
+dfPC <- dfPC %>% mutate(prop_eur  = case_when(gwas == "complete" ~ 0.5, 
+                                                        gwas == "none" ~ 1, 
+                                                        gwas == "half" ~ 0.75,
+                                                        gwas == "quarter" ~ 0.875,
+                                                        gwas == "threequarter" ~ 0.625))
 ```
+
+Look at covariance between $PC_i$ and $\hat{F}_{Gr}$
+```{r}
+dfPC %>% filter(gwas_type == "even" & test_type == "odd") %>% ggplot(aes(x = PC, y = B2)) + geom_bar(stat = "identity") + facet_grid(~prop_eur)
+```
+
 

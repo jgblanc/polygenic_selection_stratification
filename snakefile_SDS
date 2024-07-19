@@ -3,34 +3,34 @@ CHR =[]
 for i in range(1, 23):
   CHR.append(str(i))
 CONTRASTS = ["Afr-Eur"]
-GWAS=["ALL", "WBS"]
+GWAS=["ALL", "WBS", "q1", "median", "q3", "max"]
 
 
 rule all:
     input:
         expand("data/TestExample/r/{gwas}/{contrasts}_chr{chr}.rvec", chr=CHR, gwas=GWAS, contrasts=CONTRASTS)
 
-rule overlapping_snp_WBS:
+
+# Get allele frequency in all GWAS panels
+
+rule get_AF_GWAS:
     input:
-        freq_ukbb="data/ukbb/WBS/variants/ukb_imp_chr{chr}_v3.afreq",
-	      sds="data/sds/SDS_UK10K_n3195_release_Sep_19_2016.tab"
+        gwas="data/SDS/ids/gwas_ids/{gwas}.txt"
     output:
-        snps="data/sds/UK10K/WBS/variants/overlappingSNPs_chr{chr}.txt"
+        gwas="data/SDS/variantFreq/{gwas}_{chr}.afreq"
+    params:
+        prefix_in="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
+        prefix_out_gwas="data/SDS/variantFreq/{gwas}_{chr}"
+    resources:
+        mem_mb=38000,
+        time="00:30:00"
     shell:
         """
-        Rscript code/sds/get_overlapping_snps.R {input.freq_ukbb} {input.sds} {output.snps}
+        plink2 --pfile {params.prefix_in} \
+        --freq \
+        --keep {input.gwas} \
+	      --threads 8 \
+        --memory 38000 \
+        --out {params.prefix_out_gwas}
         """
 
-# SDS Data processing
-
-rule flip_all_snps:
-    input:
-        freq_ukbb_wbs="data/ukbb/WBS/variants/ukb_imp_chr{chr}_v3.afreq",
-        freq_ukbb_all="data/ukbb/ALL/variants/ukb_imp_chr{chr}_v3.afreq",
-	      sds="data/sds/SDS_UK10K_n3195_release_Sep_19_2016.tab"
-    output:
-        rvec="data/sds/UK10K/r/sds_chr{chr}.rvec",
-    shell:
-        """
-        Rscript code/sds/flip_overlapping_snps.R {input.freq_ukbb_wbs} {input.freq_ukbb_all} {input.sds} {output.rvec}
-        """

@@ -11,11 +11,29 @@ library(data.table)
 library(tidyverse)
 ```
 
+## Initial look at both SDS data sets
 
-## Sample Individuals based on PC coordinates
+Read in both files
+```{r, warning=FALSE, message=FALSE}
+UK <- fread("../data/SDS/raw/SDS_UK10K_n3195_release_Sep_19_2016.tab.gz")
+Han <- fread("../data/SDS/raw/auto_SDS_norm_sort.txt.gz")
+```
+
+Look at formatting
+```{r}
+head(UK)
+```
+
+```{r}
+head(Han)
+```
+
+
+
+## Sample Individuals for GWAS panel 
 
 Plot PC1 vs PC2 colored by self-identified ethnic background
-```{r}
+```{r, warning=FALSE}
 # Load data and combine
 dfPCA <- fread("../endpoints/ukbb/whole_biobank.eigenvec.gz")
 dfEB <- fread("../endpoints/ukbb/EthnicBackground_21000.txt")
@@ -23,7 +41,59 @@ df <- inner_join(dfPCA, dfEB)
 
 # Use continental labels 
 df <- df %>% mutate(continental = case_when(EthnicBackground_21000 %in% c(4, 4001, 4002, 4003) ~ "Africa", EthnicBackground_21000 %in% c(1, 1001, 1002, 1003) ~ "Europe", EthnicBackground_21000 %in% c(2, 2001, 2002, 2003, 2004) ~ "Mixed", EthnicBackground_21000 %in% c(3, 3001, 3002, 3003, 3004) ~ "Asia"))
-
-# Make PCA plot color based on self identified Ethnic backgroud
-ggplot(data = df, aes(x = PC1, y = PC2, color = continental)) + geom_point() + theme_classic()
 ```
+
+```{r}
+# Make PCA plot color based on self identified Ethnic background
+ggplot(data = df, aes(x = PC1, y = PC2, color = continental)) + geom_point() + theme_classic(base_size = 14) + scale_color_manual(values = c("darkred", "navy", "goldenrod4", "gray50"), na.value = "gray70")
+```
+Use predefined sets 
+```{r}
+df <- df %>% mutate(POP = continental)
+
+# Use all genotyped individuals 
+dfALL <- df %>% select("#FID", "IID", "POP")
+fwrite(dfALL,"../data/SDS/ids/gwas_ids/ALL.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+
+# Use only WBS 
+WBS <- fread("../data/ukbb/WBS.ids")
+dfWBS <- inner_join(df, WBS) %>% select("#FID", "IID", "POP")
+fwrite(dfWBS,"../data/SDS/ids/gwas_ids/WBS.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+```
+
+Use distance from WBS
+```{r}
+# Get average of WBS
+dfWBS <- inner_join(df, WBS)
+avgPC1 <- mean(dfWBS$PC1)
+avgPC2 <- mean(dfWBS$PC2)
+
+# Calculate from WBS centroid 
+avgPC <- c(avgPC1, avgPC2)
+df$distance <- sqrt(rowSums((df[, 3:4] - avgPC)^2))
+
+# Plot distance
+ggplot(data = df, aes(x = distance, y = PC1, color = POP)) + geom_point() + theme_classic(base_size = 14) + scale_color_manual(values = c("darkred", "navy", "goldenrod4", "gray50"), na.value = "gray70")
+```
+```{r}
+set.seed(12)
+# Sample GWAS panels
+smry <- summary(df$distance)
+## Sample everyone 
+dfGWAS <- df %>% sample_n(10000) %>% select("#FID", "IID", "POP")
+fwrite(dfGWAS,"../data/SDS/ids/gwas_ids/max.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+
+## 1st quartile
+dfGWAS <- df %>% filter(distance <=  smry[2])%>% sample_n(10000) %>% select("#FID", "IID", "POP")
+fwrite(dfGWAS,"../data/SDS/ids/gwas_ids/q1.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+
+## median
+dfGWAS <- df %>% filter(distance <=  smry[3])%>% sample_n(10000) %>% select("#FID", "IID", "POP")
+fwrite(dfGWAS,"../data/SDS/ids/gwas_ids/median.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+
+## 3rd quartile
+dfGWAS <- df %>% filter(distance <=  smry[5])%>% sample_n(10000) %>% select("#FID", "IID", "POP")
+fwrite(dfGWAS,"../data/SDS/ids/gwas_ids/q3.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+```
+
+
