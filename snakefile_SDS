@@ -8,7 +8,7 @@ GWAS=["q1"]
 
 rule all:
     input:
-        expand("data/SDS/variantFreq/{gwas}_{chr}.afreq", chr=CHR, gwas=GWAS, contrasts=CONTRASTS)
+        expand("data/SDS/r/{gwas}/UK10K_chr{chr}.rvec", chr=CHR, gwas=GWAS, contrasts=CONTRASTS)
 
 
 # Get allele frequency in all GWAS panels
@@ -28,9 +28,23 @@ rule get_AF_GWAS:
         """
         plink2 --pfile {params.prefix_in} \
         --freq \
+        --maf 0.01 \
         --keep {input.gwas} \
 	      --threads 8 \
         --memory 38000 \
         --out {params.prefix_out_gwas}
         """
 
+# Process and match UK10K SNPs
+
+rule flip_all_snps:
+    input:
+        gwas_freq="data/SDS/variantFreq/{gwas}_{chr}.afreq"
+	      sds="data/SDS/raw/SDS_UK10K_n3195_release_Sep_19_2016.tab"
+    output:
+        rvec="data/SDS/r/{gwas}/UK10K_chr{chr}.rvec",
+        overlappingSNPs=data/SDS/variants/{gwas}/UK10K/overlappingSNPs_chr{chr}.txt
+    shell:
+        """
+        Rscript code/sds/flip_overlapping_snps.R {input.gwas_freq} {input.sds} {output.rvec} {output.overlappingSNPs}
+        """
