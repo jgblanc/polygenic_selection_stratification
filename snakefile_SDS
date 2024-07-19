@@ -39,11 +39,11 @@ rule get_AF_GWAS:
 
 rule flip_all_snps:
     input:
-        gwas_freq="data/SDS/variantFreq/{gwas}_{chr}.afreq"
-	      sds="data/SDS/raw/SDS_UK10K_n3195_release_Sep_19_2016.tab"
+        gwas_freq="data/SDS/variantFreq/{gwas}_{chr}.afreq",
+	      sds="data/SDS/raw/SDS_UK10K_n3195_release_Sep_19_2016.tab.gz"
     output:
         rvec="data/SDS/r/{gwas}/UK10K_chr{chr}.rvec",
-        overlappingSNPs=data/SDS/variants/{gwas}/UK10K/overlappingSNPs_chr{chr}.txt
+        overlappingSNPs="data/SDS/variants/{gwas}/UK10K/overlappingSNPs_chr{chr}.txt"
     shell:
         """
         Rscript code/sds/flip_overlapping_snps.R {input.gwas_freq} {input.sds} {output.rvec} {output.overlappingSNPs}
