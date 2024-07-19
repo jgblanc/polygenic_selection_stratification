@@ -26,7 +26,7 @@ for (i in 2:length(args)) {
   dataset <- strsplit(filename, "/")[[1]][3]
 
   # Extract gwas
-  gwas <- strsplit(filename, "/")[[1]][4]
+  gwas <- strsplit(filename, "/")[[1]][5]
 
   # Extract gwas type
   tmp <- strsplit(strsplit(filename, "/")[[1]][6], "_")[[1]][1]

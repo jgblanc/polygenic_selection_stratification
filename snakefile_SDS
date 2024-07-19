@@ -1,0 +1,36 @@
+# Snakefile to do the pre-data processing Singleton Density Scores in UK10K and
+CHR =[]
+for i in range(1, 23):
+  CHR.append(str(i))
+CONTRASTS = ["Afr-Eur"]
+GWAS=["ALL", "WBS"]
+
+
+rule all:
+    input:
+        expand("data/TestExample/r/{gwas}/{contrasts}_chr{chr}.rvec", chr=CHR, gwas=GWAS, contrasts=CONTRASTS)
+
+rule overlapping_snp_WBS:
+    input:
+        freq_ukbb="data/ukbb/WBS/variants/ukb_imp_chr{chr}_v3.afreq",
+	      sds="data/sds/SDS_UK10K_n3195_release_Sep_19_2016.tab"
+    output:
+        snps="data/sds/UK10K/WBS/variants/overlappingSNPs_chr{chr}.txt"
+    shell:
+        """
+        Rscript code/sds/get_overlapping_snps.R {input.freq_ukbb} {input.sds} {output.snps}
+        """
+
+# SDS Data processing
+
+rule flip_all_snps:
+    input:
+        freq_ukbb_wbs="data/ukbb/WBS/variants/ukb_imp_chr{chr}_v3.afreq",
+        freq_ukbb_all="data/ukbb/ALL/variants/ukb_imp_chr{chr}_v3.afreq",
+	      sds="data/sds/SDS_UK10K_n3195_release_Sep_19_2016.tab"
+    output:
+        rvec="data/sds/UK10K/r/sds_chr{chr}.rvec",
+    shell:
+        """
+        Rscript code/sds/flip_overlapping_snps.R {input.freq_ukbb_wbs} {input.freq_ukbb_all} {input.sds} {output.rvec}
+        """

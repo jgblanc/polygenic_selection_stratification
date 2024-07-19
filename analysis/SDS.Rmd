@@ -1,0 +1,29 @@
+---
+title: "SDS"
+author: "Jennifer Blanc"
+date: "2024-07-19"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(data.table)
+library(tidyverse)
+```
+
+
+## Sample Individuals based on PC coordinates
+
+Plot PC1 vs PC2 colored by self-identified ethnic background
+```{r}
+# Load data and combine
+dfPCA <- fread("../endpoints/ukbb/whole_biobank.eigenvec.gz")
+dfEB <- fread("../endpoints/ukbb/EthnicBackground_21000.txt")
+df <- inner_join(dfPCA, dfEB)
+
+# Use continental labels 
+df <- df %>% mutate(continental = case_when(EthnicBackground_21000 %in% c(4, 4001, 4002, 4003) ~ "Africa", EthnicBackground_21000 %in% c(1, 1001, 1002, 1003) ~ "Europe", EthnicBackground_21000 %in% c(2, 2001, 2002, 2003, 2004) ~ "Mixed", EthnicBackground_21000 %in% c(3, 3001, 3002, 3003, 3004) ~ "Asia"))
+
+# Make PCA plot color based on self identified Ethnic backgroud
+ggplot(data = df, aes(x = PC1, y = PC2, color = continental)) + geom_point() + theme_classic()
+```

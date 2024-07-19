@@ -9,12 +9,13 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(data.table)
 library(tidyverse)
+library(ggpubr)
 ```
 
 ## Sample Individuals based on PC coordinates
 
 Plot PC1 vs PC2 colored by self-identified ethnic background
-```{r}
+```{r, warning=FALSE}
 # Load data and combine
 dfPCA <- fread("../endpoints/ukbb/whole_biobank.eigenvec.gz")
 dfEB <- fread("../endpoints/ukbb/EthnicBackground_21000.txt")
@@ -22,11 +23,12 @@ df <- inner_join(dfPCA, dfEB)
 
 # Use continental labels 
 df <- df %>% mutate(continental = case_when(EthnicBackground_21000 %in% c(4, 4001, 4002, 4003) ~ "Africa", EthnicBackground_21000 %in% c(1, 1001, 1002, 1003) ~ "Europe", EthnicBackground_21000 %in% c(2, 2001, 2002, 2003, 2004) ~ "Mixed", EthnicBackground_21000 %in% c(3, 3001, 3002, 3003, 3004) ~ "Asia"))
-
-# Make PCA plot color based on self identified Ethnic backgroud
-ggplot(data = df, aes(x = PC1, y = PC2, color = continental)) + geom_point() + theme_classic()
 ```
 
+```{r}
+# Make PCA plot color based on self identified Ethnic background
+ggplot(data = df, aes(x = PC1, y = PC2, color = continental)) + geom_point() + theme_classic(base_size = 14) + scale_color_manual(values = c("darkred", "navy", "goldenrod4", "gray50"), na.value = "gray70")
+```
 Sample individuals each on opposite ends of PC1 
 ```{r}
 # Sample from each end of PC1
@@ -35,66 +37,103 @@ dfAfr <- df %>% arrange(PC1) %>% slice_head(n = 6000)
 
 # Plot data
 tmp <- rbind(dfEur, dfAfr)
-ggplot(data = tmp, aes(x = PC1, y = PC2, color = continental)) + geom_point() + theme_classic()
+ggplot(data = tmp, aes(x = PC1, y = PC2, color = continental)) + geom_point() + theme_classic(base_size = 14) + scale_color_manual(values = c("darkred", "navy", "goldenrod4", "gray50"), na.value = "gray70")
 ```
 
 Make mixed panels with different amounts of overlap
-```{r}
+```{r, eval=FALSE}
 # Sample Test panel 
 tmpAfr <- dfAfr %>% sample_n(1000) %>% mutate(POP = "Afr")
 tmpEur <- dfEur  %>% sample_n(1000) %>% mutate(POP = "Eur")
 dfTEST <- rbind(tmpAfr, tmpEur) %>% select("#FID", "IID", "POP")
-fwrite(dfTEST,"../data/TestExample/ids/test_ids/test.text", row.names = F, col.names = T, quote = F, sep = "\t")
+#fwrite(dfTEST,"../data/TestExample/ids/test_ids/test.text", row.names = F, col.names = T, quote = F, sep = "\t")
 
 # Sample GWAS panels
 ## Complete Overlap
 tmpAfr <- dfAfr %>% filter(!IID %in% dfTEST$IID) %>% sample_n(5000) %>% mutate(POP = "Afr")
 tmpEur <- dfEur %>% filter(!IID %in% dfTEST$IID) %>% sample_n(5000) %>% mutate(POP = "Eur")
 dfGWAS <- rbind(tmpAfr, tmpEur) %>% select("#FID", "IID", "POP")
-fwrite(dfGWAS,"../data/TestExample/ids/gwas_ids/complete.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+#fwrite(dfGWAS,"../data/TestExample/ids/gwas_ids/complete.txt", row.names = F, col.names = T, quote = F, sep = "\t")
 
 ## No Overlap
 dfGWAS <- dfEur %>% filter(!IID %in% dfTEST$IID) %>% sample_n(10000) %>% mutate(POP = "Eur")
-fwrite(dfGWAS,"../data/TestExample/ids/gwas_ids/none.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+#fwrite(dfGWAS,"../data/TestExample/ids/gwas_ids/none.txt", row.names = F, col.names = T, quote = F, sep = "\t")
 
 ## Half Overlap
 tmpAfr <- dfAfr %>% filter(!IID %in% dfTEST$IID) %>% sample_n(2500) %>% mutate(POP = "Afr")
 tmpEur <- dfEur %>% filter(!IID %in% dfTEST$IID) %>% sample_n(7500) %>% mutate(POP = "Eur")
 dfGWAS <- rbind(tmpAfr, tmpEur) %>% select("#FID", "IID", "POP")
-fwrite(dfGWAS,"../data/TestExample/ids/gwas_ids/half.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+#fwrite(dfGWAS,"../data/TestExample/ids/gwas_ids/half.txt", row.names = F, col.names = T, quote = F, sep = "\t")
 
 ## Quarter
 tmpAfr <- dfAfr %>% filter(!IID %in% dfTEST$IID) %>% sample_n(1250) %>% mutate(POP = "Afr")
 tmpEur <- dfEur %>% filter(!IID %in% dfTEST$IID) %>% sample_n(8750) %>% mutate(POP = "Eur")
 dfGWAS <- rbind(tmpAfr, tmpEur) %>% select("#FID", "IID", "POP")
-fwrite(dfGWAS,"../data/TestExample/ids/gwas_ids/quarter.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+#fwrite(dfGWAS,"../data/TestExample/ids/gwas_ids/quarter.txt", row.names = F, col.names = T, quote = F, sep = "\t")
 
 ## Three Quarters
 ## GWAS
 tmpAfr <- dfAfr %>% filter(!IID %in% dfTEST$IID) %>% sample_n(3750) %>% mutate(POP = "Afr")
 tmpEur <- dfEur %>% filter(!IID %in% dfTEST$IID) %>% sample_n(6250) %>% mutate(POP = "Eur")
 dfGWAS <- rbind(tmpAfr, tmpEur) %>% select("#FID", "IID", "POP")
-fwrite(dfGWAS,"../data/TestExample/ids/gwas_ids/threequarter.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+#fwrite(dfGWAS,"../data/TestExample/ids/gwas_ids/threequarter.txt", row.names = F, col.names = T, quote = F, sep = "\t")
 ```
 
+## Compute $\hat{F}_{Gr}$ for indviduals in the GWAS panel 
 
 ```{r}
-co <- fread("~/Downloads/chr-all_test-all_Afr-Eur.txt")
+# Complete Overlap
+FGr_complete <- fread("../endpoints/TestExample/final_FGr/complete_chr-all_test-all_Afr-Eur.txt.gz")
+p1 <- ggplot(data = FGr_complete, aes(x = PC1, y = FGr, color = POP)) + geom_point() + theme_classic(base_size = 14) + scale_color_manual(values = c("darkred", "navy"))
 
-ggplot(co, aes(x = FGr, y = FGr, color = POP)) + geom_point()
+# No Overlap 
+FGr_none <- fread("../endpoints/TestExample/final_FGr/none_chr-all_test-all_Afr-Eur.txt.gz")
+p2 <- ggplot(data = FGr_none, aes(x = PC1, y = FGr, color = POP)) + geom_point() + theme_classic(base_size = 14) + scale_color_manual(values = c("darkred", "navy"))
 
-plot(df$FGr, df$PC1)
-cor(df$FGr, df$PC1)
-
-df %>% filter(IID == "4513184")
+# Print plots
+p <- ggarrange(p1, p2, nrow =1, common.legend = TRUE)
+p
 ```
+
+## Overlap statistics
+
+Load data and process 
 ```{r}
-df <- fread("~/Downloads/none.txt")
-
-ggplot(df, aes(x = FGr, y = PC1, color = POP)) + geom_point()
-
-plot(df$FGr, df$PC1)
-cor(df$FGr, df$PC1)
+dfOverlap <- fread("../endpoints/TestExample/OverlapStats.txt")
+dfOverlap <- dfOverlap %>% mutate(prop_eur  = case_when(gwas == "complete" ~ 0.5, 
+                                                        gwas == "none" ~ 1, 
+                                                        gwas == "half" ~ 0.75,
+                                                        gwas == "quarter" ~ 0.875,
+                                                        gwas == "threequarter" ~ 0.625))
 ```
 
+Compare overlap to proportion of variance explained 
+```{r}
+ggplot(dfOverlap, aes(x = prop_eur, y = Z)) + geom_point(size = 3, color = "purple3") + theme_bw(base_size = 14) + xlab("Proportion EUR in GWAS") + ylab("Proportion of variance explained (Z)")
+```
+Compare variance explained to error 
+```{r}
+# All data
+p1 <- ggplot(dfOverlap, aes(x = Z, y = error)) + geom_point(size = 3, color = "purple3") + theme_bw(base_size = 12) + ylab("Error") + xlab("Proportion of variance explained (Z)") + geom_hline(yintercept = 0, color = "red", linetype = 2, linewidth = 1.2)
+
+# Remove no overlap
+p2 <- dfOverlap %>% filter(prop_eur %in% c(0.5,0.750, 0.875, 0.625)) %>% ggplot(aes(x = Z, y = error)) + geom_point(size = 3, color = "purple3") + theme_bw(base_size = 12) + ylab("Error") + xlab("Proportion of variance explained (Z)") + geom_hline(yintercept = 0, color = "red", linetype = 2, linewidth = 1.2)
+
+# Print plots
+p <- ggarrange(p1, p2, nrow = 1)
+p
+```
+Compare D to overlap 
+```{r}
+dfOverlap$d_lc <- dfOverlap$D - (2*sqrt(dfOverlap$varD)) 
+dfOverlap$d_uc <- dfOverlap$D + (2 *sqrt(dfOverlap$varD))
+
+ggplot(dfOverlap, aes(x = prop_eur, y = D)) + geom_point(size = 2) + geom_hline(yintercept = 999, color = "red", linetype = 2) + geom_errorbar(aes(ymin = d_lc, ymax = d_uc))  + theme_bw(base_size = 12) + xlab("Proportion EUR in GWAS")
+```
+
+## PC statistics
+
+```{r}
+dfPC <- fread("../endpoints/TestExample/PCStats.txt")
+```
 
