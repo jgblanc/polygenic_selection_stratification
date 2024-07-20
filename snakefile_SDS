@@ -51,7 +51,7 @@ rule flip_all_snps:
 
 # Process and match Han SNPs
 
-rule flip_all_snps:
+rule liftover_snps:
     input:
         gwas_freq="data/SDS/variantFreq/{gwas}_{chr}.afreq",
 	      sds="data/SDS/raw/auto_SDS_norm_sort.txt.gz"
