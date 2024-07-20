@@ -1,10 +1,10 @@
 # Snakefile to do the pre-data processing Singleton Density Scores in UK10K and
-CHR =["22"]
-#for i in range(1, 23):
-#  CHR.append(str(i))
+CHR =[]
+for i in range(1, 23):
+  CHR.append(str(i))
 CONTRASTS = ["Afr-Eur"]
-#GWAS=["ALL", "WBS", "q1", "median", "q3", "max"]
-GWAS=["q1"]
+GWAS=["ALL", "WBS", "q1", "median", "q3", "max"]
+#GWAS=["q1"]
 
 rule all:
     input:
@@ -47,4 +47,18 @@ rule flip_all_snps:
     shell:
         """
         Rscript code/sds/flip_overlapping_snps.R {input.gwas_freq} {input.sds} {output.rvec} {output.overlappingSNPs}
+        """
+
+# Process and match Han SNPs
+
+rule flip_all_snps:
+    input:
+        gwas_freq="data/SDS/variantFreq/{gwas}_{chr}.afreq",
+	      sds="data/SDS/raw/auto_SDS_norm_sort.txt.gz"
+    output:
+        rvec="data/SDS/r/{gwas}/Han_chr{chr}.rvec",
+        overlappingSNPs="data/SDS/variants/{gwas}/Han/overlappingSNPs_chr{chr}.txt"
+    shell:
+        """
+        Rscript code/sds/liftover_snps.R {input.gwas_freq} {input.sds} {output.rvec} {output.overlappingSNPs}
         """
