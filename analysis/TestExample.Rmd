@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(data.table)
 library(tidyverse)
 library(ggpubr)
+library(latex2exp)
 ```
 
 ## Sample Individuals based on PC coordinates
@@ -142,9 +143,14 @@ dfPC <- dfPC %>% mutate(prop_eur  = case_when(gwas == "complete" ~ 0.5,
                                                         gwas == "threequarter" ~ 0.625))
 ```
 
-Look at covariance between $PC_i$ and $\hat{F}_{Gr}$
+Look at correlation between $PC_i$ and $\hat{F}_{Gr}$
 ```{r}
-dfPC %>% filter(gwas_type == "even" & test_type == "odd") %>% ggplot(aes(x = PC, y = B2)) + geom_bar(stat = "identity") + facet_grid(~prop_eur)
+dfPC %>% filter(gwas_type == "even" & test_type == "odd") %>% ggplot(aes(x = PC, y = B2)) + geom_bar(stat = "identity", color = "darkgreen") + facet_grid(~prop_eur) + theme_bw(base_size = 12) + ylab(TeX("$B_{i}^2$"))
 ```
 
+Look at correlation between $R^2_{K}$
+```{r}
+dfPC %>% filter(gwas_type == "even" & test_type == "odd") %>% ggplot(aes(x = PC, y = r2)) + geom_bar(stat = "identity", color = "darkgreen") + facet_grid(~prop_eur) + theme_bw(base_size = 12) + ylab(TeX("$R_{K}^2$")) + geom_hline(data = dfOverlap, aes(yintercept = gammaF), color = "red", linetype = 2)
+```
+Something is wrong with the theory here
 
