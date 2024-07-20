@@ -23,32 +23,28 @@ ukbb <- ukbb %>% separate(ID, c("chr", "POS"), remove = FALSE) %>% filter(ukbb$A
 
 # Read in SDS
 sds <- fread(sds_file)
+sds <- sds %>% select("lifted_chr", "alt", "AA", "DA", "norm_SDS", "lifted_start")
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-sds$POS <- as.character(sds$POS)
+# Wrangle columns
+colnames(sds)[1] <- "#CHROM"
+sds$`#CHROM` <- as.character(sds$`#CHROM`)
+sds <- sds %>%
+  mutate(`#CHROM` = str_replace(`#CHROM`, "chr", ""))
+colnames(sds)[6] <- "POS"
+sds$ID <- paste0(sds$`#CHROM`,":", sds$POS)
+sds$`#CHROM` <- as.numeric(sds$`#CHROM`)
+sds$POS <- as.numeric(sds$POS)
 
 # Join files by chromosome and position
-df <- inner_join(ukbb, sds, by = c("#CHROM" = "CHR", "POS" = "POS"))
+ukbb$POS <- as.numeric(ukbb$POS)
+df <- inner_join(ukbb, sds, by = c("#CHROM" = "#CHROM", "POS" = "POS"))
 
 # Get rid of rows where any alleles don't match
-df_filter <- df %>% filter((DA == REF & AA == ALT) | (DA == ALT | AA == REF))
+df_filter <- df %>% filter(ALT == alt)
+df_filter2 <- df_filter %>% filter((DA == REF & AA == ALT) | (DA == ALT & AA == REF))
 
 # If derived and alternate allele don't match, flip SDS
-df_flipped <- df_filter %>% mutate(SDS = case_when(DA == REF ~ (-1 * SDS), DA == ALT ~ SDS))
+df_flipped <- df_filter2 %>% mutate(SDS = case_when(DA == REF ~ (-1 * norm_SDS), DA == ALT ~ norm_SDS))
 
 # Select correct columns
 df_out <- df_flipped %>% select("#CHROM", "ID.x", "REF", "ALT", "SDS")

@@ -33,16 +33,17 @@ Convert Han coordinates to hg19
 library(rtracklayer)
 library(GenomicRanges)
 
-chain_url <- "http://hgdownload.cse.ucsc.edu/goldenPath/hg38/liftOver/hg38ToHg19.over.chain.gz"
-chain_file <- "hg38ToHg19.over.chain.gz"
-download.file(chain_url, chain_file)
+#chain_url <- "http://hgdownload.cse.ucsc.edu/goldenPath/hg38/liftOver/hg38ToHg19.over.chain.gz"
+#chain_file <- "hg38ToHg19.over.chain.gz"
+#download.file(chain_url, chain_file)
 
 # Download the chain file
-download.file(chain_url, chain_file, mode = "wb")
+chain_file <- "../data/liftover/hg38ToHg19.over.chain.gz"
+#download.file(chain_url, chain_file, mode = "wb")
 
 # Uncompress the chain file
 chain_file_unzipped <- sub(".gz$", "", chain_file)
-R.utils::gunzip(chain_file, chain_file_unzipped, remove = FALSE)
+#R.utils::gunzip(chain_file, chain_file_unzipped, remove = FALSE)
 
 # Load the chain file
 chain <- import.chain(chain_file_unzipped)
@@ -55,13 +56,17 @@ gr <- GRanges(seqnames = Han$chr, ranges = IRanges(start = Han$pos, end = Han$po
 lifted_snps <- liftOver(gr, chain)
 
 # Extract the results
-#converted_snps <- as.data.frame(unlist(lifted_snps))
-#converted_snps
+converted_snps <- as.data.frame(unlist(lifted_snps))
+converted_snps
 
-# Only keep non-empty liftOver results
-non_empty <- sapply(lifted_snps, length) > 0
-original_coords <- as.data.frame(gr[non_empty])
-lifted_coords <- as.data.frame(unlist(lifted_snps[non_empty]))
+# Filter out empty liftOver results
+non_empty_indices <- elementNROWS(lifted_snps) > 0
+filtered_gr <- gr[non_empty_indices]
+filtered_lifted_snps <- lifted_snps[non_empty_indices]
+
+# Convert the filtered GRanges and lifted results to data frames
+original_coords <- as.data.frame(filtered_gr)
+lifted_coords <- as.data.frame(unlist(filtered_lifted_snps))
 
 # Combine the data frames
 combined_coords <- data.frame(
@@ -73,16 +78,15 @@ combined_coords <- data.frame(
   lifted_end = lifted_coords$end
 )
 
+# Print the combined coordinates
+print(combined_coords)
 ```
-
+Join lifted over coordinates with SDS values 
 ```{r}
-chr1LO <- converted_snps %>% filter(seqnames == "chr1")
-ch1Han <- Han %>% filter(chr == "chr1")
-uk1 <- UK %>% filter(CHR == 1)
+dfHan <- inner_join(Han, combined_coords, by = c("chr" = "original_chr", "pos" = "original_start"))
 
-tmp <- inner_join(chr1LO, uk1, by = c("start"= "POS"))
+fwrite(dfHan,"../data/SDS/raw/Han_SDS_liftedover.txt.gz", row.names = F, col.names = T, quote = F, sep = "\t")
 ```
-
 
 
 ## Sample Individuals for GWAS panel 

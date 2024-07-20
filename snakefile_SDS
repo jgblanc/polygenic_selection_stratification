@@ -1,14 +1,14 @@
 # Snakefile to do the pre-data processing Singleton Density Scores in UK10K and
-CHR =[]
-for i in range(1, 23):
-  CHR.append(str(i))
-CONTRASTS = ["Afr-Eur"]
-GWAS=["ALL", "WBS", "q1", "median", "q3", "max"]
-#GWAS=["q1"]
+CHR =["22"]
+#for i in range(1, 23):
+#  CHR.append(str(i))
+CONTRASTS = ["Han"]
+#GWAS=["ALL", "WBS", "q1", "median", "q3", "max"]
+GWAS=["q1"]
 
 rule all:
     input:
-        expand("data/SDS/r/{gwas}/UK10K_chr{chr}.rvec", chr=CHR, gwas=GWAS, contrasts=CONTRASTS)
+        expand("data/SDS/r/{gwas}/Han_chr{chr}.rvec", chr=CHR, gwas=GWAS, contrasts=CONTRASTS)
 
 
 # Get allele frequency in all GWAS panels
@@ -54,7 +54,7 @@ rule flip_all_snps:
 rule liftover_snps:
     input:
         gwas_freq="data/SDS/variantFreq/{gwas}_{chr}.afreq",
-	      sds="data/SDS/raw/auto_SDS_norm_sort.txt.gz"
+	      sds="data/SDS/raw/Han_SDS_liftedover.txt.gz"
     output:
         rvec="data/SDS/r/{gwas}/Han_chr{chr}.rvec",
         overlappingSNPs="data/SDS/variants/{gwas}/Han/overlappingSNPs_chr{chr}.txt"

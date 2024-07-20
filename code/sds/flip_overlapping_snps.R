@@ -29,7 +29,7 @@ sds$POS <- as.character(sds$POS)
 df <- inner_join(ukbb, sds, by = c("#CHROM" = "CHR", "POS" = "POS"))
 
 # Get rid of rows where any alleles don't match
-df_filter <- df %>% filter((DA == REF & AA == ALT) | (DA == ALT | AA == REF))
+df_filter <- df %>% filter((DA == REF & AA == ALT) | (DA == ALT & AA == REF))
 
 # If derived and alternate allele don't match, flip SDS
 df_flipped <- df_filter %>% mutate(SDS = case_when(DA == REF ~ (-1 * SDS), DA == ALT ~ SDS))
