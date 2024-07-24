@@ -46,7 +46,8 @@ rule calculate_GWAS_variance:
     output:
         "data/{dataset}/gwas_variance/{gwas}/{contrasts}/variance_{chr}.txt"
     resources:
-	      time="10:00:00"
+	      time="24:00:00",
+	      mem_mb=100000,
     shell:
         """
         Rscript code/calculate_FGr/compute_GWAS_variance.R {input} {output}

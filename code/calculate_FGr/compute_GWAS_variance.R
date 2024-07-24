@@ -16,23 +16,20 @@ outFile = args[2]
 
 
 # Initialize an empty list to store results
-dfOut <- as.data.frame(matrix(NA,nrow = 1, ncol = 2))
-colnames(dfOut) <- c("ID", "Var")
+results_list <- list()
+index <- 1
+
 con <- file(inFile, open = "r")
 
 # Read and process each line
 while(TRUE) {
-
   line <- readLines(con, n = 1, warn = FALSE)
-
   if (length(line) == 0) break  # Exit loop if end of file
 
-  # Gell fields
+  # Get fields
   fields <- strsplit(line, "\\s+")[[1]]
   dosages <- as.numeric(fields[7:length(fields)])
   ID <- fields[2]
-  print(ID)
-
 
   # Convert to dosage of ALT allele
   dosages <- 2 - dosages
@@ -40,13 +37,14 @@ while(TRUE) {
   # Calculate variance
   variance <- var(dosages)
 
-  # Save results
-  tmp <- c(ID, variance)
-  dfOut <- rbind(dfOut, tmp)
-
+  # Save results to list
+  results_list[[index]] <- data.table(ID = ID, Var = variance)
+  index <- index + 1
 }
 
-# Save output
-dfOut <- dfOut[3:nrow(dfOut), ]
-fwrite(dfOut, outFile, row.names = F, col.names = T, quote = F, sep = "\t")
+# Close the connection
+close(con)
 
+# Combine the list into a data.table and save the output
+dfOut <- rbindlist(results_list)
+fwrite(dfOut, outFile, row.names = FALSE, col.names = TRUE, quote = FALSE, sep = "\t")
