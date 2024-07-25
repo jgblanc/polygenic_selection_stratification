@@ -85,9 +85,8 @@ Join lifted over coordinates with SDS values
 ```{r}
 dfHan <- inner_join(Han, combined_coords, by = c("chr" = "original_chr", "pos" = "original_start"))
 
-fwrite(dfHan,"../data/SDS/raw/Han_SDS_liftedover.txt.gz", row.names = F, col.names = T, quote = F, sep = "\t")
+#fwrite(dfHan,"../data/SDS/raw/Han_SDS_liftedover.txt.gz", row.names = F, col.names = T, quote = F, sep = "\t")
 ```
-
 
 ## Sample Individuals for GWAS panel 
 
@@ -156,3 +155,126 @@ fwrite(dfGWAS,"../data/SDS/ids/gwas_ids/q3.txt", row.names = F, col.names = T, q
 ```
 
 
+## Overlap statistics
+
+Load data and process 
+```{r}
+dfOverlap <- fread("../endpoints/SDS/OverlapStats.txt")
+dfOverlap <- dfOverlap %>% mutate(gwas_type  = case_when(gwas == "q1" ~ "q1", 
+                                                        gwas == "median" ~ "q2", 
+                                                        gwas == "q3" ~ "q3",
+                                                        gwas == "max" ~ "q4",
+                                                        gwas == "ALL" ~ "ALL",
+                                                        gwas == "WBS" ~ "WBS")) %>% 
+  mutate(gwas_type2 = case_when(gwas_type %in% c("q1", "q2", "q3", "q4") ~ "distance",
+         gwas_type %in% c("ALL", "WBS") ~ "full"))
+dfOverlap$gwas_type <- factor(dfOverlap$gwas_type, levels = c("ALL", "WBS", "q1", "q2", "q3", "q4"))
+```
+
+Proportion of variance explained (Z) by GWAS type
+```{r}
+UK <- dfOverlap %>% filter(contrasts == "UK10K") %>% ggplot(aes(x = gwas_type, y = Z, fill = gwas_type2)) + geom_bar(stat = "identity") + xlab("GWAS Type") + ylab("Proportion of variance explained (Z)") + theme_bw(base_size = 14) + scale_fill_manual(values = c("purple4", "lightseagreen"))  + guides(fill="none") + ggtitle("UK10K") + theme(plot.title = element_text(hjust = 0.5)) + ylim(0, 0.0008)
+
+Han <- dfOverlap %>% filter(contrasts == "Han") %>% ggplot(aes(x = gwas_type, y = Z, fill = gwas_type2)) + geom_bar(stat = "identity") + xlab("GWAS Type") + ylab("Proportion of variance explained (Z)") + theme_bw(base_size = 14) + scale_fill_manual(values = c("purple4", "lightseagreen"))  + guides(fill="none") + ggtitle("Han") + theme(plot.title = element_text(hjust = 0.5))+ ylim(0, 0.0008)
+
+# Print plots
+p <- ggarrange(UK, Han, nrow = 1)
+p
+```
+
+Error by GWAS type
+```{r}
+UK <- dfOverlap %>% filter(contrasts == "UK10K") %>% ggplot(aes(x = gwas_type, y = error, fill = gwas_type2)) + geom_bar(stat = "identity") + xlab("GWAS Type") + ylab("Error") + theme_bw(base_size = 14) + scale_fill_manual(values = c("purple4", "lightseagreen"))  + guides(fill="none") + ggtitle("UK10K") + theme(plot.title = element_text(hjust = 0.5)) + ylim(0,1) + geom_hline(yintercept = 0, color = "red", linetype = 2, linewidth = 1.2)
+
+
+Han <- dfOverlap %>% filter(contrasts == "Han") %>% ggplot(aes(x = gwas_type, y = error, fill = gwas_type2)) + geom_bar(stat = "identity") + xlab("GWAS Type") + ylab("Error") + theme_bw(base_size = 14) + scale_fill_manual(values = c("purple4", "lightseagreen"))  + guides(fill="none") + ggtitle("Han") + theme(plot.title = element_text(hjust = 0.5)) + ylim(0,1) + geom_hline(yintercept = 0, color = "red", linetype = 2, linewidth = 1.2)
+
+# Print plots
+p <- ggarrange(UK, Han, nrow = 1)
+p
+```
+
+Proportion variance explained by error 
+```{r}
+UK <- dfOverlap %>% filter(contrasts == "UK10K") %>% ggplot(aes(x = Z, y = error, color = gwas_type)) + geom_point(size = 3) + xlab("Proportion of variance explained (Z)") + ylab("Error") + theme_bw(base_size = 12)  + guides(fill="none") + ggtitle("UK10K") + theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom") + ylim(0,1) + labs(color = "GWAS Type") + geom_hline(yintercept = 0, color = "red", linetype = 2, linewidth = 1.2)
+
+Han <- dfOverlap %>% filter(contrasts == "Han") %>% ggplot(aes(x = Z, y = error, color = gwas_type)) + geom_point(size = 3) + xlab("Proportion of variance explained (Z)") + ylab("Error") + theme_bw(base_size = 12)  + guides(fill="none") + ggtitle("Han") + theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom") + ylim(0,1) + labs(color = "GWAS Type") + geom_hline(yintercept = 0, color = "red", linetype = 2, linewidth = 1.2)
+
+# Print plots
+p <- ggarrange(UK, Han, nrow = 1, common.legend = TRUE)
+p
+```
+
+Compare D by GWAS type  
+```{r}
+dfOverlap$d_lc <- dfOverlap$D - (2*sqrt(dfOverlap$varD)) 
+dfOverlap$d_uc <- dfOverlap$D + (2 *sqrt(dfOverlap$varD))
+
+UK <- dfOverlap %>% filter(contrasts == "UK10K") %>% ggplot(aes(x = gwas_type, y = D, color = gwas_type2)) + geom_point(size = 3) + xlab("GWAS Type") + ylab("D") + theme_bw(base_size = 14) + scale_color_manual(values = c("purple4", "lightseagreen"))  + guides(color="none") + ggtitle("UK10K") + theme(plot.title = element_text(hjust = 0.5)) + geom_hline(yintercept = 0, color = "red", linetype = 2, linewidth = 1.2) + geom_errorbar(aes(ymin = d_lc, ymax = d_uc)) + ylim(0, 2000000000)
+
+Han <- dfOverlap %>% filter(contrasts == "Han") %>% ggplot(aes(x = gwas_type, y = D, color = gwas_type2)) + geom_point(size = 3) + xlab("GWAS Type") + ylab("D") + theme_bw(base_size = 14) + scale_color_manual(values = c("purple4", "lightseagreen"))  + guides(color="none") + ggtitle("Han") + theme(plot.title = element_text(hjust = 0.5)) + geom_hline(yintercept = 0, color = "red", linetype = 2, linewidth = 1.2) + geom_errorbar(aes(ymin = d_lc, ymax = d_uc)) + ylim(0, 2000000000)
+
+# Print plots
+p <- ggarrange(UK, Han, nrow = 1, common.legend = TRUE)
+p
+```
+
+## PC statistics
+
+```{r}
+dfPC <- fread("../endpoints/SDS/PCStats.txt")
+dfPC <- dfPC %>% mutate(gwas_sample  = case_when(gwas == "q1" ~ "q1", 
+                                                        gwas == "median" ~ "q2", 
+                                                        gwas == "q3" ~ "q3",
+                                                        gwas == "max" ~ "q4",
+                                                        gwas == "ALL" ~ "ALL",
+                                                        gwas == "WBS" ~ "WBS")) %>% 
+  mutate(gwas_sample2 = case_when(gwas_type %in% c("q1", "q2", "q3", "q4") ~ "distance",
+         gwas_sample %in% c("ALL", "WBS") ~ "full"))
+dfPC$gwas_sample <- factor(dfPC$gwas_sample, levels = c("ALL", "WBS", "q1", "q2", "q3", "q4"))
+```
+
+Look at correlation between $PC_i$ and $\hat{F}_{Gr}$
+```{r}
+# UK
+UK <- dfPC %>% filter(gwas_type == "even" & test_type == "odd" & contrasts == "UK10K")%>% ggplot(aes(x = PC, y = B2)) + geom_bar(stat = "identity", color = "darkgreen") + facet_grid(~gwas_sample) + theme_bw(base_size = 12) + ylab(TeX("$B_{i}^2$")) + ggtitle("UK10K") + theme(plot.title = element_text(hjust = 0.5))
+
+# Han
+Han <- dfPC %>% filter(gwas_type == "even" & test_type == "odd" & contrasts == "Han")%>% ggplot(aes(x = PC, y = B2)) + geom_bar(stat = "identity", color = "darkgreen") + facet_grid(~gwas_sample) + theme_bw(base_size = 12) + ylab(TeX("$B_{i}^2$")) + ggtitle("Han") + theme(plot.title = element_text(hjust = 0.5))
+
+# Print plots
+p <- ggarrange(UK, Han, nrow = 1, common.legend = TRUE)
+p
+```
+Limit to "ALL" 
+```{r}
+# UK
+UK <- dfPC %>% filter(gwas_type == "even" & test_type == "odd" & contrasts == "UK10K" & gwas_sample == "ALL")%>% ggplot(aes(x = PC, y = B2)) + geom_bar(stat = "identity", color = "darkgreen") + facet_grid(~gwas_sample) + theme_bw(base_size = 12) + ylab(TeX("$B_{i}^2$")) + ggtitle("UK10K") + theme(plot.title = element_text(hjust = 0.5)) 
+
+
+# Han
+Han <- dfPC %>% filter(gwas_type == "even" & test_type == "odd" & contrasts == "Han"& gwas_sample == "ALL")%>% ggplot(aes(x = PC, y = B2)) + geom_bar(stat = "identity", color = "darkgreen") + facet_grid(~gwas_sample) + theme_bw(base_size = 12) + ylab(TeX("$B_{i}^2$")) + ggtitle("Han") + theme(plot.title = element_text(hjust = 0.5))
+
+# Print plots
+p <- ggarrange(UK, Han, nrow = 1, common.legend = TRUE)
+p
+```
+
+
+Limit to "WBS" 
+```{r}
+# UK
+UK <- dfPC %>% filter(gwas_type == "even" & test_type == "odd" & contrasts == "UK10K" & gwas_sample == "WBS")%>% ggplot(aes(x = PC, y = B2)) + geom_bar(stat = "identity", color = "darkgreen") + facet_grid(~gwas_sample) + theme_bw(base_size = 12) + ylab(TeX("$B_{i}^2$")) + ggtitle("UK10K") + theme(plot.title = element_text(hjust = 0.5)) + ylim(0,0.012)
+
+# Han
+Han <- dfPC %>% filter(gwas_type == "even" & test_type == "odd" & contrasts == "Han"& gwas_sample == "WBS")%>% ggplot(aes(x = PC, y = B2)) + geom_bar(stat = "identity", color = "darkgreen") + facet_grid(~gwas_sample) + theme_bw(base_size = 12) + ylab(TeX("$B_{i}^2$")) + ggtitle("Han") + theme(plot.title = element_text(hjust = 0.5)) + ylim(0, 0.012)
+
+# Print plots
+p <- ggarrange(UK, Han, nrow = 1, common.legend = TRUE)
+p
+```
+
+Look at correlation between $R^2_{K}$
+```{r}
+dfPC %>% filter(gwas_type == "even" & test_type == "odd" & contrasts == "UK10K") %>% ggplot(aes(x = PC, y = r2)) + geom_bar(stat = "identity", color = "darkgreen") + facet_grid(~gwas_sample) + theme_bw(base_size = 12) + ylab(TeX("$R_{K}^2$")) + geom_hline(data = dfOverlap, aes(yintercept = gammaF), color = "red", linetype = 2)
+```

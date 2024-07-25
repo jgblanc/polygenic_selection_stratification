@@ -1,0 +1,56 @@
+# Snakefile to do the pre-data processing for the Le et al aDNA contrasts
+CHR = ["22"]
+#for i in range(1, 23):
+#  CHR.append(str(i))
+CONTRASTS = ["EUROPEAN_NEOLITHIC", "BRONZE_AGE", "HISTORICAL"]
+#GWAS=["ALL", "WBS", "q1", "q2", "q3", "q4"]
+GWAS=["q1"]
+
+rule all:
+    input:
+        expand("data/adnaSel/r/{gwas}/{contrasts}_chr{chr}.rvec", chr=CHR, gwas=GWAS, contrasts=CONTRASTS)
+
+
+# Get allele frequency in all GWAS panels
+
+rule get_AF_GWAS:
+    input:
+        gwas="data/adnaSel/ids/gwas_ids/{gwas}.txt"
+    output:
+        gwas="data/adnaSel/variantFreq/{gwas}_{chr}.afreq"
+    params:
+        prefix_in="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
+        prefix_out_gwas="data/adnaSel/variantFreq/{gwas}_{chr}"
+    resources:
+        mem_mb=38000,
+        time="00:30:00"
+    shell:
+        """
+        plink2 --pfile {params.prefix_in} \
+        --freq \
+        --maf 0.01 \
+        --keep {input.gwas} \
+	      --threads 8 \
+        --memory 38000 \
+        --out {params.prefix_out_gwas}
+        """
+
+# Process and match SNPs
+
+rule flip_all_snps:
+    input:
+        freq="data/adnaSel/variantFreq/{gwas}_{chr}.afreq"
+	      contrasts="data/adnaSel/raw/all_populations_mles.txt"
+    output:
+        rvec=expand("data/adnaSel/r/{gwas}/{contrasts}_chr{{chr}}.rvec", contrasts = CONTRASTS),
+        overlappingSNPs="data/adnaSel/variants/{gwas}/overlappingSNPs_chr{chr}.txt"
+    params:
+        out_path_r="data/adnaSel/r/{gwas}"
+    shell:
+        """
+        Rscript code/adnaSel/flip_overlapping_snps.R {input.freq} {input.contrasts} {params.out_path_r} {output.overlappingSNPs} {wildcards.chr}
+        """
+
+
+
+

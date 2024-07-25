@@ -1,0 +1,28 @@
+---
+title: "HGDP1KG"
+author: "Jennifer Blanc"
+date: "2024-07-25"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Initial Look at meta data
+
+```{r}
+# Read in data
+df <- fread("~/Downloads/gnomad_meta_updated.tsv", sep = "\t")
+
+# Select relevant columns (for now)
+dfFilter <- df %>% select("s","project_meta.project_subpop" , "latitude" ,  "longitude",
+                   "population",  "region")
+colnames(dfFilter)[1] <- "IID"
+
+# Plot data by lat and long
+ggplot(data = dfFilter, aes(x = longitude, y = latitude, color = region)) + geom_point()
+```
+
+
+
