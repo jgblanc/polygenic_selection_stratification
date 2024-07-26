@@ -1,10 +1,10 @@
 # Snakefile to do the pre-data processing for the Le et al aDNA contrasts
-CHR = ["22"]
-#for i in range(1, 23):
-#  CHR.append(str(i))
-CONTRASTS = ["EUROPEAN_NEOLITHIC", "BRONZE_AGE", "HISTORICAL"]
-#GWAS=["ALL", "WBS", "q1", "q2", "q3", "q4"]
-GWAS=["q1"]
+CHR = []
+for i in range(1, 23):
+  CHR.append(str(i))
+CONTRASTS = ["EuropeanNeolithic", "BronzeAge", "Historical"]
+GWAS=["ALL", "WBS", "q1", "q2", "q3", "q4"]
+#GWAS=["q1"]
 
 rule all:
     input:
@@ -39,16 +39,17 @@ rule get_AF_GWAS:
 
 rule flip_all_snps:
     input:
-        freq="data/adnaSel/variantFreq/{gwas}_{chr}.afreq"
+        freq="data/adnaSel/variantFreq/{gwas}_{chr}.afreq",
 	      contrasts="data/adnaSel/raw/all_populations_mles.txt"
     output:
-        rvec=expand("data/adnaSel/r/{gwas}/{contrasts}_chr{{chr}}.rvec", contrasts = CONTRASTS),
-        overlappingSNPs="data/adnaSel/variants/{gwas}/overlappingSNPs_chr{chr}.txt"
+        rvec=expand("data/adnaSel/r/{{gwas}}/{contrasts}_chr{{chr}}.rvec", contrasts = CONTRASTS),
+        overlappingSNPs=expand("data/adnaSel/variants/{{gwas}}/{contrasts}/overlappingSNPs_chr{{chr}}.txt", contrasts=CONTRASTS)
     params:
-        out_path_r="data/adnaSel/r/{gwas}"
+        out_path_r="data/adnaSel/r/{gwas}/",
+	out_path_snps="data/adnaSel/variants/{gwas}/"
     shell:
         """
-        Rscript code/adnaSel/flip_overlapping_snps.R {input.freq} {input.contrasts} {params.out_path_r} {output.overlappingSNPs} {wildcards.chr}
+        Rscript code/adnaSel/flip_overlapping_snps.R {input.freq} {input.contrasts} {params.out_path_r} {params.out_path_snps} {wildcards.chr}
         """
 
 

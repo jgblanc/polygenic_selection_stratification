@@ -2,7 +2,7 @@
 #SBATCH --job-name=main
 #SBATCH --output=logs/main.out
 #SBATCH --error=logs/main.err
-#SBATCH --time=24:00:00
+#SBATCH --time=48:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --mem-per-cpu=2000
@@ -20,7 +20,3 @@ rm -r .snakemake/
 cat snakefile_main
 snakemake --unlock -s snakefile_main
 snakemake --profile cluster-setup/ -s snakefile_main --rerun-incomplete
-#snakemake -j1 --rerun-incomplete -s snakefile_main 
-
-#snakemake --cores all --rerun-incomplete -s snakefile_UKBB    
-#snakemake -j1 --rerun-incomplete 
