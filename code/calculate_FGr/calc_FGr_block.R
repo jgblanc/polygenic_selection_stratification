@@ -30,11 +30,14 @@ m <- nrow(dfGWAS_IDs)
 
 # Read in and format r
 r <- fread(r_file)
+print(head(r))
 dfSnps <- fread(snps_file)
 colnames(dfSnps) <- "ID"
+print(head(dfSnps))
 r <- inner_join(r, dfSnps)
 r <- r %>% dplyr::select("ID", "ALT", "r")
 colnames(r) <- c("ID", "A1", "BETA")
+print(head(r))
 
 
 # Separate ID into CHR and BP

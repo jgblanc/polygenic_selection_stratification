@@ -25,6 +25,7 @@ for (i in 2:num_chr) {
   tmp <- fread(r_file)
   r <- rbind(r, tmp)
 }
+print(head(r))
 
 # Read in all variances
 var_file <- paste0(variance_prefix, "1.txt")
@@ -37,12 +38,15 @@ for (i in 2:num_chr) {
 
 # Join dataframes and standrdize everything
 df <- inner_join(r, dfVar)
+df$r[is.na(df$r)] <- 0
 df$r <- df$r * (1/sqrt(df$Var))
 df$r <- df$r - mean(df$r)
+print(df)
 df$r <- df$r / sqrt(sum(df$r^2))
+print(df)
 print(paste0("The length of the vector is ", sqrt(sum(df$r^2))))
 df$r <- df$r * (1/sqrt(df$Var))
-
+print(head(df))
 
 # Save output
 fwrite(df, outfile, row.names = F, col.names = T, quote = F, sep = "\t")

@@ -21,8 +21,12 @@ index <- 1
 
 con <- file(inFile, open = "r")
 
+# Read and discard the first line to skip it
+readLines(con, n = 1, warn = FALSE)
+
 # Read and process each line
 while(TRUE) {
+ 
   line <- readLines(con, n = 1, warn = FALSE)
   if (length(line) == 0) break  # Exit loop if end of file
 
@@ -39,7 +43,7 @@ while(TRUE) {
 
   # Save results to list
   results_list[[index]] <- data.table(ID = ID, Var = variance)
-  index <- index + 1
+  index <- 1+ index
 }
 
 # Close the connection
