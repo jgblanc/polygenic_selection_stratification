@@ -13,7 +13,7 @@ editor_options:
 
 ## Results 
 
-[Test Example](analysis/TestExample.html)  
+[Test Example](docs/TestExample.html)  
 
 - Contrasts are "African" vs "European" allele frequency differences in the UKBB  
 - This analysis is used to check the pipeline output and as an interpretable example  
