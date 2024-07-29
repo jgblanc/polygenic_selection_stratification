@@ -8,4 +8,14 @@ editor_options:
   chunk_output_type: console
 ---
 
-Welcome to my research website.
+## Data Analysis Pipeline  
+
+
+## Results 
+
+[Test Example](analysis/TestExample.html)  
+
+- Contrasts are "African" vs "European" allele frequency differences in the UKBB  
+- This analysis is used to check the pipeline output and as an interpretable example  
+
+
