@@ -18,4 +18,7 @@ editor_options:
 - Contrasts are "African" vs "European" allele frequency differences in the UKBB  
 - This analysis is used to check the pipeline output and as an interpretable example  
 
+[SDS](SDS.html)  
 
+- UK10K contrasts are from [Field et al. 2016](https://www.science.org/doi/10.1126/science.aag0776) 
+- Han contrasts are from [Luo et al. 2023](https://www.sciencedirect.com/science/article/pii/S2095927323005558)  
