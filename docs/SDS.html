@@ -540,15 +540,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjgblancpolygenicselectionstratificationtree330f9f44c69be3a4cb443e6b50cd199c211b6587targetblank330f9f4a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjgblancpolygenicselectionstratificationtree76380e686474937aeed2163f3bdc28002eadc8c2targetblank76380e6a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/jgblanc/polygenic_selection_stratification/tree/330f9f44c69be3a4cb443e6b50cd199c211b6587" target="_blank">330f9f4</a>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/tree/76380e686474937aeed2163f3bdc28002eadc8c2" target="_blank">76380e6</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomjgblancpolygenicselectionstratificationtree330f9f44c69be3a4cb443e6b50cd199c211b6587targetblank330f9f4a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomjgblancpolygenicselectionstratificationtree76380e686474937aeed2163f3bdc28002eadc8c2targetblank76380e6a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -558,7 +558,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/jgblanc/polygenic_selection_stratification/tree/330f9f44c69be3a4cb443e6b50cd199c211b6587" target="_blank">330f9f4</a>.
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/tree/76380e686474937aeed2163f3bdc28002eadc8c2" target="_blank">76380e6</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -636,6 +636,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/blob/76380e686474937aeed2163f3bdc28002eadc8c2/analysis/SDS.Rmd" target="_blank">76380e6</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-30
+</td>
+<td>
+wflow_publish(c("analysis/index.Rmd", "analysis/SDS.Rmd"))
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jgblanc/polygenic_selection_stratification/553129da6a322e914aa249b57d2ef96ce3e77f9d/docs/SDS.html" target="_blank">553129d</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-30
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -894,12 +928,12 @@ different GWAS panels based on their distance from the WBS:</p>
 <ul>
 <li>q1: individuals in the first quartile of distance<br />
 </li>
-<li>q2: individuals in the second quartile of distance<br />
+<li>q2: individuals in the first two quartiles of distance<br />
 </li>
-<li>q3: individuals in the third quartile of distance<br />
+<li>q3: individuals in the first three quartiles of distance<br />
 </li>
-<li>q4: individuals in the fourth quartile of distance (equivalent to
-sampling 10,000 individuals from ALL)</li>
+<li>q4: individuals in all distances (equivalent to sampling 10,000
+individuals from ALL)</li>
 </ul>
 <pre class="r"><code># Calculate distance
 
@@ -974,8 +1008,45 @@ Han &lt;- dfOverlap %&gt;% filter(contrasts == &quot;Han&quot;) %&gt;% ggplot(ae
 # Print plots
 p &lt;- ggarrange(UK, Han, nrow = 1)
 p</code></pre>
-<p><img src="figure/SDS.Rmd/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" />
-The Han contrasts explain a larger proportion of variance in GWAS
+<p><img src="figure/SDS.Rmd/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-12-1">
+Past versions of unnamed-chunk-12-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-12-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/blob/553129da6a322e914aa249b57d2ef96ce3e77f9d/docs/figure/SDS.Rmd/unnamed-chunk-12-1.png" target="_blank">553129d</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-30
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>The Han contrasts explain a larger proportion of variance in GWAS
 samples that “other” ancestries but a slightly smaller proportion of
 variance in predominantly European samples. Additionally, due to the
 distribution of ancestries in the biobank q1, q2, and q3, are nearly all
@@ -990,9 +1061,46 @@ Han &lt;- dfOverlap %&gt;% filter(contrasts == &quot;Han&quot;) %&gt;% ggplot(ae
 # Print plots
 p &lt;- ggarrange(UK, Han, nrow = 1)
 p</code></pre>
-<p><img src="figure/SDS.Rmd/unnamed-chunk-13-1.png" width="672" style="display: block; margin: auto;" />
-The Han contrasts explain a larger proportion of variance in ALL and q4
-and consequently have smaller error. The UK10K contrasts explain a
+<p><img src="figure/SDS.Rmd/unnamed-chunk-13-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-13-1">
+Past versions of unnamed-chunk-13-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-13-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/blob/553129da6a322e914aa249b57d2ef96ce3e77f9d/docs/figure/SDS.Rmd/unnamed-chunk-13-1.png" target="_blank">553129d</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-30
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>The Han contrasts explain a larger proportion of variance in ALL and
+q4 and consequently have smaller error. The UK10K contrasts explain a
 larger proportion of variance in WBS, q1, q2, and q3 and consequently
 have lower error for those GWAS panels. Similar to results we’ve seen
 before, using the whole biobank achieves much lower error than
@@ -1006,12 +1114,123 @@ Han &lt;- dfOverlap %&gt;% filter(contrasts == &quot;Han&quot;) %&gt;% ggplot(ae
 p &lt;- ggarrange(UK, Han, nrow = 1, common.legend = TRUE)
 p</code></pre>
 <p><img src="figure/SDS.Rmd/unnamed-chunk-14-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-14-1">
+Past versions of unnamed-chunk-14-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-14-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/blob/553129da6a322e914aa249b57d2ef96ce3e77f9d/docs/figure/SDS.Rmd/unnamed-chunk-14-1.png" target="_blank">553129d</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-30
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>Combine results into one plot</p>
 <pre class="r"><code>dfOverlap %&gt;% ggplot(aes(x = Z, y = error, color = gwas_type, shape = contrasts)) + geom_point(size = 3) + xlab(&quot;Proportion of variance explained (Z)&quot;) + ylab(&quot;Error&quot;) + theme_bw(base_size = 12)  + guides(fill=&quot;none&quot;) + theme(plot.title = element_text(hjust = 0.5), legend.position = &quot;bottom&quot;) + ylim(0,1) + labs(color = &quot;GWAS Type&quot;) + geom_hline(yintercept = 0, color = &quot;red&quot;, linetype = 2, linewidth = 1.2)</code></pre>
-<p><img src="figure/SDS.Rmd/unnamed-chunk-15-1.png" width="672" style="display: block; margin: auto;" />
-Limit to WBS, q1, q2, q3</p>
+<p><img src="figure/SDS.Rmd/unnamed-chunk-15-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-15-1">
+Past versions of unnamed-chunk-15-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-15-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/blob/553129da6a322e914aa249b57d2ef96ce3e77f9d/docs/figure/SDS.Rmd/unnamed-chunk-15-1.png" target="_blank">553129d</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-30
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Limit to WBS, q1, q2, q3</p>
 <pre class="r"><code>dfOverlap %&gt;% filter(gwas_type %in% c(&quot;WBS&quot;, &quot;q1&quot;, &quot;q2&quot;, &quot;q3&quot;)) %&gt;% ggplot(aes(x = Z, y = error, color = gwas_type, shape = contrasts)) + geom_point(size = 3) + xlab(&quot;Proportion of variance explained (Z)&quot;) + ylab(&quot;Error&quot;) + theme_bw(base_size = 12)  + guides(fill=&quot;none&quot;) + theme(plot.title = element_text(hjust = 0.5), legend.position = &quot;bottom&quot;) + ylim(0,1) + labs(color = &quot;GWAS Type&quot;) + geom_hline(yintercept = 0, color = &quot;red&quot;, linetype = 2, linewidth = 1.2)</code></pre>
 <p><img src="figure/SDS.Rmd/unnamed-chunk-16-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-16-1">
+Past versions of unnamed-chunk-16-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-16-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/blob/553129da6a322e914aa249b57d2ef96ce3e77f9d/docs/figure/SDS.Rmd/unnamed-chunk-16-1.png" target="_blank">553129d</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-30
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>The same pattern holds that the more variance a constrast explains in
 a given GWAS, the lower the error.</p>
 <p><strong>GWAS type vs D</strong></p>
@@ -1026,6 +1245,43 @@ Han &lt;- dfOverlap %&gt;% filter(contrasts == &quot;Han&quot;) %&gt;% ggplot(ae
 p &lt;- ggarrange(UK, Han, nrow = 1, common.legend = TRUE)
 p</code></pre>
 <p><img src="figure/SDS.Rmd/unnamed-chunk-17-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-17-1">
+Past versions of unnamed-chunk-17-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-17-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/blob/553129da6a322e914aa249b57d2ef96ce3e77f9d/docs/figure/SDS.Rmd/unnamed-chunk-17-1.png" target="_blank">553129d</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-30
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>This is not a great plot because the GWAS panels are different sizes
 (q1-q4 are all the same) so it’s not a fair comparison but plotting the
 expectation just looks like its on the 0 line because <span
@@ -1074,6 +1330,43 @@ Han &lt;- dfPC %&gt;% filter(gwas_type == &quot;even&quot; &amp; test_type == &q
 p &lt;- ggarrange(UK, Han, nrow = 1, common.legend = TRUE)
 p</code></pre>
 <p><img src="figure/SDS.Rmd/unnamed-chunk-20-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-20-1">
+Past versions of unnamed-chunk-20-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-20-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/blob/553129da6a322e914aa249b57d2ef96ce3e77f9d/docs/figure/SDS.Rmd/unnamed-chunk-20-1.png" target="_blank">553129d</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-30
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>Limit results to “ALL”</p>
 <pre class="r"><code># UK
 UK &lt;- dfPC %&gt;% filter(gwas_type == &quot;even&quot; &amp; test_type == &quot;odd&quot; &amp; contrasts == &quot;UK10K&quot; &amp; gwas_sample == &quot;ALL&quot;)%&gt;% ggplot(aes(x = PC, y = B2)) + geom_bar(stat = &quot;identity&quot;, color = &quot;darkgreen&quot;, fill = &quot;darkgreen&quot;) + facet_grid(~gwas_sample) + theme_bw(base_size = 12) + ylab(TeX(&quot;$B_{i}^2$&quot;)) + ggtitle(&quot;UK10K&quot;) + theme(plot.title = element_text(hjust = 0.5)) 
@@ -1086,6 +1379,43 @@ Han &lt;- dfPC %&gt;% filter(gwas_type == &quot;even&quot; &amp; test_type == &q
 p &lt;- ggarrange(UK, Han, nrow = 1, common.legend = TRUE)
 p</code></pre>
 <p><img src="figure/SDS.Rmd/unnamed-chunk-21-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-21-1">
+Past versions of unnamed-chunk-21-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-21-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/blob/553129da6a322e914aa249b57d2ef96ce3e77f9d/docs/figure/SDS.Rmd/unnamed-chunk-21-1.png" target="_blank">553129d</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-30
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>Limit results to “WBS”</p>
 <pre class="r"><code># UK
 UK &lt;- dfPC %&gt;% filter(gwas_type == &quot;even&quot; &amp; test_type == &quot;odd&quot; &amp; contrasts == &quot;UK10K&quot; &amp; gwas_sample == &quot;WBS&quot;)%&gt;% ggplot(aes(x = PC, y = B2)) + geom_bar(stat = &quot;identity&quot;, color = &quot;darkgreen&quot;,  fill = &quot;darkgreen&quot;) + facet_grid(~gwas_sample) + theme_bw(base_size = 12) + ylab(TeX(&quot;$B_{i}^2$&quot;)) + ggtitle(&quot;UK10K&quot;) + theme(plot.title = element_text(hjust = 0.5)) + ylim(0,0.012)
@@ -1097,6 +1427,43 @@ Han &lt;- dfPC %&gt;% filter(gwas_type == &quot;even&quot; &amp; test_type == &q
 p &lt;- ggarrange(UK, Han, nrow = 1, common.legend = TRUE)
 p</code></pre>
 <p><img src="figure/SDS.Rmd/unnamed-chunk-22-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-22-1">
+Past versions of unnamed-chunk-22-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-22-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/blob/553129da6a322e914aa249b57d2ef96ce3e77f9d/docs/figure/SDS.Rmd/unnamed-chunk-22-1.png" target="_blank">553129d</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-30
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>Both set’s of contrasts are fairly highly correlated with the first
 PC of the whole biobank and then moderately correlated with some of the
 top 10, though different ones for each contrast. Further investigation
@@ -1119,6 +1486,43 @@ Han &lt;- dfPC %&gt;% filter(gwas_type == &quot;even&quot; &amp; test_type == &q
 p &lt;- ggarrange(UK, Han, nrow = 2, common.legend = TRUE)
 p</code></pre>
 <p><img src="figure/SDS.Rmd/unnamed-chunk-23-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-23-1">
+Past versions of unnamed-chunk-23-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-23-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/blob/553129da6a322e914aa249b57d2ef96ce3e77f9d/docs/figure/SDS.Rmd/unnamed-chunk-23-1.png" target="_blank">553129d</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-30
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>Limit to “ALL”</p>
 <pre class="r"><code># UK 
 dfFilter &lt;- dfOverlap %&gt;% filter(contrasts == &quot;UK10K&quot; &amp; gwas_type == &quot;ALL&quot;) %&gt;% mutate(gwas_sample = gwas_type)
@@ -1132,6 +1536,43 @@ Han &lt;- dfPC %&gt;% filter(gwas_type == &quot;even&quot; &amp; test_type == &q
 p &lt;- ggarrange(UK, Han, nrow = 1, common.legend = TRUE)
 p</code></pre>
 <p><img src="figure/SDS.Rmd/unnamed-chunk-24-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-24-1">
+Past versions of unnamed-chunk-24-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-24-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/blob/553129da6a322e914aa249b57d2ef96ce3e77f9d/docs/figure/SDS.Rmd/unnamed-chunk-24-1.png" target="_blank">553129d</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-30
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>Limit to “WBS”</p>
 <pre class="r"><code># UK 
 dfFilter &lt;- dfOverlap %&gt;% filter(contrasts == &quot;UK10K&quot; &amp; gwas_type == &quot;WBS&quot;) %&gt;% mutate(gwas_sample = gwas_type)
@@ -1145,6 +1586,43 @@ Han &lt;- dfPC %&gt;% filter(gwas_type == &quot;even&quot; &amp; test_type == &q
 p &lt;- ggarrange(UK, Han, nrow = 1, common.legend = TRUE)
 p</code></pre>
 <p><img src="figure/SDS.Rmd/unnamed-chunk-25-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-25-1">
+Past versions of unnamed-chunk-25-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-25-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/blob/553129da6a322e914aa249b57d2ef96ce3e77f9d/docs/figure/SDS.Rmd/unnamed-chunk-25-1.png" target="_blank">553129d</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-30
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
