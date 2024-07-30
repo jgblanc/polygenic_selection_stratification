@@ -22,3 +22,8 @@ editor_options:
 
 - UK10K contrasts are from [Field et al. 2016](https://www.science.org/doi/10.1126/science.aag0776) 
 - Han contrasts are from [Luo et al. 2023](https://www.sciencedirect.com/science/article/pii/S2095927323005558)  
+
+
+[aDNA Selection](adnaSel.html)  
+
+- Contrasts are from [Le et al. 2022](https://www.biorxiv.org/content/10.1101/2022.08.24.505188v1)
