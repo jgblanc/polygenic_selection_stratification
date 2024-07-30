@@ -133,9 +133,9 @@ dfWBS <- inner_join(df, WBS) %>% select("#FID", "IID", "POP")
 First I calculate the euclidean distance of each individual from the mean position on PC1 and PC2 for the WBS. Using this distance metric I select $M=10,000$ individuals for 4 different GWAS panels based on their distance from the WBS:  
 
 - q1: individuals in the first quartile of distance  
-- q2: individuals in the second quartile of distance  
-- q3: individuals in the third quartile of distance  
-- q4: individuals in the fourth quartile of distance (equivalent to sampling 10,000 individuals from ALL)   
+- q2: individuals in the first two quartiles of distance  
+- q3: individuals in the first three quartiles of distance  
+- q4: individuals in all distances (equivalent to sampling 10,000 individuals from ALL)   
 
 ```{r, cache=TRUE}
 # Calculate distance
