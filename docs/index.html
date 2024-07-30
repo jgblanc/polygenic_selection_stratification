@@ -365,15 +365,15 @@ results.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjgblancpolygenicselectionstratificationtreefd70ba5c7c4cea643ce6c1735948ab61245df316targetblankfd70ba5a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjgblancpolygenicselectionstratificationtreec68174d5dd087bf0e1c5a8e0f494abfc5d5840fetargetblankc68174da">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/jgblanc/polygenic_selection_stratification/tree/fd70ba5c7c4cea643ce6c1735948ab61245df316" target="_blank">fd70ba5</a>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/tree/c68174d5dd087bf0e1c5a8e0f494abfc5d5840fe" target="_blank">c68174d</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomjgblancpolygenicselectionstratificationtreefd70ba5c7c4cea643ce6c1735948ab61245df316targetblankfd70ba5a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomjgblancpolygenicselectionstratificationtreec68174d5dd087bf0e1c5a8e0f494abfc5d5840fetargetblankc68174da"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -383,7 +383,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/jgblanc/polygenic_selection_stratification/tree/fd70ba5c7c4cea643ce6c1735948ab61245df316" target="_blank">fd70ba5</a>.
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/tree/c68174d5dd087bf0e1c5a8e0f494abfc5d5840fe" target="_blank">c68174d</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -462,6 +462,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/blob/c68174d5dd087bf0e1c5a8e0f494abfc5d5840fe/analysis/index.Rmd" target="_blank">c68174d</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-30
+</td>
+<td>
+wflow_publish(c("analysis/index.Rmd"))
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jgblanc/polygenic_selection_stratification/99d568909599dad055b58b9e3b6d9a5ada252f6c/docs/index.html" target="_blank">99d5689</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-30
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -675,6 +709,56 @@ Start workflowr project.
 </div>
 <div id="data-analysis-pipeline" class="section level2">
 <h2>Data Analysis Pipeline</h2>
+<div id="overlap-statistics" class="section level3">
+<h3>Overlap Statistics</h3>
+<ul>
+<li><span class="math inline">\(D\)</span>: variance along test axis
+<span class="math inline">\(r^\top G^\top G r\)</span><br />
+</li>
+<li><span class="math inline">\(\mathbb{E}[D] = M - 1\)</span><br />
+</li>
+<li><span class="math inline">\(\hat{\sigma}^2_{D}\)</span>: jackknife
+estimation of var(D)<br />
+</li>
+<li><span class="math inline">\(p_{D}\)</span>: p-value for hypothesis
+test (does D differ from <span
+class="math inline">\(\mathbb{E}[D]\)</span>)<br />
+</li>
+<li><span class="math inline">\(Z\)</span>: proportion of variance along
+test axis <span
+class="math inline">\(\frac{D}{Tr\mathbf{K}}\)</span><br />
+</li>
+<li><span class="math inline">\(Tr\mathbf{K} = (M-1)L\)</span><br />
+</li>
+<li><span class="math inline">\(\hat{\sigma}^2_{FGr}\)</span>: jackknife
+estimate of entries of <span class="math inline">\(\hat{F}_{Gr}\)</span>
+across blocks $<em>{i=1}^M </em>{j=1}^B ( <em>{Gr,i}^{-j} - </em>{k=1}^K
+_{Gr,i}^{-k} )^2 $<br />
+</li>
+<li><span class="math inline">\(var(\hat{F}_{Gr})\)</span>: variance of
+entries of <span class="math inline">\(\hat{F}_{Gr}\)</span> <span
+class="math inline">\(\frac{1}{M} \sum\limits_{i=1}^M
+\left(\hat{F}_{Gr,i} - \frac{1}{M} \sum\limits_{\ell = 1}^M
+\hat{F}_{Gr,\ell} \right)^2\)</span><br />
+</li>
+<li><span class="math inline">\(error =
+\frac{\hat{\sigma}^2_{FGr}}{var(\hat{F}_{Gr})}\)</span><br />
+</li>
+<li><span class="math inline">\(signal = 1 - error\)</span><br />
+</li>
+<li><span class="math inline">\(\gamma_{F} = 1 - error^2\)</span><br />
+</li>
+<li><span class="math inline">\(\hat{\beta}_{pc,i} = Cov(\hat{F}_{Gr},
+\hat{U}_{i})\)</span> (use even-odd chromosomes)<br />
+</li>
+<li><span class="math inline">\(\hat{\beta}_{i}^2\)</span>: variance in
+<span class="math inline">\(\hat{F}_{Gr}\)</span> explained by <span
+class="math inline">\(PC_i\)</span><br />
+</li>
+<li><span class="math inline">\(R^2_{K} = \sum_{K}
+\beta^2_i\)</span></li>
+</ul>
+</div>
 </div>
 <div id="results" class="section level2">
 <h2>Results</h2>
