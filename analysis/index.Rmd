@@ -10,6 +10,23 @@ editor_options:
 
 ## Data Analysis Pipeline  
 
+### Overlap Statistics  
+
+- $D$: variance along test axis $r^\top G^\top G r$  
+- $\mathbb{E}[D] = M - 1$  
+- $\hat{\sigma}^2_{D}$: jackknife estimation of var(D)  
+- $p_{D}$: p-value for hypothesis test (does D differ from $\mathbb{E}[D]$)  
+- $Z$: proportion of variance along test axis $\frac{D}{Tr\mathbf{K}}$  
+- $Tr\mathbf{K} = (M-1)L$  
+- $\hat{\sigma}^2_{FGr}$: jackknife estimate of entries of $\hat{F}_{Gr}$ across blocks $\frac{1}{M}\sum\limits_{i=1}^M \frac{B-1}{B} \sum\limits_{j=1}^B \left( \hat{F}_{Gr,i}^{-j} - \frac{1}{B} \sum\limits_{k=1}^K \hat{F}_{Gr,i}^{-k} \right)^2 $  
+- $var(\hat{F}_{Gr})$: variance of entries of $\hat{F}_{Gr}$ $\frac{1}{M} \sum\limits_{i=1}^M \left(\hat{F}_{Gr,i} - \frac{1}{M} \sum\limits_{\ell = 1}^M \hat{F}_{Gr,\ell} \right)^2$  
+- $error = \frac{\hat{\sigma}^2_{FGr}}{var(\hat{F}_{Gr})}$  
+- $signal = 1 - error$  
+- $\gamma_{F} = 1 - error^2$  
+- $\hat{\beta}_{pc,i} = Cov(\hat{F}_{Gr}, \hat{U}_{i})$ (use even-odd chromosomes)  
+- $\hat{\beta}_{i}^2$: variance in $\hat{F}_{Gr}$ explained by $PC_i$  
+- $R^2_{K} = \sum_{K} \beta^2_i$  
+
 
 ## Results 
 
