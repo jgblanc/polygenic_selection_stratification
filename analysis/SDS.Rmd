@@ -238,7 +238,7 @@ Limit to WBS, q1, q2, q3
 dfOverlap %>% filter(gwas_type %in% c("WBS", "q1", "q2", "q3")) %>% ggplot(aes(x = Z, y = error, color = gwas_type, shape = contrasts)) + geom_point(size = 3) + xlab("Proportion of variance explained (Z)") + ylab("Error") + theme_bw(base_size = 12)  + guides(fill="none") + theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom") + ylim(0,1) + labs(color = "GWAS Type") + geom_hline(yintercept = 0, color = "red", linetype = 2, linewidth = 1.2)
 ```
 
-The same pattern holds that the more variance a constrast explains in a given GWAS, the lower the error. 
+The same pattern holds that the more variance a contrast explains in a given GWAS, the lower the error. 
 
 **GWAS type vs D**   
 ```{r}

@@ -18,7 +18,7 @@ editor_options:
 - $p_{D}$: p-value for hypothesis test (does D differ from $\mathbb{E}[D]$)  
 - $Z$: proportion of variance along test axis $\frac{D}{Tr\mathbf{K}}$  
 - $Tr\mathbf{K} = (M-1)L$  
-- $\hat{\sigma}^2_{FGr}$: jackknife estimate of entries of $\hat{F}_{Gr}$ across blocks $\frac{1}{M}\sum\limits_{i=1}^M \frac{B-1}{B} \sum\limits_{j=1}^B \left( \hat{F}_{Gr,i}^{-j} - \frac{1}{B} \sum\limits_{k=1}^K \hat{F}_{Gr,i}^{-k} \right)^2 $  
+- $\hat{\sigma}^2_{FGr}$: jackknife estimate of entries of $\hat{F}_{Gr}$ across blocks $\frac{1}{M}\sum\limits_{i=1}^M \frac{B-1}{B} \sum\limits_{j=1}^B \left( \hat{F}_{Gr,i}^{-j} - \frac{1}{B} \sum\limits_{k=1}^K \hat{F}_{Gr,i}^{-k} \right)^2$  
 - $var(\hat{F}_{Gr})$: variance of entries of $\hat{F}_{Gr}$ $\frac{1}{M} \sum\limits_{i=1}^M \left(\hat{F}_{Gr,i} - \frac{1}{M} \sum\limits_{\ell = 1}^M \hat{F}_{Gr,\ell} \right)^2$  
 - $error = \frac{\hat{\sigma}^2_{FGr}}{var(\hat{F}_{Gr})}$  
 - $signal = 1 - error$  

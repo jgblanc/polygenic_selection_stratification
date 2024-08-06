@@ -7,22 +7,202 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(data.table)
+library(tidyverse)
+library(maps)
 ```
 
-## Initial Look at meta data
+# Construct GWAS and Test Panels 
+
+
+### Initial look at meta data
 
 ```{r}
 # Read in data
-df <- fread("~/Downloads/gnomad_meta_updated.tsv", sep = "\t")
+df <- fread("../data/HGDP1KG/gnomad_meta_updated.tsv", sep = "\t")
 
 # Select relevant columns (for now)
 dfFilter <- df %>% select("s","project_meta.project_subpop" , "latitude" ,  "longitude",
-                   "population",  "region")
+                   "population",  "region", "project_meta.project_pop")
 colnames(dfFilter)[1] <- "IID"
 
 # Plot data by lat and long
-ggplot(data = dfFilter, aes(x = longitude, y = latitude, color = region)) + geom_point()
+world_map <- map_data("world")
+ggplot() + geom_polygon(data = world_map, aes(x = long, y = lat, group = group), fill = "white", color = "black") + geom_point(data = dfFilter, aes(x = longitude, y = latitude, color = project_meta.project_pop), size = 2) +
+  theme_minimal(base_size = 14) + xlab("Longitude") + ylab("Latitude") +labs(colour="POP") + theme(legend.position = "bottom")
+```
+
+### Select different test panels 
+
+**Longitude (and Latitude) in Eurasia**
+
+Similar to the analysis in [Berg et al](https://elifesciences.org/articles/39725) we want to test for polygenic selection along longitude for populations in Eurasia (N = 2,224).   
+- EAS: 825  
+- FIN: 99  
+- NFE: 510 (note we removed CEU samples because their lat/long corresponds to sample collection in Utah)   
+- SAS: 790 
+
+```{r}
+# Select Eurasian Sample
+dfEurAsia <- dfFilter %>% filter(project_meta.project_pop %in% c("fin", "nfe", "eas", "sas")) %>% 
+  filter(population != "CEU") # Remove CEU due to LAT/LONG on AMERICA
+dfEurAsia <- dfEurAsia %>% select("IID", "latitude", "longitude", "project_meta.project_pop", "population")
+colnames(dfEurAsia) <- c("#IID", "lat", "long", "pop", "subpop")
+
+# Save IDs 
+#fwrite(dfEurAsia,"../data/HGDP1KG/ids/test_ids/eurasia.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+
+# Plot Map
+ggplot() + geom_polygon(data = world_map, aes(x = long, y = lat, group = group), fill = "white", color = "black") +
+  geom_point(data = dfEurAsia, aes(x = long, y = lat, color = pop), size = 2) + 
+  theme_minimal(base_size = 14) + xlab("Longitude") + ylab("Latitude") +labs(colour="POP") + theme(legend.position = "bottom")
+```
+
+**Latitude (and Longitude) in Europe**
+
+Similar to the analysis in [Berg et al](https://elifesciences.org/articles/39725) we want to test for polygenic selection along latitude for populations in Europe (N = 510).   
+- NFE: 510 (note we removed CEU samples because their lat/long corresponds to sample collection in Utah)   
+
+```{r}
+# Select Eurasian Sample
+dfEur <- dfFilter %>% filter(project_meta.project_pop %in% c("nfe"))
+dfEur <- dfEur %>% select("IID", "latitude", "longitude", "project_meta.project_pop", "population") %>% 
+  filter(population != "CEU")
+colnames(dfEur) <- c("#IID", "lat", "long", "pop", "subpop")
+
+# Save IDs 
+fwrite(dfEur,"../data/HGDP1KG/ids/test_ids/nfe_no_ceu.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+
+# Plot Map 
+ggplot() + geom_polygon(data = world_map, aes(x = long, y = lat, group = group), fill = "white", color = "black") +
+  geom_point(data = dfEur, aes(x = long, y = lat, color = subpop), size = 2) + 
+  theme_minimal(base_size = 14) + xlab("Longitude") + ylab("Latitude") +labs(colour="POP") + theme(legend.position = "bottom")
+```
+**Sardinia vs Europe**
+
+Similar to the analysis in [Chen et al](https://www.sciencedirect.com/science/article/pii/S0002929720301610) we want to test for polygenic selection acting on height in Sardinia compared to the rest of Europe.   
+- NFE: 689 (including CEU)   
+
+```{r}
+# Select Eurasian Sample
+dfEur <- dfFilter %>% filter(project_meta.project_pop %in% c("nfe"))
+dfEur <- dfEur %>% select("IID", "latitude", "longitude", "project_meta.project_pop", "population") 
+colnames(dfEur) <- c("#IID", "lat", "long", "pop", "subpop")
+dfEur <- dfEur %>% mutate(SDI = case_when(subpop == "Sardinian" ~ "sdi", TRUE ~ "eur"))
+
+# Save IDs 
+fwrite(dfEur,"../data/HGDP1KG/ids/test_ids/nfe.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+
+# Plot Map 
+ggplot() + geom_polygon(data = world_map, aes(x = long, y = lat, group = group), fill = "white", color = "black") +
+  geom_point(data = dfEur, aes(x = long, y = lat, color = SDI), size = 2) + 
+  theme_minimal(base_size = 14) + xlab("Longitude") + ylab("Latitude") +labs(colour="POP") + theme(legend.position = "bottom")
+```
+**All continental differences**  
+
+Here we include the 5 major populations and will test for overlap in "continental" level contrasts (N = 3,859).  
+- EAS: 825  
+- NFE:  689 
+- SAS: 790  
+- AFR: 1003  
+- AMR: 552  
+
+```{r}
+dfAll <- dfFilter %>%  filter(project_meta.project_pop %in% c("nfe", "afr", "amr", "eas", "sas")) %>% select("IID", "latitude", "longitude", "project_meta.project_pop", "population")
+colnames(dfAll) <- c("#IID", "lat", "long", "pop", "subpop")
+
+# Save IDs 
+fwrite(dfAll,"../data/HGDP1KG/ids/test_ids/all.txt", row.names = F, col.names = T, quote = F, sep = "\t")
 ```
 
 
+### Sample GWAS Panels 
 
+#### Explore PCA of Whole Biobank
+
+Plot PC1 vs PC2 colored by self-identified ethnic background
+```{r, warning=FALSE}
+# Load data and combine
+dfPCA <- fread("../endpoints/ukbb/whole_biobank.eigenvec.gz")
+dfEB <- fread("../endpoints/ukbb/EthnicBackground_21000.txt")
+df <- inner_join(dfPCA, dfEB)
+
+# Use continental labels 
+df <- df %>% mutate(continental = case_when(EthnicBackground_21000 %in% c(4, 4001, 4002, 4003) ~ "Africa", EthnicBackground_21000 %in% c(1, 1001, 1002, 1003) ~ "Europe", EthnicBackground_21000 %in% c(2, 2001, 2002, 2003, 2004) ~ "Mixed", EthnicBackground_21000 %in% c(3, 3001, 3002, 3003, 3004) ~ "Asia"))
+```
+
+```{r, cache=TRUE}
+# Make PCA plot color based on self identified Ethnic background
+ggplot(data = df, aes(x = PC1, y = PC2, color = continental)) + geom_point() + theme_classic(base_size = 14) + scale_color_manual(values = c("darkred", "navy", "goldenrod4", "gray50"), na.value = "gray70")
+```
+
+#### Pre-defined sets  
+
+First use two predefined sets:  
+- ALL: all genotyped individuals in the UKBB ($M = 486,670$)  
+- WBS ("White British Subset"): all individuals the UKBB assigned to be part of the WBS ($M=408,812$)  
+
+```{r, warning=FALSE}
+df <- df %>% mutate(POP = continental)
+
+# Use all genotyped individuals 
+dfALL <- df %>% select("#FID", "IID", "POP")
+fwrite(dfALL,"../data/HGDP1KG/ids/gwas_ids/ALL.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+
+# Use only WBS 
+WBS <- fread("../data/ukbb/WBS.ids")
+dfWBS <- inner_join(df, WBS) %>% select("#FID", "IID", "POP")
+fwrite(dfWBS,"../data/HGDP1KG/ids/gwas_ids/WBS.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+```
+
+
+#### Use PC distance
+
+First I calculate the euclidean distance of each individual from the mean position on PC1 and PC2 for the WBS. Using this distance metric I select $M=10,000$ individuals for 4 different GWAS panels based on their distance from the WBS:  
+
+- q1: individuals in the first fourth of the total distance  
+- q2: individuals in the first half of distance  
+- q3: individuals in the three-fourths of total distance  
+- q4: individuals in any distance (equivalent to sampling 10,000 individuals from ALL)   
+
+
+```{r, warning=FALSE}
+# Get average of WBS
+dfWBS <- inner_join(df, WBS)
+avgPC1 <- mean(dfWBS$PC1)
+avgPC2 <- mean(dfWBS$PC2)
+
+# Calculate from WBS centroid 
+avgPC <- c(avgPC1, avgPC2)
+df$distance <- sqrt(rowSums((df[, 3:4] - avgPC)^2))
+
+# Plot distance
+ggplot(data = df, aes(x = distance, y = PC1, color = POP)) + geom_point() + theme_classic(base_size = 14) + scale_color_manual(values = c("darkred", "navy", "goldenrod4", "gray50"), na.value = "gray70")
+```
+
+```{r, eval=FALSE}
+set.seed(1212)
+# Sample GWAS panels
+maxDist <- max(df$distance)
+interval <- maxDist / 4
+q1 <- interval
+q2 <- interval * 2
+q3 <- interval * 3
+q4 <- interval * 4
+
+## Sample everyone 
+dfGWAS <- df %>% filter(distance <=  q4) %>% sample_n(10000) %>% select("#FID", "IID", "POP")
+#fwrite(dfGWAS,"../data/HGDP1KG/ids/gwas_ids/q4.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+
+## Sample q3
+dfGWAS <- df %>% filter(distance <=  q3)%>% sample_n(10000) %>% select("#FID", "IID", "POP")
+#fwrite(dfGWAS,"../data/HGDP1KG/ids/gwas_ids/q3.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+
+## Sample q4
+dfGWAS <- df %>% filter(distance <=  q2)%>% sample_n(10000) %>% select("#FID", "IID", "POP")
+#fwrite(dfGWAS,"../data/HGDP1KG/ids/gwas_ids/q2.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+
+## 1st quartile
+dfGWAS <- df %>% filter(distance <=  q1)%>% sample_n(10000) %>% select("#FID", "IID", "POP")
+#fwrite(dfGWAS,"../data/HGDP1KG/ids/gwas_ids/q1.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+```

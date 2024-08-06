@@ -106,7 +106,8 @@ p1 <- ggplot(data = FGr_complete, aes(x = PC1, y = FGr, color = POP)) + geom_poi
 
 # No Overlap 
 FGr_none <- fread("../endpoints/TestExample/final_FGr/none_chr-all_test-all_Afr-Eur.txt.gz")
-p2 <- ggplot(data = FGr_none, aes(x = PC1, y = FGr, color = POP)) + geom_point() + theme_classic(base_size = 14) + scale_color_manual(values = c("darkred", "navy")) + ggtitle("No Overlap") + theme(plot.title = element_text(hjust = 0.5))
+p2 <- ggplot(data = FGr_none, aes(x = PC1, y = FGr, color = POP)) + geom_point() + theme_classic(base_size = 14) + scale_color_manual(values = c("navy")) + ggtitle("No Overlap") + theme(plot.title = element_text(hjust = 0.5))
+p2
 
 # Print plots
 p <- ggarrange(p1, p2, nrow =1, common.legend = TRUE)

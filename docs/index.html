@@ -296,7 +296,7 @@ $(document).ready(function () {
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
 <span class="glyphicon glyphicon-list" aria-hidden="true"></span>
-workflowr <span class="glyphicon glyphicon-ok text-success"
+workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
 aria-hidden="true"></span>
 </button>
 </p>
@@ -307,8 +307,8 @@ aria-hidden="true"></span>
 </li>
 <li>
 <a data-toggle="tab" href="#checks"> Checks <span
-class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
-</a>
+class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> </a>
 </li>
 <li>
 <a data-toggle="tab" href="#versions">Past versions</a>
@@ -321,9 +321,9 @@ class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
 </p>
 <p>
 <strong>Checks:</strong> <span
-class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 2
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 1
 <span class="glyphicon glyphicon-exclamation-sign text-danger"
-aria-hidden="true"></span> 0
+aria-hidden="true"></span> 1
 </p>
 <p>
 <strong>Knit directory:</strong>
@@ -347,33 +347,36 @@ versions</em> tab lists the development history.
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate">
-<span class="glyphicon glyphicon-ok text-success"
-aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date
-</a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted
+changes </a>
 </p>
 </div>
-<div id="strongRMarkdownfilestronguptodate"
+<div id="strongRMarkdownfilestronguncommittedchanges"
 class="panel-collapse collapse">
 <div class="panel-body">
-<p>Great! Since the R Markdown file has been committed to the Git
-repository, you know the exact version of the code that produced these
-results.</p>
+<p>The R Markdown file has unstaged changes. To know which version of
+the R Markdown file created these results, you’ll want to first commit
+it to the Git repo. If you’re still working on the analysis, you can
+ignore this warning. When you’re finished, you can run
+<code>wflow_publish</code> to commit the R Markdown file and build the
+HTML.</p>
 </div>
 </div>
 </div>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjgblancpolygenicselectionstratificationtreec68174d5dd087bf0e1c5a8e0f494abfc5d5840fetargetblankc68174da">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjgblancpolygenicselectionstratificationtreed5b7436f80ae1aff103434e5ee8cfa6e904ea660targetblankd5b7436a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/jgblanc/polygenic_selection_stratification/tree/c68174d5dd087bf0e1c5a8e0f494abfc5d5840fe" target="_blank">c68174d</a>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/tree/d5b7436f80ae1aff103434e5ee8cfa6e904ea660" target="_blank">d5b7436</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomjgblancpolygenicselectionstratificationtreec68174d5dd087bf0e1c5a8e0f494abfc5d5840fetargetblankc68174da"
+id="strongRepositoryversionstrongahrefhttpsgithubcomjgblancpolygenicselectionstratificationtreed5b7436f80ae1aff103434e5ee8cfa6e904ea660targetblankd5b7436a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -383,7 +386,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/jgblanc/polygenic_selection_stratification/tree/c68174d5dd087bf0e1c5a8e0f494abfc5d5840fe" target="_blank">c68174d</a>.
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/tree/d5b7436f80ae1aff103434e5ee8cfa6e904ea660" target="_blank">d5b7436</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -418,6 +421,8 @@ Unstaged changes:
     Modified:   _workflowr.yml
     Modified:   analysis/HGDP1KG.Rmd
     Modified:   analysis/SDS.Rmd
+    Modified:   analysis/TestExample.Rmd
+    Modified:   analysis/index.Rmd
 
 </code></pre>
 <p>
@@ -462,6 +467,23 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jgblanc/polygenic_selection_stratification/d5b7436f80ae1aff103434e5ee8cfa6e904ea660/docs/index.html" target="_blank">d5b7436</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-30
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -732,8 +754,10 @@ class="math inline">\(\frac{D}{Tr\mathbf{K}}\)</span><br />
 </li>
 <li><span class="math inline">\(\hat{\sigma}^2_{FGr}\)</span>: jackknife
 estimate of entries of <span class="math inline">\(\hat{F}_{Gr}\)</span>
-across blocks $<em>{i=1}^M </em>{j=1}^B ( <em>{Gr,i}^{-j} - </em>{k=1}^K
-_{Gr,i}^{-k} )^2 $<br />
+across blocks <span class="math inline">\(\frac{1}{M}\sum\limits_{i=1}^M
+\frac{B-1}{B} \sum\limits_{j=1}^B \left( \hat{F}_{Gr,i}^{-j} -
+\frac{1}{B} \sum\limits_{k=1}^K \hat{F}_{Gr,i}^{-k}
+\right)^2\)</span><br />
 </li>
 <li><span class="math inline">\(var(\hat{F}_{Gr})\)</span>: variance of
 entries of <span class="math inline">\(\hat{F}_{Gr}\)</span> <span
