@@ -17,6 +17,7 @@ data/*/gwas_variance/*
 data/HGDP1KG/*
 data/*/raw/*
 data/liftover/*
+data/ukbb/variants/*
 output/*
 logs/*
 .snakemake/
