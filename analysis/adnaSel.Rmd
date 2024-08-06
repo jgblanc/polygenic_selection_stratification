@@ -7,16 +7,24 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(data.table)
+library(tidyverse)
+library(ggpubr)
+library(latex2exp)
 ```
 
-## Look at data
+
+# Construct Test and GWAS panels 
+
+## Explore data
 
 ```{r}
 df <- fread("../data/adnaSel/raw/all_populations_mles.txt")
 head(df)
 ```
+I can calculate the contrasts by comparing the observed frequency to the expected (as showin in their paper). 
 
-## Sample Individuals for GWAS panel 
+### Explore PCA of Whole Biobank
 
 Plot PC1 vs PC2 colored by self-identified ethnic background
 ```{r, warning=FALSE}
@@ -29,27 +37,41 @@ df <- inner_join(dfPCA, dfEB)
 df <- df %>% mutate(continental = case_when(EthnicBackground_21000 %in% c(4, 4001, 4002, 4003) ~ "Africa", EthnicBackground_21000 %in% c(1, 1001, 1002, 1003) ~ "Europe", EthnicBackground_21000 %in% c(2, 2001, 2002, 2003, 2004) ~ "Mixed", EthnicBackground_21000 %in% c(3, 3001, 3002, 3003, 3004) ~ "Asia"))
 ```
 
-```{r}
+```{r, cache=TRUE}
 # Make PCA plot color based on self identified Ethnic background
 ggplot(data = df, aes(x = PC1, y = PC2, color = continental)) + geom_point() + theme_classic(base_size = 14) + scale_color_manual(values = c("darkred", "navy", "goldenrod4", "gray50"), na.value = "gray70")
 ```
+### Sample Panels 
 
-Use predefined sets 
-```{r}
+#### Pre-defined sets  
+
+First use two predefined sets:  
+- ALL: all genotyped individuals in the UKBB ($M = 486,670$)  
+- WBS ("White British Subset"): all individuals the UKBB assigned to be part of the WBS ($M=408,812$)  
+
+```{r, warning=FALSE}
 df <- df %>% mutate(POP = continental)
 
 # Use all genotyped individuals 
 dfALL <- df %>% select("#FID", "IID", "POP")
-fwrite(dfALL,"../data/adnaSel/ids/gwas_ids/ALL.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+#fwrite(dfALL,"../data/adnaSel/ids/gwas_ids/ALL.txt", row.names = F, col.names = T, quote = F, sep = "\t")
 
 # Use only WBS 
 WBS <- fread("../data/ukbb/WBS.ids")
 dfWBS <- inner_join(df, WBS) %>% select("#FID", "IID", "POP")
-fwrite(dfWBS,"../data/adnaSel/ids/gwas_ids/WBS.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+#fwrite(dfWBS,"../data/adnaSel/ids/gwas_ids/WBS.txt", row.names = F, col.names = T, quote = F, sep = "\t")
 ```
+#### Use PC distance
 
-Use distance from WBS
-```{r}
+First I calculate the euclidean distance of each individual from the mean position on PC1 and PC2 for the WBS. Using this distance metric I select $M=10,000$ individuals for 4 different GWAS panels based on their distance from the WBS:  
+
+- q1: individuals in the first fourth of the total distance  
+- q2: individuals in the first half of distance  
+- q3: individuals in the three-fourths of total distance  
+- q4: individuals in any distance (equivalent to sampling 10,000 individuals from ALL)   
+
+
+```{r, warning=FALSE}
 # Get average of WBS
 dfWBS <- inner_join(df, WBS)
 avgPC1 <- mean(dfWBS$PC1)
@@ -63,8 +85,7 @@ df$distance <- sqrt(rowSums((df[, 3:4] - avgPC)^2))
 ggplot(data = df, aes(x = distance, y = PC1, color = POP)) + geom_point() + theme_classic(base_size = 14) + scale_color_manual(values = c("darkred", "navy", "goldenrod4", "gray50"), na.value = "gray70")
 ```
 
-Sample equal distances from WBS centroid 
-```{r}
+```{r, eval=FALSE}
 set.seed(12)
 # Sample GWAS panels
 maxDist <- max(df$distance)
@@ -76,18 +97,221 @@ q4 <- interval * 4
 
 ## Sample everyone 
 dfGWAS <- df %>% filter(distance <=  q4) %>% sample_n(10000) %>% select("#FID", "IID", "POP")
-fwrite(dfGWAS,"../data/adnaSel/ids/gwas_ids/q4.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+#fwrite(dfGWAS,"../data/adnaSel/ids/gwas_ids/q4.txt", row.names = F, col.names = T, quote = F, sep = "\t")
 
 ## Sample q3
 dfGWAS <- df %>% filter(distance <=  q3)%>% sample_n(10000) %>% select("#FID", "IID", "POP")
-fwrite(dfGWAS,"../data/adnaSel/ids/gwas_ids/q3.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+#fwrite(dfGWAS,"../data/adnaSel/ids/gwas_ids/q3.txt", row.names = F, col.names = T, quote = F, sep = "\t")
 
 ## Sample q4
 dfGWAS <- df %>% filter(distance <=  q2)%>% sample_n(10000) %>% select("#FID", "IID", "POP")
-fwrite(dfGWAS,"../data/adnaSel/ids/gwas_ids/q2.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+#fwrite(dfGWAS,"../data/adnaSel/ids/gwas_ids/q2.txt", row.names = F, col.names = T, quote = F, sep = "\t")
 
 ## 1sr quartile
 dfGWAS <- df %>% filter(distance <=  q1)%>% sample_n(10000) %>% select("#FID", "IID", "POP")
-fwrite(dfGWAS,"../data/adnaSel/ids/gwas_ids/q1.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+#fwrite(dfGWAS,"../data/adnaSel/ids/gwas_ids/q1.txt", row.names = F, col.names = T, quote = F, sep = "\t")
 ```
 
+# Results 
+
+### Overlap statistics
+
+Load data and format 
+```{r}
+dfOverlap <- fread("../endpoints/adnaSel/OverlapStats.txt")
+dfOverlap <- dfOverlap %>% mutate(gwas_type2 = case_when(gwas %in% c("q1", "q2", "q3", "q4") ~ "distance",
+         gwas %in% c("ALL", "WBS") ~ "full"))
+dfOverlap$gwas <- factor(dfOverlap$gwas, levels = c("ALL", "WBS", "q1", "q2", "q3", "q4"))
+```
+
+**GWAS type vs proportion of variance explained** 
+```{r}
+EN <- dfOverlap %>% filter(contrasts == "EuropeanNeolithic") %>% ggplot(aes(x = gwas, y = Z, fill = gwas_type2)) + geom_bar(stat = "identity") + xlab("GWAS Type") + ylab("Proportion of variance explained (Z)") + theme_bw(base_size = 14) + scale_fill_manual(values = c("purple4", "lightseagreen"))  + guides(fill="none") + ggtitle("Neolithic") + theme(plot.title = element_text(hjust = 0.5)) + ylim(0, 7e-5)
+
+BA <- dfOverlap %>% filter(contrasts == "BronzeAge") %>% ggplot(aes(x = gwas, y = Z, fill = gwas_type2)) + geom_bar(stat = "identity") + xlab("GWAS Type") + ylab("Proportion of variance explained (Z)") + theme_bw(base_size = 14) + scale_fill_manual(values = c("purple4", "lightseagreen"))  + guides(fill="none") + ggtitle("Bronze Age") + theme(plot.title = element_text(hjust = 0.5))+ ylim(0, 7e-5)
+
+H <- dfOverlap %>% filter(contrasts == "Historical") %>% ggplot(aes(x = gwas, y = Z, fill = gwas_type2)) + geom_bar(stat = "identity") + xlab("GWAS Type") + ylab("Proportion of variance explained (Z)") + theme_bw(base_size = 14) + scale_fill_manual(values = c("purple4", "lightseagreen"))  + guides(fill="none") + ggtitle("Historical") + theme(plot.title = element_text(hjust = 0.5))+ ylim(0, 7e-5)
+
+# Print plots
+p <- ggarrange(EN, BA, H, nrow = 1)
+p
+```
+The Bronze age contrasts explain a larger proportion of variance in both ALL and WBS compared to the other two sets of contrasts. Bronze age is modeled as a mixture of Steppe and European Neolithic and has the largest sample size in their analysis. Compared to using q1-q4 as quartiles, using distances generates a smooth gradient between WBS and ALL. 
+
+**GWAS type vs error** 
+```{r}
+EN <- dfOverlap %>% filter(contrasts == "EuropeanNeolithic") %>% ggplot(aes(x = gwas, y = error, fill = gwas_type2)) + geom_bar(stat = "identity") + xlab("GWAS Type") + ylab("Error") + theme_bw(base_size = 14) + scale_fill_manual(values = c("purple4", "lightseagreen"))  + guides(fill="none") + ggtitle("Neolithic") + theme(plot.title = element_text(hjust = 0.5)) + ylim(0,1) + geom_hline(yintercept = 0, color = "red", linetype = 2, linewidth = 1.2)
+
+BA <- dfOverlap %>% filter(contrasts == "BronzeAge") %>% ggplot(aes(x = gwas, y = error, fill = gwas_type2)) + geom_bar(stat = "identity") + xlab("GWAS Type") + ylab("Error") + theme_bw(base_size = 14) + scale_fill_manual(values = c("purple4", "lightseagreen"))  + guides(fill="none") + ggtitle("BronzeAge") + theme(plot.title = element_text(hjust = 0.5)) + ylim(0,1) + geom_hline(yintercept = 0, color = "red", linetype = 2, linewidth = 1.2)
+
+H <- dfOverlap %>% filter(contrasts == "Historical") %>% ggplot(aes(x = gwas, y = error, fill = gwas_type2)) + geom_bar(stat = "identity") + xlab("GWAS Type") + ylab("Error") + theme_bw(base_size = 14) + scale_fill_manual(values = c("purple4", "lightseagreen"))  + guides(fill="none") + ggtitle("Historical") + theme(plot.title = element_text(hjust = 0.5)) + ylim(0,1) + geom_hline(yintercept = 0, color = "red", linetype = 2, linewidth = 1.2)
+
+
+# Print plots
+p <- ggarrange(EN, BA, H, nrow = 1)
+p
+```
+Similar to other analyses, there is lower error when more ancestries are included. Unlike other analyses, the error is quite a bit higher for both ALL and WBS.  
+
+**Proportion variance explained vs error**   
+```{r}
+EN <- dfOverlap %>% filter(contrasts == "EuropeanNeolithic") %>% ggplot(aes(x = Z, y = error, color = gwas)) + geom_point(size = 3) + xlab("Z") + ylab("Error") + theme_bw(base_size = 12)  + guides(fill="none") + ggtitle("Neolithic") + theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom") + ylim(0,1) + labs(color = "GWAS Type") + geom_hline(yintercept = 0, color = "red", linetype = 2, linewidth = 1.2)
+
+BA <- dfOverlap %>% filter(contrasts == "BronzeAge") %>% ggplot(aes(x = Z, y = error, color = gwas)) + geom_point(size = 3) + xlab("Z") + ylab("Error") + theme_bw(base_size = 12)  + guides(fill="none") + ggtitle("Bronze Age") + theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom") + ylim(0,1) + labs(color = "GWAS Type") + geom_hline(yintercept = 0, color = "red", linetype = 2, linewidth = 1.2)
+
+H <- dfOverlap %>% filter(contrasts == "Historical") %>% ggplot(aes(x = Z, y = error, color = gwas)) + geom_point(size = 3) + xlab("Z") + ylab("Error") + theme_bw(base_size = 12)  + guides(fill="none") + ggtitle("Historical") + theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom") + ylim(0,1) + labs(color = "GWAS Type") + geom_hline(yintercept = 0, color = "red", linetype = 2, linewidth = 1.2)
+
+# Print plots
+p <- ggarrange(EN, BA, H, nrow = 1, common.legend = TRUE)
+p
+```
+
+Combine into one plot 
+```{r}
+dfOverlap %>% ggplot(aes(x = Z, y = error, color = gwas, shape = contrasts)) + geom_point(size = 3) + xlab("Z") + ylab("Error") + theme_bw(base_size = 12)  + guides(fill="none")+ theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom") + ylim(0,1) + labs(color = "GWAS Type") + geom_hline(yintercept = 0, color = "red", linetype = 2, linewidth = 1.2)
+```
+In general, the larger the Z the smaller the error but this is the first example that it doesn't strictly hold. 
+
+**GWAS type vs D**   
+```{r}
+dfOverlap$d_lc <- dfOverlap$D - (2*sqrt(dfOverlap$varD)) 
+dfOverlap$d_uc <- dfOverlap$D + (2 *sqrt(dfOverlap$varD))
+
+EN <- dfOverlap %>% filter(contrasts == "EuropeanNeolithic") %>% ggplot(aes(x = gwas, y = D, color = gwas_type2)) + geom_point(size = 3) + xlab("GWAS Type") + ylab("D") + theme_bw(base_size = 14) + scale_color_manual(values = c("purple4", "lightseagreen"))  + guides(color="none") + ggtitle("Neolithic") + theme(plot.title = element_text(hjust = 0.5)) + geom_hline(yintercept = 0, color = "red", linetype = 2, linewidth = 1.2) + geom_errorbar(aes(ymin = d_lc, ymax = d_uc)) + ylim(0, 34000000)
+
+BA <- dfOverlap %>% filter(contrasts == "BronzeAge") %>% ggplot(aes(x = gwas, y = D, color = gwas_type2)) + geom_point(size = 3) + xlab("GWAS Type") + ylab("D") + theme_bw(base_size = 14) + scale_color_manual(values = c("purple4", "lightseagreen"))  + guides(color="none") + ggtitle("Bronze Age") + theme(plot.title = element_text(hjust = 0.5)) + geom_hline(yintercept = 0, color = "red", linetype = 2, linewidth = 1.2) + geom_errorbar(aes(ymin = d_lc, ymax = d_uc)) + ylim(0, 34000000)
+
+H <- dfOverlap %>% filter(contrasts == "Historical") %>% ggplot(aes(x = gwas, y = D, color = gwas_type2)) + geom_point(size = 3) + xlab("GWAS Type") + ylab("D") + theme_bw(base_size = 14) + scale_color_manual(values = c("purple4", "lightseagreen"))  + guides(color="none") + ggtitle("Historical") + theme(plot.title = element_text(hjust = 0.5)) + geom_hline(yintercept = 0, color = "red", linetype = 2, linewidth = 1.2) + geom_errorbar(aes(ymin = d_lc, ymax = d_uc)) + ylim(0, 34000000)
+
+# Print plots
+p <- ggarrange(EN, BA, H, nrow = 1, common.legend = TRUE)
+p
+```
+
+This is not a great plot because the GWAS panels are different sizes (q1-q4 are all the same) so it's not a fair comparison but plotting the expectation just looks like its on the 0 line because $M-1$ is small compared to $D$. All of the p-value for D are signficant though there is significant variability in the order of magnitude. 
+
+
+```{r}
+dfOverlap %>% select(D, pvalD, contrasts, gwas)
+```
+
+
+### PC statistics
+
+Load and format results
+```{r}
+dfPC <- fread("../endpoints/adnaSel/PCStats.txt")
+dfPC <- dfPC %>% mutate(gwas_sample = case_when(gwas %in% c("q1", "q2", "q3", "q4") ~ "distance",
+         gwas %in% c("ALL", "WBS") ~ "full"))
+dfPC$gwas <- factor(dfPC$gwas, levels = c("ALL", "WBS", "q1", "q2", "q3", "q4"))
+```
+
+**Squared correlation between $PC_i$ between $\hat{F}_{Gr}$**
+```{r}
+# EN
+EN <- dfPC %>% filter(gwas_type == "even" & test_type == "odd" & contrasts == "EuropeanNeolithic")%>% ggplot(aes(x = PC, y = B2)) + geom_bar(stat = "identity", fill = "darkgreen", color = "darkgreen") + facet_grid(~gwas) + theme_bw(base_size = 12) + ylab(TeX("$B_{i}^2$")) + ggtitle("Neolithic") + theme(plot.title = element_text(hjust = 0.5)) + ylim(0,0.7)
+
+# BA
+BA <- dfPC %>% filter(gwas_type == "even" & test_type == "odd" & contrasts == "BronzeAge")%>% ggplot(aes(x = PC, y = B2)) + geom_bar(stat = "identity",  fill = "darkgreen", color = "darkgreen") + facet_grid(~gwas) + theme_bw(base_size = 12) + ylab(TeX("$B_{i}^2$")) + ggtitle("Bronze Age") + theme(plot.title = element_text(hjust = 0.5))+ ylim(0,0.7)
+
+# H
+H <- dfPC %>% filter(gwas_type == "even" & test_type == "odd" & contrasts == "Historical")%>% ggplot(aes(x = PC, y = B2)) + geom_bar(stat = "identity",  fill = "darkgreen", color = "darkgreen") + facet_grid(~gwas) + theme_bw(base_size = 12) + ylab(TeX("$B_{i}^2$")) + ggtitle("Historical") + theme(plot.title = element_text(hjust = 0.5))+ ylim(0,0.7)
+
+# Print plots
+p <- ggarrange(EN, BA, H, nrow = 3, common.legend = TRUE)
+p
+```
+
+Limit to "ALL"
+```{r}
+# EN
+EN <- dfPC %>% filter(gwas_type == "even" & test_type == "odd" & contrasts == "EuropeanNeolithic" & gwas == "ALL")%>% ggplot(aes(x = PC, y = B2)) + geom_bar(stat = "identity",  fill = "darkgreen", color = "darkgreen") + facet_grid(~gwas) + theme_bw(base_size = 12) + ylab(TeX("$B_{i}^2$")) + ggtitle("Neolithic") + theme(plot.title = element_text(hjust = 0.5)) + ylim(0,0.7)
+
+# BA
+BA <- dfPC %>% filter(gwas_type == "even" & test_type == "odd" & contrasts == "BronzeAge"& gwas == "ALL")%>% ggplot(aes(x = PC, y = B2)) + geom_bar(stat = "identity",  fill = "darkgreen", color = "darkgreen") + facet_grid(~gwas) + theme_bw(base_size = 12) + ylab(TeX("$B_{i}^2$")) + ggtitle("Bronze Age") + theme(plot.title = element_text(hjust = 0.5)) + ylim(0,0.7)
+
+# H
+H <- dfPC %>% filter(gwas_type == "even" & test_type == "odd" & contrasts == "Historical"& gwas == "ALL")%>% ggplot(aes(x = PC, y = B2)) + geom_bar(stat = "identity", fill = "darkgreen", color = "darkgreen") + facet_grid(~gwas) + theme_bw(base_size = 12) + ylab(TeX("$B_{i}^2$")) + ggtitle("Historical") + theme(plot.title = element_text(hjust = 0.5))+ ylim(0,0.7)
+
+# Print plots
+p <- ggarrange(EN, BA, H, nrow = 1, common.legend = TRUE)
+p
+```
+
+
+Limit to "WBS"
+```{r}
+# EN
+EN <- dfPC %>% filter(gwas_type == "even" & test_type == "odd" & contrasts == "EuropeanNeolithic" & gwas == "WBS")%>% ggplot(aes(x = PC, y = B2)) + geom_bar(stat = "identity",  fill = "darkgreen", color = "darkgreen") + facet_grid(~gwas) + theme_bw(base_size = 12) + ylab(TeX("$B_{i}^2$")) + ggtitle("Neolithic") + theme(plot.title = element_text(hjust = 0.5)) + ylim(0,0.03)
+
+# BA
+BA <- dfPC %>% filter(gwas_type == "even" & test_type == "odd" & contrasts == "BronzeAge"& gwas == "WBS")%>% ggplot(aes(x = PC, y = B2)) + geom_bar(stat = "identity", fill = "darkgreen", color = "darkgreen") + facet_grid(~gwas) + theme_bw(base_size = 12) + ylab(TeX("$B_{i}^2$")) + ggtitle("Bronze Age") + theme(plot.title = element_text(hjust = 0.5)) + ylim(0,0.03)
+
+# H
+H <- dfPC %>% filter(gwas_type == "even" & test_type == "odd" & contrasts == "Historical"& gwas == "WBS")%>% ggplot(aes(x = PC, y = B2)) + geom_bar(stat = "identity", fill = "darkgreen", color = "darkgreen") + facet_grid(~gwas) + theme_bw(base_size = 12) + ylab(TeX("$B_{i}^2$")) + ggtitle("Historical") + theme(plot.title = element_text(hjust = 0.5))+ ylim(0,0.03)
+
+# Print plots
+p <- ggarrange(EN, BA, H, nrow = 1, common.legend = TRUE)
+p
+```
+
+
+All three sets of contrasts are quite correlated with the first PC in ALL. In the WBS, it seems the bronze age contrasts are correlated with the first PC. Its hard to think about what these mean when the contrasts are a departure from an expectation and not directly an allele frequency contrast.   
+
+**Cumulative variance explained** 
+```{r}
+# EN
+dfFilter <- dfOverlap %>% filter(contrasts == "EuropeanNeolithic") %>% mutate(gwas_sample = gwas)
+EN <- dfPC %>% filter(gwas_type == "even" & test_type == "odd" & contrasts == "EuropeanNeolithic") %>% ggplot(aes(x = PC, y = r2)) + geom_bar(stat = "identity", fill = "darkgreen") + facet_grid(~gwas) + theme_bw(base_size = 12) + ylab(TeX("$R_{K}^2$")) + geom_hline(data = dfFilter, aes(yintercept = signal), color = "red", linetype = 2) + ggtitle("Neolithic") + theme(plot.title = element_text(hjust = 0.5)) + ylim(0,1)
+
+# BA
+dfFilter <- dfOverlap %>% filter(contrasts == "BronzeAge") %>% mutate(gwas_sample = gwas)
+BA <- dfPC %>% filter(gwas_type == "even" & test_type == "odd" & contrasts == "BronzeAge") %>% ggplot(aes(x = PC, y = r2)) + geom_bar(stat = "identity", fill = "darkgreen") + facet_grid(~gwas) + theme_bw(base_size = 12) + ylab(TeX("$R_{K}^2$")) + geom_hline(data = dfFilter, aes(yintercept = signal), color = "red", linetype = 2) + ggtitle("Bonze Age") + theme(plot.title = element_text(hjust = 0.5)) + ylim(0,1)
+
+# Historical
+dfFilter <- dfOverlap %>% filter(contrasts == "Historical") %>% mutate(gwas_sample = gwas)
+H <- dfPC %>% filter(gwas_type == "even" & test_type == "odd" & contrasts == "Historical") %>% ggplot(aes(x = PC, y = r2)) + geom_bar(stat = "identity", fill = "darkgreen") + facet_grid(~gwas) + theme_bw(base_size = 12) + ylab(TeX("$R_{K}^2$")) + geom_hline(data = dfFilter, aes(yintercept = signal), color = "red", linetype = 2) + ggtitle("Historical") + theme(plot.title = element_text(hjust = 0.5))+ ylim(0,1)
+
+# Print plots
+p <- ggarrange(EN, BA, H , nrow = 3, common.legend = TRUE)
+p
+```
+
+Limit to ALL
+```{r}
+# EN
+dfFilter <- dfOverlap %>% filter(contrasts == "EuropeanNeolithic"& gwas == "ALL") %>% mutate(gwas_sample = gwas)
+EN <- dfPC %>% filter(gwas_type == "even" & test_type == "odd" & contrasts == "EuropeanNeolithic"& gwas == "ALL") %>% ggplot(aes(x = PC, y = r2)) + geom_bar(stat = "identity", fill = "darkgreen") + facet_grid(~gwas) + theme_bw(base_size = 12) + ylab(TeX("$R_{K}^2$")) + geom_hline(data = dfFilter, aes(yintercept = signal), color = "red", linetype = 2) + ggtitle("Neolithic") + theme(plot.title = element_text(hjust = 0.5)) + ylim(0,1)
+
+# BA
+dfFilter <- dfOverlap %>% filter(contrasts == "BronzeAge"& gwas == "ALL") %>% mutate(gwas_sample = gwas)
+BA <- dfPC %>% filter(gwas_type == "even" & test_type == "odd" & contrasts == "BronzeAge" & gwas == "ALL") %>% ggplot(aes(x = PC, y = r2)) + geom_bar(stat = "identity", fill = "darkgreen") + facet_grid(~gwas) + theme_bw(base_size = 12) + ylab(TeX("$R_{K}^2$")) + geom_hline(data = dfFilter, aes(yintercept = signal), color = "red", linetype = 2) + ggtitle("Bonze Age") + theme(plot.title = element_text(hjust = 0.5))+ ylim(0,1)
+
+# Historical
+dfFilter <- dfOverlap %>% filter(contrasts == "Historical"& gwas == "ALL") %>% mutate(gwas_sample = gwas)
+H <- dfPC %>% filter(gwas_type == "even" & test_type == "odd" & contrasts == "Historical"& gwas == "ALL") %>% ggplot(aes(x = PC, y = r2)) + geom_bar(stat = "identity", fill = "darkgreen") + facet_grid(~gwas) + theme_bw(base_size = 12) + ylab(TeX("$R_{K}^2$")) + geom_hline(data = dfFilter, aes(yintercept = signal), color = "red", linetype = 2) + ggtitle("Historical") + theme(plot.title = element_text(hjust = 0.5))+ ylim(0,1)
+
+# Print plots
+p <- ggarrange(EN, BA, H , nrow = 1, common.legend = TRUE)
+p
+```
+
+
+Limit to WBS
+```{r}
+# EN
+dfFilter <- dfOverlap %>% filter(contrasts == "EuropeanNeolithic"& gwas == "WBS") %>% mutate(gwas_sample = gwas)
+EN <- dfPC %>% filter(gwas_type == "even" & test_type == "odd" & contrasts == "EuropeanNeolithic"& gwas == "WBS") %>% ggplot(aes(x = PC, y = r2)) + geom_bar(stat = "identity", fill = "darkgreen") + facet_grid(~gwas) + theme_bw(base_size = 12) + ylab(TeX("$R_{K}^2$")) + geom_hline(data = dfFilter, aes(yintercept = signal), color = "red", linetype = 2) + ggtitle("Neolithic") + theme(plot.title = element_text(hjust = 0.5)) + ylim(0,1)
+
+# BA
+dfFilter <- dfOverlap %>% filter(contrasts == "BronzeAge"& gwas == "WBS") %>% mutate(gwas_sample = gwas)
+BA <- dfPC %>% filter(gwas_type == "even" & test_type == "odd" & contrasts == "BronzeAge" & gwas == "WBS") %>% ggplot(aes(x = PC, y = r2)) + geom_bar(stat = "identity", fill = "darkgreen") + facet_grid(~gwas) + theme_bw(base_size = 12) + ylab(TeX("$R_{K}^2$")) + geom_hline(data = dfFilter, aes(yintercept = signal), color = "red", linetype = 2) + ggtitle("Bonze Age") + theme(plot.title = element_text(hjust = 0.5))+ ylim(0,1)
+
+# Historical
+dfFilter <- dfOverlap %>% filter(contrasts == "Historical"& gwas == "WBS") %>% mutate(gwas_sample = gwas)
+H <- dfPC %>% filter(gwas_type == "even" & test_type == "odd" & contrasts == "Historical"& gwas == "WBS") %>% ggplot(aes(x = PC, y = r2)) + geom_bar(stat = "identity", fill = "darkgreen") + facet_grid(~gwas) + theme_bw(base_size = 12) + ylab(TeX("$R_{K}^2$")) + geom_hline(data = dfFilter, aes(yintercept = signal), color = "red", linetype = 2) + ggtitle("Historical") + theme(plot.title = element_text(hjust = 0.5))+ ylim(0,1)
+
+# Print plots
+p <- ggarrange(EN, BA, H , nrow = 1, common.legend = TRUE)
+p
+```

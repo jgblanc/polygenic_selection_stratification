@@ -32,6 +32,8 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
 
 <link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
 <!-- Add a small amount of space between sections. -->
@@ -270,7 +272,13 @@ $(document).ready(function () {
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        
+        <li>
+  <a href="https://github.com/jgblanc/polygenic_selection_stratification">
+    <span class="fab fa-github"></span>
+     
+    Source code
+  </a>
+</li>
       </ul>
     </div><!--/.nav-collapse -->
   </div><!--/.container -->
@@ -309,7 +317,7 @@ class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2024-07-11
+<strong>Last updated:</strong> 2024-07-30
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -319,7 +327,7 @@ aria-hidden="true"></span> 0
 </p>
 <p>
 <strong>Knit directory:</strong>
-<code>polygenic_selection_stratification/</code> <span
+<code>polygenic_selection_stratification/analysis/</code> <span
 class="glyphicon glyphicon-question-sign" aria-hidden="true"
 title="This is the local directory in which the code in this file was executed.">
 </span>
@@ -357,13 +365,15 @@ results.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong52bd085">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjgblancpolygenicselectionstratificationtreec68174d5dd087bf0e1c5a8e0f494abfc5d5840fetargetblankc68174da">
 <span class="glyphicon glyphicon-ok text-success"
-aria-hidden="true"></span> <strong>Repository version:</strong> 52bd085
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/tree/c68174d5dd087bf0e1c5a8e0f494abfc5d5840fe" target="_blank">c68174d</a>
 </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrong52bd085"
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomjgblancpolygenicselectionstratificationtreec68174d5dd087bf0e1c5a8e0f494abfc5d5840fetargetblankc68174da"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -372,7 +382,8 @@ and connecting the code version to the results is critical for
 reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version 52bd085.
+The results in this page were generated with repository version
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/tree/c68174d5dd087bf0e1c5a8e0f494abfc5d5840fe" target="_blank">c68174d</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -387,7 +398,26 @@ were generated:
 </p>
 <pre><code>
 Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .RData
+    Ignored:    .Rhistory
     Ignored:    .Rproj.user/
+    Ignored:    analysis/SDS_cache/
+    Ignored:    analysis/TestExample_cache/
+    Ignored:    analysis/adnaSel_cache/
+    Ignored:    code/.DS_Store
+    Ignored:    data/HGDP1KG/
+    Ignored:    data/SDS/raw/
+    Ignored:    data/adnaSel/raw/
+    Ignored:    data/liftover/
+
+Untracked files:
+    Untracked:  snakefile_HGDP1KG
+
+Unstaged changes:
+    Modified:   _workflowr.yml
+    Modified:   analysis/HGDP1KG.Rmd
+    Modified:   analysis/SDS.Rmd
 
 </code></pre>
 <p>
@@ -437,7 +467,228 @@ Message
 Rmd
 </td>
 <td>
-52bd085
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/blob/c68174d5dd087bf0e1c5a8e0f494abfc5d5840fe/analysis/index.Rmd" target="_blank">c68174d</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-30
+</td>
+<td>
+wflow_publish(c("analysis/index.Rmd"))
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jgblanc/polygenic_selection_stratification/99d568909599dad055b58b9e3b6d9a5ada252f6c/docs/index.html" target="_blank">99d5689</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-30
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/blob/fd70ba5c7c4cea643ce6c1735948ab61245df316/analysis/index.Rmd" target="_blank">fd70ba5</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-30
+</td>
+<td>
+wflow_publish(c("analysis/index.Rmd", "analysis/adnaSel.Rmd"))
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jgblanc/polygenic_selection_stratification/408f6ee7f0e7a99ca2091b827d62a98c6227ccf0/docs/index.html" target="_blank">408f6ee</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-30
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jgblanc/polygenic_selection_stratification/553129da6a322e914aa249b57d2ef96ce3e77f9d/docs/index.html" target="_blank">553129d</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-30
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/blob/330f9f44c69be3a4cb443e6b50cd199c211b6587/analysis/index.Rmd" target="_blank">330f9f4</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-30
+</td>
+<td>
+wflow_publish(c("analysis/index.Rmd", "analysis/SDS.Rmd"))
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jgblanc/polygenic_selection_stratification/b24f77b6b7fbf042aba52e84a7b99e26652270a5/docs/index.html" target="_blank">b24f77b</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-29
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/blob/f338e6e7f6487c1c323126594a58a61b3f22cce6/analysis/index.Rmd" target="_blank">f338e6e</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-29
+</td>
+<td>
+wflow_publish(c("analysis/index.Rmd"))
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jgblanc/polygenic_selection_stratification/9ae23a3dafd6a7d7f9c2384851ead5766c9b31da/docs/index.html" target="_blank">9ae23a3</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-29
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/blob/7c419c8e46630f044a6c2cc7da2575a06ed89fad/analysis/index.Rmd" target="_blank">7c419c8</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-29
+</td>
+<td>
+wflow_publish(c("analysis/index.Rmd"))
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jgblanc/polygenic_selection_stratification/04ee6c5dd4ff115c3901bc1d13681bc4a16ff5d1/docs/index.html" target="_blank">04ee6c5</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-29
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/blob/d95959379761086bb50653a83bf2286b111bf7f8/analysis/index.Rmd" target="_blank">d959593</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-29
+</td>
+<td>
+wflow_publish(c("analysis/index.Rmd", "analysis/TestExample.Rmd"))
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jgblanc/polygenic_selection_stratification/d135a9ba375e99922fd42343f257ac93b39bc835/docs/index.html" target="_blank">d135a9b</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-11
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/blob/52bd085dc48c054e6f4346b92e0aa258821d6b51/analysis/index.Rmd" target="_blank">52bd085</a>
 </td>
 <td>
 Jennifer Blanc
@@ -456,7 +707,85 @@ Start workflowr project.
 </div>
 </div>
 </div>
-<p>Welcome to my research website.</p>
+<div id="data-analysis-pipeline" class="section level2">
+<h2>Data Analysis Pipeline</h2>
+<div id="overlap-statistics" class="section level3">
+<h3>Overlap Statistics</h3>
+<ul>
+<li><span class="math inline">\(D\)</span>: variance along test axis
+<span class="math inline">\(r^\top G^\top G r\)</span><br />
+</li>
+<li><span class="math inline">\(\mathbb{E}[D] = M - 1\)</span><br />
+</li>
+<li><span class="math inline">\(\hat{\sigma}^2_{D}\)</span>: jackknife
+estimation of var(D)<br />
+</li>
+<li><span class="math inline">\(p_{D}\)</span>: p-value for hypothesis
+test (does D differ from <span
+class="math inline">\(\mathbb{E}[D]\)</span>)<br />
+</li>
+<li><span class="math inline">\(Z\)</span>: proportion of variance along
+test axis <span
+class="math inline">\(\frac{D}{Tr\mathbf{K}}\)</span><br />
+</li>
+<li><span class="math inline">\(Tr\mathbf{K} = (M-1)L\)</span><br />
+</li>
+<li><span class="math inline">\(\hat{\sigma}^2_{FGr}\)</span>: jackknife
+estimate of entries of <span class="math inline">\(\hat{F}_{Gr}\)</span>
+across blocks $<em>{i=1}^M </em>{j=1}^B ( <em>{Gr,i}^{-j} - </em>{k=1}^K
+_{Gr,i}^{-k} )^2 $<br />
+</li>
+<li><span class="math inline">\(var(\hat{F}_{Gr})\)</span>: variance of
+entries of <span class="math inline">\(\hat{F}_{Gr}\)</span> <span
+class="math inline">\(\frac{1}{M} \sum\limits_{i=1}^M
+\left(\hat{F}_{Gr,i} - \frac{1}{M} \sum\limits_{\ell = 1}^M
+\hat{F}_{Gr,\ell} \right)^2\)</span><br />
+</li>
+<li><span class="math inline">\(error =
+\frac{\hat{\sigma}^2_{FGr}}{var(\hat{F}_{Gr})}\)</span><br />
+</li>
+<li><span class="math inline">\(signal = 1 - error\)</span><br />
+</li>
+<li><span class="math inline">\(\gamma_{F} = 1 - error^2\)</span><br />
+</li>
+<li><span class="math inline">\(\hat{\beta}_{pc,i} = Cov(\hat{F}_{Gr},
+\hat{U}_{i})\)</span> (use even-odd chromosomes)<br />
+</li>
+<li><span class="math inline">\(\hat{\beta}_{i}^2\)</span>: variance in
+<span class="math inline">\(\hat{F}_{Gr}\)</span> explained by <span
+class="math inline">\(PC_i\)</span><br />
+</li>
+<li><span class="math inline">\(R^2_{K} = \sum_{K}
+\beta^2_i\)</span></li>
+</ul>
+</div>
+</div>
+<div id="results" class="section level2">
+<h2>Results</h2>
+<p><a href="TestExample.html">Test Example</a></p>
+<ul>
+<li>Contrasts are “African” vs “European” allele frequency differences
+in the UKBB<br />
+</li>
+<li>This analysis is used to check the pipeline output and as an
+interpretable example</li>
+</ul>
+<p><a href="SDS.html">SDS</a></p>
+<ul>
+<li>UK10K contrasts are from <a
+href="https://www.science.org/doi/10.1126/science.aag0776">Field et
+al. 2016</a></li>
+<li>Han contrasts are from <a
+href="https://www.sciencedirect.com/science/article/pii/S2095927323005558">Luo
+et al. 2023</a></li>
+</ul>
+<p><a href="adnaSel.html">aDNA Selection</a></p>
+<ul>
+<li>Contrasts are from <a
+href="https://www.biorxiv.org/content/10.1101/2022.08.24.505188v1">Le et
+al. 2022</a></li>
+</ul>
+</div>
 
 
 <!-- Adjust MathJax settings so that all math formulae are shown using

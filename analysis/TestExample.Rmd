@@ -7,13 +7,16 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(autodep = TRUE)
 library(data.table)
 library(tidyverse)
 library(ggpubr)
 library(latex2exp)
 ```
 
-## Sample Individuals based on PC coordinates
+# Construct Test and GWAS panels 
+
+### Explore PCA of Whole Biobank
 
 Plot PC1 vs PC2 colored by self-identified ethnic background
 ```{r, warning=FALSE}
@@ -26,7 +29,7 @@ df <- inner_join(dfPCA, dfEB)
 df <- df %>% mutate(continental = case_when(EthnicBackground_21000 %in% c(4, 4001, 4002, 4003) ~ "Africa", EthnicBackground_21000 %in% c(1, 1001, 1002, 1003) ~ "Europe", EthnicBackground_21000 %in% c(2, 2001, 2002, 2003, 2004) ~ "Mixed", EthnicBackground_21000 %in% c(3, 3001, 3002, 3003, 3004) ~ "Asia"))
 ```
 
-```{r}
+```{r, cache=TRUE}
 # Make PCA plot color based on self identified Ethnic background
 ggplot(data = df, aes(x = PC1, y = PC2, color = continental)) + geom_point() + theme_classic(base_size = 14) + scale_color_manual(values = c("darkred", "navy", "goldenrod4", "gray50"), na.value = "gray70")
 ```
@@ -40,9 +43,21 @@ dfAfr <- df %>% arrange(PC1) %>% slice_head(n = 6000)
 tmp <- rbind(dfEur, dfAfr)
 ggplot(data = tmp, aes(x = PC1, y = PC2, color = continental)) + geom_point() + theme_classic(base_size = 14) + scale_color_manual(values = c("darkred", "navy", "goldenrod4", "gray50"), na.value = "gray70")
 ```
+The 6,000 individuals with the smallest PC1 values mostly self-identify as "African". The 11,000 with the largest PC1 values mostly self-identify as European. 
 
-Make mixed panels with different amounts of overlap
-```{r, eval=FALSE}
+### Sample Panels based on PC 1 
+
+Make mixed panels with different amounts of overlap:  
+
+- Test panel: 1,000 Afr, 1,000 Eur  
+- GWAS panels:  
+    - 10,000 Eur  
+    - 8,750 Eur, 1,250 Afr  
+    - 7,500 Eur, 2,500 Afr  
+    - 6,250 Eur, 3,750 Afr  
+    - 5,000 Eur, 5,000 Afr  
+
+```{r, eval=FALSE, echo=FALSE}
 # Sample Test panel 
 tmpAfr <- dfAfr %>% sample_n(1000) %>% mutate(POP = "Afr")
 tmpEur <- dfEur  %>% sample_n(1000) %>% mutate(POP = "Eur")
@@ -80,23 +95,25 @@ dfGWAS <- rbind(tmpAfr, tmpEur) %>% select("#FID", "IID", "POP")
 #fwrite(dfGWAS,"../data/TestExample/ids/gwas_ids/threequarter.txt", row.names = F, col.names = T, quote = F, sep = "\t")
 ```
 
-## Compute $\hat{F}_{Gr}$ for indviduals in the GWAS panel 
+# Results 
+
+### $\hat{F}_{Gr}$ for indviduals in the GWAS panel 
 
 ```{r}
 # Complete Overlap
 FGr_complete <- fread("../endpoints/TestExample/final_FGr/complete_chr-all_test-all_Afr-Eur.txt.gz")
-p1 <- ggplot(data = FGr_complete, aes(x = PC1, y = FGr, color = POP)) + geom_point() + theme_classic(base_size = 14) + scale_color_manual(values = c("darkred", "navy"))
+p1 <- ggplot(data = FGr_complete, aes(x = PC1, y = FGr, color = POP)) + geom_point() + theme_classic(base_size = 14) + scale_color_manual(values = c("darkred", "navy")) + ggtitle("Complete Overlap") + theme(plot.title = element_text(hjust = 0.5))
 
 # No Overlap 
 FGr_none <- fread("../endpoints/TestExample/final_FGr/none_chr-all_test-all_Afr-Eur.txt.gz")
-p2 <- ggplot(data = FGr_none, aes(x = PC1, y = FGr, color = POP)) + geom_point() + theme_classic(base_size = 14) + scale_color_manual(values = c("darkred", "navy"))
+p2 <- ggplot(data = FGr_none, aes(x = PC1, y = FGr, color = POP)) + geom_point() + theme_classic(base_size = 14) + scale_color_manual(values = c("darkred", "navy")) + ggtitle("No Overlap") + theme(plot.title = element_text(hjust = 0.5))
 
 # Print plots
 p <- ggarrange(p1, p2, nrow =1, common.legend = TRUE)
 p
 ```
 
-## Overlap statistics
+### Overlap statistics
 
 Load data and process 
 ```{r}
@@ -105,35 +122,55 @@ dfOverlap <- dfOverlap %>% mutate(prop_eur  = case_when(gwas == "complete" ~ 0.5
                                                         gwas == "none" ~ 1, 
                                                         gwas == "half" ~ 0.75,
                                                         gwas == "quarter" ~ 0.875,
-                                                        gwas == "threequarter" ~ 0.625))
+                                                        gwas == "threequarter" ~ 0.625)) 
 ```
 
-Compare overlap to proportion of variance explained 
+**Overlap vs proportion of variance explained** 
 ```{r}
-ggplot(dfOverlap, aes(x = prop_eur, y = Z)) + geom_point(size = 3, color = "purple3") + theme_bw(base_size = 14) + xlab("Proportion EUR in GWAS") + ylab("Proportion of variance explained (Z)")
+ggplot(dfOverlap, aes(x = prop_eur, y = Z)) + geom_point(size = 3, color = "purple4") + theme_bw(base_size = 14) + xlab("Proportion EUR in GWAS") + ylab("Proportion of variance explained (Z)") 
 ```
-Compare variance explained to error 
+As the proportion of overlap between panels decreases, the proportion of variance explained by $\hat{F}_{Gr}$ also decreases.  
+
+**Overlap vs error** 
 ```{r}
-# All data
-p1 <- ggplot(dfOverlap, aes(x = Z, y = error)) + geom_point(size = 3, color = "purple3") + theme_bw(base_size = 12) + ylab("Error") + xlab("Proportion of variance explained (Z)") + geom_hline(yintercept = 0, color = "red", linetype = 2, linewidth = 1.2)
+p1 <- ggplot(dfOverlap, aes(x = prop_eur, y = error)) + geom_point(size = 3, color = "purple4") + theme_bw(base_size = 14) + xlab("Proportion EUR in GWAS") + ylab("Error")  + geom_hline(yintercept = 0, color = "red", linetype = 2, linewidth = 1.2) + ggtitle("All Data") + theme(plot.title = element_text(hjust = 0.5))
 
 # Remove no overlap
-p2 <- dfOverlap %>% filter(prop_eur %in% c(0.5,0.750, 0.875, 0.625)) %>% ggplot(aes(x = Z, y = error)) + geom_point(size = 3, color = "purple3") + theme_bw(base_size = 12) + ylab("Error") + xlab("Proportion of variance explained (Z)") + geom_hline(yintercept = 0, color = "red", linetype = 2, linewidth = 1.2)
+p2 <- dfOverlap %>% filter(prop_eur %in% c(0.5,0.750, 0.875, 0.625)) %>% ggplot(aes(x = prop_eur, y = error)) + geom_point(size = 3, color = "purple4") + theme_bw(base_size = 14) + xlab("Proportion EUR in GWAS") + ylab("Error") + geom_hline(yintercept = 0, color = "red", linetype = 2, linewidth = 1.2) + ggtitle("Removed No Overlap") + theme(plot.title = element_text(hjust = 0.5))
 
 # Print plots
 p <- ggarrange(p1, p2, nrow = 1)
 p
 ```
-Compare D to overlap 
+First problem is that the error in the no overlap situation is greater than one (1.0073). I'm not sure how concerned to be about this. The other thing to notice is that while Z decreases gradually with decreased overlap, error goes from 0 to near 1 abruptly with a small amount of overlap. It does appear that error decreases with increased overlap.  
+
+
+**Proportion variance explained vs error** 
+```{r}
+# All data
+p1 <- ggplot(dfOverlap, aes(x = Z, y = error)) + geom_point(size = 3, color = "purple4") + theme_bw(base_size = 12) + ylab("Error") + xlab("Proportion of variance explained (Z)") + geom_hline(yintercept = 0, color = "red", linetype = 2, linewidth = 1.2) + ggtitle("All Data") + theme(plot.title = element_text(hjust = 0.5))
+
+# Remove no overlap
+p2 <- dfOverlap %>% filter(prop_eur %in% c(0.5,0.750, 0.875, 0.625)) %>% ggplot(aes(x = Z, y = error)) + geom_point(size = 3, color = "purple4") + theme_bw(base_size = 12) + ylab("Error") + xlab("Proportion of variance explained (Z)") + geom_hline(yintercept = 0, color = "red", linetype = 2, linewidth = 1.2) + ggtitle("Removed No Overlap") + theme(plot.title = element_text(hjust = 0.5))
+
+# Print plots
+p <- ggarrange(p1, p2, nrow = 1)
+p
+```
+Not sure there is any new insight from this plot, as Z is related to the overlap. 
+
+**Overlap vs D**  
 ```{r}
 dfOverlap$d_lc <- dfOverlap$D - (2*sqrt(dfOverlap$varD)) 
 dfOverlap$d_uc <- dfOverlap$D + (2 *sqrt(dfOverlap$varD))
 
 ggplot(dfOverlap, aes(x = prop_eur, y = D)) + geom_point(size = 2) + geom_hline(yintercept = 999, color = "red", linetype = 2) + geom_errorbar(aes(ymin = d_lc, ymax = d_uc))  + theme_bw(base_size = 12) + xlab("Proportion EUR in GWAS")
 ```
+The expected value of $D$ is 9,999 and is highly significant in all cases though the general pattern of a smaller value of $D$ with decreasing overlap holds. Similar to other results, the biggest gap is between no overlap and 0.875 European. This plot doesn't really have any additional information compared to the overlap vs. $Z$ plot as the denominator in $Z$ is the same for all GWAS panels.   
 
-## PC statistics
+### PC statistics
 
+Load and format data
 ```{r}
 dfPC <- fread("../endpoints/TestExample/PCStats.txt")
 dfPC <- dfPC %>% mutate(prop_eur  = case_when(gwas == "complete" ~ 0.5, 
@@ -143,14 +180,16 @@ dfPC <- dfPC %>% mutate(prop_eur  = case_when(gwas == "complete" ~ 0.5,
                                                         gwas == "threequarter" ~ 0.625))
 ```
 
-Look at correlation between $PC_i$ and $\hat{F}_{Gr}$
+**Squared correlation between $PC_i$ between $\hat{F}_{Gr}$**
 ```{r}
-dfPC %>% filter(gwas_type == "even" & test_type == "odd") %>% ggplot(aes(x = PC, y = B2)) + geom_bar(stat = "identity", color = "darkgreen") + facet_grid(~prop_eur) + theme_bw(base_size = 12) + ylab(TeX("$B_{i}^2$"))
+dfPC %>% filter(gwas_type == "even" & test_type == "odd") %>% ggplot(aes(x = PC, y = B2)) + geom_bar(stat = "identity", fill = "darkgreen", color = "darkgreen") + facet_grid(~prop_eur) + theme_bw(base_size = 12) + ylab(TeX("$B_{i}^2$"))
 ```
+As expected, there is a high correlation between PC 1 and $\hat{F}_{Gr}$ in GWAS panels that have overlap. What is a little surprising is that there is still some correlation between PC1 and $\hat{F}_{Gr}$ even when there is no overlap between panels. 
 
-Look at correlation between $R^2_{K}$
+
+**Cumulative variance explained** 
 ```{r}
-dfPC %>% filter(gwas_type == "even" & test_type == "odd") %>% ggplot(aes(x = PC, y = r2)) + geom_bar(stat = "identity", color = "darkgreen") + facet_grid(~prop_eur) + theme_bw(base_size = 12) + ylab(TeX("$R_{K}^2$")) + geom_hline(data = dfOverlap, aes(yintercept = gammaF), color = "red", linetype = 2)
+dfPC %>% filter(gwas_type == "even" & test_type == "odd") %>% ggplot(aes(x = PC, y = r2)) + geom_bar(stat = "identity", fill = "darkgreen", color = "darkgreen") + facet_grid(~prop_eur) + theme_bw(base_size = 12) + ylab(TeX("$R_{K}^2$")) + geom_hline(data = dfOverlap, aes(yintercept = signal), color = "red", linetype = 2, linewidth = 1.5)
 ```
-Something is wrong with the theory here
+Something is wrong with the theory (or analysis) here. We thought that most variance PCs could explain was $1 - error$ or ($1 - error^2$?) but in the no overlap situation, its clear that even the first PC explains more than $1 - error$.  
 

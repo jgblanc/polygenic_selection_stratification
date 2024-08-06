@@ -1,0 +1,1779 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Jennifer Blanc" />
+
+<meta name="date" content="2024-07-19" />
+
+<title>SDS</title>
+
+<script src="site_libs/header-attrs-2.16/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">polygenic_selection_stratification</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jgblanc/polygenic_selection_stratification">
+    <span class="fab fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">SDS</h1>
+<h4 class="author">Jennifer Blanc</h4>
+<h4 class="date">2024-07-19</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2024-07-30
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong>
+<code>polygenic_selection_stratification/analysis/</code> <span
+class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.1). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date
+</a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git
+repository, you know the exact version of the code that produced these
+results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20240711code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20240711)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20240711code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20240711)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongdetected">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>Cache:</strong> detected </a>
+</p>
+</div>
+<div id="strongCachestrongdetected" class="panel-collapse collapse">
+<div class="panel-body">
+The following chunks had caches available:
+<ul>
+<li>
+unnamed-chunk-7
+</li>
+<li>
+unnamed-chunk-9
+</li>
+</ul>
+<p>To ensure reproducibility of the results, delete the cache directory
+<code>SDS_cache</code> and re-run the analysis. To have workflowr
+automatically delete the cache directory prior to building the file, set
+<code>delete_cache = TRUE</code> when running <code>wflow_build()</code>
+or <code>wflow_publish()</code>.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjgblancpolygenicselectionstratificationtree76380e686474937aeed2163f3bdc28002eadc8c2targetblank76380e6a">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/tree/76380e686474937aeed2163f3bdc28002eadc8c2" target="_blank">76380e6</a>
+</a>
+</p>
+</div>
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomjgblancpolygenicselectionstratificationtree76380e686474937aeed2163f3bdc28002eadc8c2targetblank76380e6a"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/tree/76380e686474937aeed2163f3bdc28002eadc8c2" target="_blank">76380e6</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .RData
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    analysis/SDS_cache/
+    Ignored:    analysis/TestExample_cache/
+    Ignored:    code/.DS_Store
+    Ignored:    data/HGDP1KG/
+    Ignored:    data/SDS/raw/
+    Ignored:    data/adnaSel/raw/
+    Ignored:    data/liftover/
+
+Untracked files:
+    Untracked:  snakefile_HGDP1KG
+
+Unstaged changes:
+    Modified:   _workflowr.yml
+    Modified:   analysis/HGDP1KG.Rmd
+    Modified:   analysis/adnaSel.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the repository in which changes were
+made to the R Markdown (<code>analysis/SDS.Rmd</code>) and HTML
+(<code>docs/SDS.html</code>) files. If you’ve configured a remote Git
+repository (see <code>?wflow_git_remote</code>), click on the hyperlinks
+in the table below to view the files as they were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/blob/76380e686474937aeed2163f3bdc28002eadc8c2/analysis/SDS.Rmd" target="_blank">76380e6</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-30
+</td>
+<td>
+wflow_publish(c("analysis/index.Rmd", "analysis/SDS.Rmd"))
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jgblanc/polygenic_selection_stratification/553129da6a322e914aa249b57d2ef96ce3e77f9d/docs/SDS.html" target="_blank">553129d</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-30
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/blob/330f9f44c69be3a4cb443e6b50cd199c211b6587/analysis/SDS.Rmd" target="_blank">330f9f4</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-30
+</td>
+<td>
+wflow_publish(c("analysis/index.Rmd", "analysis/SDS.Rmd"))
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/blob/835694d604eb57ecd0b294b10c7890083566eee1/analysis/SDS.Rmd" target="_blank">835694d</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-25
+</td>
+<td>
+t
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/blob/5640dce8e931c1f5468db8fba090f1e072b59cbc/analysis/SDS.Rmd" target="_blank">5640dce</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-20
+</td>
+<td>
+t
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/blob/f6db161623605e35b92e680cd9c5718f8dbb62b8/analysis/SDS.Rmd" target="_blank">f6db161</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-19
+</td>
+<td>
+t
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/blob/d5e7b219a82a2b12474171c76ee05ff32a337cab/analysis/SDS.Rmd" target="_blank">d5e7b21</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-19
+</td>
+<td>
+t
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/blob/3f4691f301cb4be1329e200a1d406a983717dbed/analysis/SDS.Rmd" target="_blank">3f4691f</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-19
+</td>
+<td>
+t
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div id="construct-test-and-gwas-panels" class="section level1">
+<h1>Construct Test and GWAS panels</h1>
+<div id="explore-sds-data" class="section level3">
+<h3>Explore SDS data</h3>
+<p>Read in both files</p>
+<pre class="r"><code>UK &lt;- fread(&quot;../data/SDS/raw/SDS_UK10K_n3195_release_Sep_19_2016.tab.gz&quot;)
+Han &lt;- fread(&quot;../data/SDS/raw/auto_SDS_norm_sort.txt.gz&quot;)</code></pre>
+<p>Look at formatting</p>
+<pre class="r"><code>head(UK)</code></pre>
+<pre><code>   CHR     POS         ID AA DA    DAF         SDS
+1:   1 3344877 rs58043752  G  A 0.1095  0.80517244
+2:   1 3345145  rs2483242  T  A 0.5746  0.74151400
+3:   1 3345216  rs1572039  T  C 0.0784  0.13022825
+4:   1 3345705  rs1537407  C  T 0.7980  0.27571036
+5:   1 3346348  rs2493277  G  C 0.5737  0.28345212
+6:   1 3346403 rs11583353  C  T 0.2238 -0.02469526</code></pre>
+<pre class="r"><code>head(Han)</code></pre>
+<pre><code>   bin          ID chr     pos alt AA DA     POS     DAF  nG0 nG1 nG2     rSDS
+1:   9 1_1418680_A   1 1418680   A  G  A 1418680 0.09123 3262 648  36 -0.03428
+2:  10 1_1419135_G   1 1419135   G  C  G 1419135 0.10660 3149 753  44 -0.13610
+3:  10 1_1419214_G   1 1419214   G  A  G 1419214 0.10680 3148 751  46 -0.13310
+4:  10 1_1420203_A   1 1420203   A  C  A 1420203 0.10480 2976 651  61 -0.14740
+5:   8 1_1420416_T   1 1420416   T  C  T 1420416 0.08696 3205 593  37 -0.03324
+6:  10 1_1421170_G   1 1421170   G  A  G 1421170 0.10330 3174 729  43 -0.09798
+   SuggestedInitPoint        MEAN         SD   norm_SDS      pleft    pright
+1:              1e-05 -0.01504605 0.07942061 -0.2421784 0.40432098 0.5956790
+2:              1e-05 -0.01137503 0.07761341 -1.6070029 0.05402687 0.9459731
+3:              1e-05 -0.01137503 0.07761341 -1.5683497 0.05839977 0.9416002
+4:              1e-05 -0.01137503 0.07761341 -1.7525963 0.03983567 0.9601643
+5:              1e-05 -0.01282750 0.08679661 -0.2351762 0.40703599 0.5929640
+6:              1e-05 -0.01137503 0.07761341 -1.1158506 0.13224304 0.8677570
+   p_bothside
+1: 0.80864196
+2: 0.10805374
+3: 0.11679953
+4: 0.07967133
+5: 0.81407197
+6: 0.26448608</code></pre>
+<p>Convert Han coordinates to hg19</p>
+<pre class="r"><code>library(rtracklayer)
+library(GenomicRanges)
+
+#chain_url &lt;- &quot;http://hgdownload.cse.ucsc.edu/goldenPath/hg38/liftOver/hg38ToHg19.over.chain.gz&quot;
+#chain_file &lt;- &quot;hg38ToHg19.over.chain.gz&quot;
+#download.file(chain_url, chain_file)
+
+# Download the chain file
+chain_file &lt;- &quot;../data/liftover/hg38ToHg19.over.chain.gz&quot;
+#download.file(chain_url, chain_file, mode = &quot;wb&quot;)
+
+# Uncompress the chain file
+chain_file_unzipped &lt;- sub(&quot;.gz$&quot;, &quot;&quot;, chain_file)
+#R.utils::gunzip(chain_file, chain_file_unzipped, remove = FALSE)
+
+# Load the chain file
+chain &lt;- import.chain(chain_file_unzipped)
+
+# Create a GRanges object with your SNP coordinates
+Han$chr &lt;- paste0(&quot;chr&quot;, Han$chr)
+gr &lt;- GRanges(seqnames = Han$chr, ranges = IRanges(start = Han$pos, end = Han$pos))
+
+# Perform the liftOver
+lifted_snps &lt;- liftOver(gr, chain)
+
+# Extract the results
+converted_snps &lt;- as.data.frame(unlist(lifted_snps))
+converted_snps
+
+# Filter out empty liftOver results
+non_empty_indices &lt;- elementNROWS(lifted_snps) &gt; 0
+filtered_gr &lt;- gr[non_empty_indices]
+filtered_lifted_snps &lt;- lifted_snps[non_empty_indices]
+
+# Convert the filtered GRanges and lifted results to data frames
+original_coords &lt;- as.data.frame(filtered_gr)
+lifted_coords &lt;- as.data.frame(unlist(filtered_lifted_snps))
+
+# Combine the data frames
+combined_coords &lt;- data.frame(
+  original_chr = original_coords$seqnames,
+  original_start = original_coords$start,
+  original_end = original_coords$end,
+  lifted_chr = lifted_coords$seqnames,
+  lifted_start = lifted_coords$start,
+  lifted_end = lifted_coords$end
+)</code></pre>
+<p>Join lifted over coordinates with SDS values and save</p>
+<pre class="r"><code>dfHan &lt;- inner_join(Han, combined_coords, by = c(&quot;chr&quot; = &quot;original_chr&quot;, &quot;pos&quot; = &quot;original_start&quot;))
+
+#fwrite(dfHan,&quot;../data/SDS/raw/Han_SDS_liftedover.txt.gz&quot;, row.names = F, col.names = T, quote = F, sep = &quot;\t&quot;)</code></pre>
+</div>
+<div id="explore-pca-of-whole-biobank" class="section level3">
+<h3>Explore PCA of Whole Biobank</h3>
+<p>Plot PC1 vs PC2 colored by self-identified ethnic background</p>
+<pre class="r"><code># Load data and combine
+dfPCA &lt;- fread(&quot;../endpoints/ukbb/whole_biobank.eigenvec.gz&quot;)
+dfEB &lt;- fread(&quot;../endpoints/ukbb/EthnicBackground_21000.txt&quot;)
+df &lt;- inner_join(dfPCA, dfEB)</code></pre>
+<pre><code>Joining, by = c(&quot;#FID&quot;, &quot;IID&quot;)</code></pre>
+<pre class="r"><code># Use continental labels 
+df &lt;- df %&gt;% mutate(continental = case_when(EthnicBackground_21000 %in% c(4, 4001, 4002, 4003) ~ &quot;Africa&quot;, EthnicBackground_21000 %in% c(1, 1001, 1002, 1003) ~ &quot;Europe&quot;, EthnicBackground_21000 %in% c(2, 2001, 2002, 2003, 2004) ~ &quot;Mixed&quot;, EthnicBackground_21000 %in% c(3, 3001, 3002, 3003, 3004) ~ &quot;Asia&quot;))</code></pre>
+<pre class="r"><code># Make PCA plot color based on self identified Ethnic background
+ggplot(data = df, aes(x = PC1, y = PC2, color = continental)) + geom_point() + theme_classic(base_size = 14) + scale_color_manual(values = c(&quot;darkred&quot;, &quot;navy&quot;, &quot;goldenrod4&quot;, &quot;gray50&quot;), na.value = &quot;gray70&quot;)</code></pre>
+<img src="figure/SDS.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" />
+<div class="alert alert-warning">
+<p>
+<strong>Warning:</strong> The above code chunk cached its results, but
+it won’t be re-run if previous chunks it depends on are updated. If you
+need to use caching, it is highly recommended to also set
+<code>knitr::opts_chunk$set(autodep = TRUE)</code> at the top of the
+file (in a chunk that is not cached). Alternatively, you can customize
+the option <code>dependson</code> for each individual chunk that is
+cached. Using either <code>autodep</code> or <code>dependson</code> will
+remove this warning. See the
+<a href="https://yihui.name/knitr/options/#cache"
+>knitr cache options</a> for more details.
+</p>
+</div>
+</div>
+<div id="sample-panels" class="section level3">
+<h3>Sample Panels</h3>
+<div id="pre-defined-sets" class="section level4">
+<h4>Pre-defined sets</h4>
+<p>First use two predefined sets:<br />
+- ALL: all genotyped individuals in the UKBB (<span
+class="math inline">\(M = 486,670\)</span>)<br />
+- WBS (“White British Subset”): all individuals the UKBB assigned to be
+part of the WBS (<span class="math inline">\(M=408,812\)</span>)</p>
+<pre class="r"><code>df &lt;- df %&gt;% mutate(POP = continental)
+
+# Use all genotyped individuals 
+dfALL &lt;- df %&gt;% select(&quot;#FID&quot;, &quot;IID&quot;, &quot;POP&quot;)
+#fwrite(dfALL,&quot;../data/SDS/ids/gwas_ids/ALL.txt&quot;, row.names = F, col.names = T, quote = F, sep = &quot;\t&quot;)
+
+# Use only WBS 
+WBS &lt;- fread(&quot;../data/ukbb/WBS.ids&quot;)
+dfWBS &lt;- inner_join(df, WBS) %&gt;% select(&quot;#FID&quot;, &quot;IID&quot;, &quot;POP&quot;)</code></pre>
+<pre><code>Joining, by = c(&quot;#FID&quot;, &quot;IID&quot;)</code></pre>
+<pre class="r"><code>#fwrite(dfWBS,&quot;../data/SDS/ids/gwas_ids/WBS.txt&quot;, row.names = F, col.names = T, quote = F, sep = &quot;\t&quot;)</code></pre>
+</div>
+<div id="use-pc-distance" class="section level4">
+<h4>Use PC distance</h4>
+<p>First I calculate the euclidean distance of each individual from the
+mean position on PC1 and PC2 for the WBS. Using this distance metric I
+select <span class="math inline">\(M=10,000\)</span> individuals for 4
+different GWAS panels based on their distance from the WBS:</p>
+<ul>
+<li>q1: individuals in the first quartile of distance<br />
+</li>
+<li>q2: individuals in the first two quartiles of distance<br />
+</li>
+<li>q3: individuals in the first three quartiles of distance<br />
+</li>
+<li>q4: individuals in all distances (equivalent to sampling 10,000
+individuals from ALL)</li>
+</ul>
+<pre class="r"><code># Calculate distance
+
+# Get average of WBS
+dfWBS &lt;- inner_join(df, WBS)</code></pre>
+<pre><code>Joining, by = c(&quot;#FID&quot;, &quot;IID&quot;)</code></pre>
+<pre class="r"><code>avgPC1 &lt;- mean(dfWBS$PC1)
+avgPC2 &lt;- mean(dfWBS$PC2)
+
+# Calculate from WBS centroid 
+avgPC &lt;- c(avgPC1, avgPC2)
+df$distance &lt;- sqrt(rowSums((df[, 3:4] - avgPC)^2))
+
+# Plot distance
+ggplot(data = df, aes(x = distance, y = PC1, color = POP)) + geom_point() + theme_classic(base_size = 14) + scale_color_manual(values = c(&quot;darkred&quot;, &quot;navy&quot;, &quot;goldenrod4&quot;, &quot;gray50&quot;), na.value = &quot;gray70&quot;)</code></pre>
+<img src="figure/SDS.Rmd/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" />
+<div class="alert alert-warning">
+<p>
+<strong>Warning:</strong> The above code chunk cached its results, but
+it won’t be re-run if previous chunks it depends on are updated. If you
+need to use caching, it is highly recommended to also set
+<code>knitr::opts_chunk$set(autodep = TRUE)</code> at the top of the
+file (in a chunk that is not cached). Alternatively, you can customize
+the option <code>dependson</code> for each individual chunk that is
+cached. Using either <code>autodep</code> or <code>dependson</code> will
+remove this warning. See the
+<a href="https://yihui.name/knitr/options/#cache"
+>knitr cache options</a> for more details.
+</p>
+</div>
+<pre class="r"><code>set.seed(12)
+# Sample GWAS panels
+smry &lt;- summary(df$distance)
+## Sample everyone 
+dfGWAS &lt;- df %&gt;% sample_n(10000) %&gt;% select(&quot;#FID&quot;, &quot;IID&quot;, &quot;POP&quot;)
+#fwrite(dfGWAS,&quot;../data/SDS/ids/gwas_ids/max.txt&quot;, row.names = F, col.names = T, quote = F, sep = &quot;\t&quot;)
+
+## 1st quartile
+dfGWAS &lt;- df %&gt;% filter(distance &lt;=  smry[2])%&gt;% sample_n(10000) %&gt;% select(&quot;#FID&quot;, &quot;IID&quot;, &quot;POP&quot;)
+#fwrite(dfGWAS,&quot;../data/SDS/ids/gwas_ids/q1.txt&quot;, row.names = F, col.names = T, quote = F, sep = &quot;\t&quot;)
+
+## median
+dfGWAS &lt;- df %&gt;% filter(distance &lt;=  smry[3])%&gt;% sample_n(10000) %&gt;% select(&quot;#FID&quot;, &quot;IID&quot;, &quot;POP&quot;)
+#fwrite(dfGWAS,&quot;../data/SDS/ids/gwas_ids/median.txt&quot;, row.names = F, col.names = T, quote = F, sep = &quot;\t&quot;)
+
+## 3rd quartile
+dfGWAS &lt;- df %&gt;% filter(distance &lt;=  smry[5])%&gt;% sample_n(10000) %&gt;% select(&quot;#FID&quot;, &quot;IID&quot;, &quot;POP&quot;)
+#fwrite(dfGWAS,&quot;../data/SDS/ids/gwas_ids/q3.txt&quot;, row.names = F, col.names = T, quote = F, sep = &quot;\t&quot;)</code></pre>
+</div>
+</div>
+</div>
+<div id="results" class="section level1">
+<h1>Results</h1>
+<div id="overlap-statistics" class="section level3">
+<h3>Overlap statistics</h3>
+<p>Load data and format</p>
+<pre class="r"><code>dfOverlap &lt;- fread(&quot;../endpoints/SDS/OverlapStats.txt&quot;)
+dfOverlap &lt;- dfOverlap %&gt;% mutate(gwas_type  = case_when(gwas == &quot;q1&quot; ~ &quot;q1&quot;, 
+                                                        gwas == &quot;median&quot; ~ &quot;q2&quot;, 
+                                                        gwas == &quot;q3&quot; ~ &quot;q3&quot;,
+                                                        gwas == &quot;max&quot; ~ &quot;q4&quot;,
+                                                        gwas == &quot;ALL&quot; ~ &quot;ALL&quot;,
+                                                        gwas == &quot;WBS&quot; ~ &quot;WBS&quot;)) %&gt;% 
+  mutate(gwas_type2 = case_when(gwas_type %in% c(&quot;q1&quot;, &quot;q2&quot;, &quot;q3&quot;, &quot;q4&quot;) ~ &quot;distance&quot;,
+         gwas_type %in% c(&quot;ALL&quot;, &quot;WBS&quot;) ~ &quot;full&quot;))
+dfOverlap$gwas_type &lt;- factor(dfOverlap$gwas_type, levels = c(&quot;ALL&quot;, &quot;WBS&quot;, &quot;q1&quot;, &quot;q2&quot;, &quot;q3&quot;, &quot;q4&quot;))</code></pre>
+<p><strong>GWAS type vs proportion of variance explained</strong></p>
+<pre class="r"><code>UK &lt;- dfOverlap %&gt;% filter(contrasts == &quot;UK10K&quot;) %&gt;% ggplot(aes(x = gwas_type, y = Z, fill = gwas_type2)) + geom_bar(stat = &quot;identity&quot;) + xlab(&quot;GWAS Type&quot;) + ylab(&quot;Proportion of variance explained (Z)&quot;) + theme_bw(base_size = 14) + scale_fill_manual(values = c(&quot;purple4&quot;, &quot;lightseagreen&quot;))  + guides(fill=&quot;none&quot;) + ggtitle(&quot;UK10K&quot;) + theme(plot.title = element_text(hjust = 0.5)) + ylim(0, 0.0008)
+
+Han &lt;- dfOverlap %&gt;% filter(contrasts == &quot;Han&quot;) %&gt;% ggplot(aes(x = gwas_type, y = Z, fill = gwas_type2)) + geom_bar(stat = &quot;identity&quot;) + xlab(&quot;GWAS Type&quot;) + ylab(&quot;Proportion of variance explained (Z)&quot;) + theme_bw(base_size = 14) + scale_fill_manual(values = c(&quot;purple4&quot;, &quot;lightseagreen&quot;))  + guides(fill=&quot;none&quot;) + ggtitle(&quot;Han&quot;) + theme(plot.title = element_text(hjust = 0.5))+ ylim(0, 0.0008)
+
+# Print plots
+p &lt;- ggarrange(UK, Han, nrow = 1)
+p</code></pre>
+<p><img src="figure/SDS.Rmd/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-12-1">
+Past versions of unnamed-chunk-12-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-12-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/blob/553129da6a322e914aa249b57d2ef96ce3e77f9d/docs/figure/SDS.Rmd/unnamed-chunk-12-1.png" target="_blank">553129d</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-30
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>The Han contrasts explain a larger proportion of variance in GWAS
+samples that “other” ancestries but a slightly smaller proportion of
+variance in predominantly European samples. Additionally, due to the
+distribution of ancestries in the biobank q1, q2, and q3, are nearly all
+European samples and only expanding to q4 captures “other”
+ancestries.</p>
+<p><strong>GWAS type vs error</strong></p>
+<pre class="r"><code>UK &lt;- dfOverlap %&gt;% filter(contrasts == &quot;UK10K&quot;) %&gt;% ggplot(aes(x = gwas_type, y = error, fill = gwas_type2)) + geom_bar(stat = &quot;identity&quot;) + xlab(&quot;GWAS Type&quot;) + ylab(&quot;Error&quot;) + theme_bw(base_size = 14) + scale_fill_manual(values = c(&quot;purple4&quot;, &quot;lightseagreen&quot;))  + guides(fill=&quot;none&quot;) + ggtitle(&quot;UK10K&quot;) + theme(plot.title = element_text(hjust = 0.5)) + ylim(0,1) + geom_hline(yintercept = 0, color = &quot;red&quot;, linetype = 2, linewidth = 1.2)
+
+
+Han &lt;- dfOverlap %&gt;% filter(contrasts == &quot;Han&quot;) %&gt;% ggplot(aes(x = gwas_type, y = error, fill = gwas_type2)) + geom_bar(stat = &quot;identity&quot;) + xlab(&quot;GWAS Type&quot;) + ylab(&quot;Error&quot;) + theme_bw(base_size = 14) + scale_fill_manual(values = c(&quot;purple4&quot;, &quot;lightseagreen&quot;))  + guides(fill=&quot;none&quot;) + ggtitle(&quot;Han&quot;) + theme(plot.title = element_text(hjust = 0.5)) + ylim(0,1) + geom_hline(yintercept = 0, color = &quot;red&quot;, linetype = 2, linewidth = 1.2)
+
+# Print plots
+p &lt;- ggarrange(UK, Han, nrow = 1)
+p</code></pre>
+<p><img src="figure/SDS.Rmd/unnamed-chunk-13-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-13-1">
+Past versions of unnamed-chunk-13-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-13-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/blob/553129da6a322e914aa249b57d2ef96ce3e77f9d/docs/figure/SDS.Rmd/unnamed-chunk-13-1.png" target="_blank">553129d</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-30
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>The Han contrasts explain a larger proportion of variance in ALL and
+q4 and consequently have smaller error. The UK10K contrasts explain a
+larger proportion of variance in WBS, q1, q2, and q3 and consequently
+have lower error for those GWAS panels. Similar to results we’ve seen
+before, using the whole biobank achieves much lower error than
+restricting to the WBS.</p>
+<p><strong>Proportion variance explained vs error</strong></p>
+<pre class="r"><code>UK &lt;- dfOverlap %&gt;% filter(contrasts == &quot;UK10K&quot;) %&gt;% ggplot(aes(x = Z, y = error, color = gwas_type)) + geom_point(size = 3) + xlab(&quot;Proportion of variance explained (Z)&quot;) + ylab(&quot;Error&quot;) + theme_bw(base_size = 12)  + guides(fill=&quot;none&quot;) + ggtitle(&quot;UK10K&quot;) + theme(plot.title = element_text(hjust = 0.5), legend.position = &quot;bottom&quot;) + ylim(0,1) + labs(color = &quot;GWAS Type&quot;) + geom_hline(yintercept = 0, color = &quot;red&quot;, linetype = 2, linewidth = 1.2)
+
+Han &lt;- dfOverlap %&gt;% filter(contrasts == &quot;Han&quot;) %&gt;% ggplot(aes(x = Z, y = error, color = gwas_type)) + geom_point(size = 3) + xlab(&quot;Proportion of variance explained (Z)&quot;) + ylab(&quot;Error&quot;) + theme_bw(base_size = 12)  + guides(fill=&quot;none&quot;) + ggtitle(&quot;Han&quot;) + theme(plot.title = element_text(hjust = 0.5), legend.position = &quot;bottom&quot;) + ylim(0,1) + labs(color = &quot;GWAS Type&quot;) + geom_hline(yintercept = 0, color = &quot;red&quot;, linetype = 2, linewidth = 1.2)
+
+# Print plots
+p &lt;- ggarrange(UK, Han, nrow = 1, common.legend = TRUE)
+p</code></pre>
+<p><img src="figure/SDS.Rmd/unnamed-chunk-14-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-14-1">
+Past versions of unnamed-chunk-14-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-14-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/blob/553129da6a322e914aa249b57d2ef96ce3e77f9d/docs/figure/SDS.Rmd/unnamed-chunk-14-1.png" target="_blank">553129d</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-30
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Combine results into one plot</p>
+<pre class="r"><code>dfOverlap %&gt;% ggplot(aes(x = Z, y = error, color = gwas_type, shape = contrasts)) + geom_point(size = 3) + xlab(&quot;Proportion of variance explained (Z)&quot;) + ylab(&quot;Error&quot;) + theme_bw(base_size = 12)  + guides(fill=&quot;none&quot;) + theme(plot.title = element_text(hjust = 0.5), legend.position = &quot;bottom&quot;) + ylim(0,1) + labs(color = &quot;GWAS Type&quot;) + geom_hline(yintercept = 0, color = &quot;red&quot;, linetype = 2, linewidth = 1.2)</code></pre>
+<p><img src="figure/SDS.Rmd/unnamed-chunk-15-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-15-1">
+Past versions of unnamed-chunk-15-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-15-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/blob/553129da6a322e914aa249b57d2ef96ce3e77f9d/docs/figure/SDS.Rmd/unnamed-chunk-15-1.png" target="_blank">553129d</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-30
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Limit to WBS, q1, q2, q3</p>
+<pre class="r"><code>dfOverlap %&gt;% filter(gwas_type %in% c(&quot;WBS&quot;, &quot;q1&quot;, &quot;q2&quot;, &quot;q3&quot;)) %&gt;% ggplot(aes(x = Z, y = error, color = gwas_type, shape = contrasts)) + geom_point(size = 3) + xlab(&quot;Proportion of variance explained (Z)&quot;) + ylab(&quot;Error&quot;) + theme_bw(base_size = 12)  + guides(fill=&quot;none&quot;) + theme(plot.title = element_text(hjust = 0.5), legend.position = &quot;bottom&quot;) + ylim(0,1) + labs(color = &quot;GWAS Type&quot;) + geom_hline(yintercept = 0, color = &quot;red&quot;, linetype = 2, linewidth = 1.2)</code></pre>
+<p><img src="figure/SDS.Rmd/unnamed-chunk-16-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-16-1">
+Past versions of unnamed-chunk-16-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-16-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/blob/553129da6a322e914aa249b57d2ef96ce3e77f9d/docs/figure/SDS.Rmd/unnamed-chunk-16-1.png" target="_blank">553129d</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-30
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>The same pattern holds that the more variance a constrast explains in
+a given GWAS, the lower the error.</p>
+<p><strong>GWAS type vs D</strong></p>
+<pre class="r"><code>dfOverlap$d_lc &lt;- dfOverlap$D - (2*sqrt(dfOverlap$varD)) 
+dfOverlap$d_uc &lt;- dfOverlap$D + (2 *sqrt(dfOverlap$varD))
+
+UK &lt;- dfOverlap %&gt;% filter(contrasts == &quot;UK10K&quot;) %&gt;% ggplot(aes(x = gwas_type, y = D, color = gwas_type2)) + geom_point(size = 3) + xlab(&quot;GWAS Type&quot;) + ylab(&quot;D&quot;) + theme_bw(base_size = 14) + scale_color_manual(values = c(&quot;purple4&quot;, &quot;lightseagreen&quot;))  + guides(color=&quot;none&quot;) + ggtitle(&quot;UK10K&quot;) + theme(plot.title = element_text(hjust = 0.5)) + geom_hline(yintercept = 0, color = &quot;red&quot;, linetype = 2, linewidth = 1.2) + geom_errorbar(aes(ymin = d_lc, ymax = d_uc)) + ylim(0, 2000000000)
+
+Han &lt;- dfOverlap %&gt;% filter(contrasts == &quot;Han&quot;) %&gt;% ggplot(aes(x = gwas_type, y = D, color = gwas_type2)) + geom_point(size = 3) + xlab(&quot;GWAS Type&quot;) + ylab(&quot;D&quot;) + theme_bw(base_size = 14) + scale_color_manual(values = c(&quot;purple4&quot;, &quot;lightseagreen&quot;))  + guides(color=&quot;none&quot;) + ggtitle(&quot;Han&quot;) + theme(plot.title = element_text(hjust = 0.5)) + geom_hline(yintercept = 0, color = &quot;red&quot;, linetype = 2, linewidth = 1.2) + geom_errorbar(aes(ymin = d_lc, ymax = d_uc)) + ylim(0, 2000000000)
+
+# Print plots
+p &lt;- ggarrange(UK, Han, nrow = 1, common.legend = TRUE)
+p</code></pre>
+<p><img src="figure/SDS.Rmd/unnamed-chunk-17-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-17-1">
+Past versions of unnamed-chunk-17-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-17-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/blob/553129da6a322e914aa249b57d2ef96ce3e77f9d/docs/figure/SDS.Rmd/unnamed-chunk-17-1.png" target="_blank">553129d</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-30
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>This is not a great plot because the GWAS panels are different sizes
+(q1-q4 are all the same) so it’s not a fair comparison but plotting the
+expectation just looks like its on the 0 line because <span
+class="math inline">\(M-1\)</span> is small compared to <span
+class="math inline">\(D\)</span>. All of the p-value for D are
+signficant though there is significant variability in the order of
+magnitude.</p>
+<pre class="r"><code>dfOverlap %&gt;% select(D, pvalD, contrasts, gwas_type)</code></pre>
+<pre><code>             D        pvalD contrasts gwas_type
+ 1:  738504921 5.664704e-53     UK10K       ALL
+ 2: 1677667850 5.810735e-65       Han       ALL
+ 3:   58708021 4.001248e-45     UK10K       WBS
+ 4:   42992070 2.792544e-07       Han       WBS
+ 5:    1594405 4.638526e-43     UK10K        q1
+ 6:    1058779 6.634826e-07       Han        q1
+ 7:    1601701 3.129154e-45     UK10K        q2
+ 8:    1064151 4.081732e-07       Han        q2
+ 9:    1565656 3.779389e-45     UK10K        q3
+10:    1035707 9.216597e-08       Han        q3
+11:   14725789 7.144070e-50     UK10K        q4
+12:   33825008 1.777103e-65       Han        q4</code></pre>
+</div>
+<div id="pc-statistics" class="section level3">
+<h3>PC statistics</h3>
+<p>Load and format results</p>
+<pre class="r"><code>dfPC &lt;- fread(&quot;../endpoints/SDS/PCStats.txt&quot;)
+dfPC &lt;- dfPC %&gt;% mutate(gwas_sample  = case_when(gwas == &quot;q1&quot; ~ &quot;q1&quot;, 
+                                                        gwas == &quot;median&quot; ~ &quot;q2&quot;, 
+                                                        gwas == &quot;q3&quot; ~ &quot;q3&quot;,
+                                                        gwas == &quot;max&quot; ~ &quot;q4&quot;,
+                                                        gwas == &quot;ALL&quot; ~ &quot;ALL&quot;,
+                                                        gwas == &quot;WBS&quot; ~ &quot;WBS&quot;)) %&gt;% 
+  mutate(gwas_sample2 = case_when(gwas_type %in% c(&quot;q1&quot;, &quot;q2&quot;, &quot;q3&quot;, &quot;q4&quot;) ~ &quot;distance&quot;,
+         gwas_sample %in% c(&quot;ALL&quot;, &quot;WBS&quot;) ~ &quot;full&quot;))
+dfPC$gwas_sample &lt;- factor(dfPC$gwas_sample, levels = c(&quot;ALL&quot;, &quot;WBS&quot;, &quot;q1&quot;, &quot;q2&quot;, &quot;q3&quot;, &quot;q4&quot;))</code></pre>
+<p><strong>Squared correlation between <span
+class="math inline">\(PC_i\)</span> between <span
+class="math inline">\(\hat{F}_{Gr}\)</span></strong></p>
+<pre class="r"><code># UK
+UK &lt;- dfPC %&gt;% filter(gwas_type == &quot;even&quot; &amp; test_type == &quot;odd&quot; &amp; contrasts == &quot;UK10K&quot;)%&gt;% ggplot(aes(x = PC, y = B2)) + geom_bar(stat = &quot;identity&quot;, color = &quot;darkgreen&quot;, fill = &quot;darkgreen&quot;) + facet_grid(~gwas_sample) + theme_bw(base_size = 12) + ylab(TeX(&quot;$B_{i}^2$&quot;)) + ggtitle(&quot;UK10K&quot;) + theme(plot.title = element_text(hjust = 0.5))
+
+# Han
+Han &lt;- dfPC %&gt;% filter(gwas_type == &quot;even&quot; &amp; test_type == &quot;odd&quot; &amp; contrasts == &quot;Han&quot;)%&gt;% ggplot(aes(x = PC, y = B2)) + geom_bar(stat = &quot;identity&quot;, color = &quot;darkgreen&quot;, fill = &quot;darkgreen&quot;) + facet_grid(~gwas_sample) + theme_bw(base_size = 12) + ylab(TeX(&quot;$B_{i}^2$&quot;)) + ggtitle(&quot;Han&quot;) + theme(plot.title = element_text(hjust = 0.5))
+
+# Print plots
+p &lt;- ggarrange(UK, Han, nrow = 1, common.legend = TRUE)
+p</code></pre>
+<p><img src="figure/SDS.Rmd/unnamed-chunk-20-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-20-1">
+Past versions of unnamed-chunk-20-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-20-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/blob/553129da6a322e914aa249b57d2ef96ce3e77f9d/docs/figure/SDS.Rmd/unnamed-chunk-20-1.png" target="_blank">553129d</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-30
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Limit results to “ALL”</p>
+<pre class="r"><code># UK
+UK &lt;- dfPC %&gt;% filter(gwas_type == &quot;even&quot; &amp; test_type == &quot;odd&quot; &amp; contrasts == &quot;UK10K&quot; &amp; gwas_sample == &quot;ALL&quot;)%&gt;% ggplot(aes(x = PC, y = B2)) + geom_bar(stat = &quot;identity&quot;, color = &quot;darkgreen&quot;, fill = &quot;darkgreen&quot;) + facet_grid(~gwas_sample) + theme_bw(base_size = 12) + ylab(TeX(&quot;$B_{i}^2$&quot;)) + ggtitle(&quot;UK10K&quot;) + theme(plot.title = element_text(hjust = 0.5)) 
+
+
+# Han
+Han &lt;- dfPC %&gt;% filter(gwas_type == &quot;even&quot; &amp; test_type == &quot;odd&quot; &amp; contrasts == &quot;Han&quot;&amp; gwas_sample == &quot;ALL&quot;)%&gt;% ggplot(aes(x = PC, y = B2)) + geom_bar(stat = &quot;identity&quot;, color = &quot;darkgreen&quot;,  fill = &quot;darkgreen&quot;) + facet_grid(~gwas_sample) + theme_bw(base_size = 12) + ylab(TeX(&quot;$B_{i}^2$&quot;)) + ggtitle(&quot;Han&quot;) + theme(plot.title = element_text(hjust = 0.5))
+
+# Print plots
+p &lt;- ggarrange(UK, Han, nrow = 1, common.legend = TRUE)
+p</code></pre>
+<p><img src="figure/SDS.Rmd/unnamed-chunk-21-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-21-1">
+Past versions of unnamed-chunk-21-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-21-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/blob/553129da6a322e914aa249b57d2ef96ce3e77f9d/docs/figure/SDS.Rmd/unnamed-chunk-21-1.png" target="_blank">553129d</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-30
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Limit results to “WBS”</p>
+<pre class="r"><code># UK
+UK &lt;- dfPC %&gt;% filter(gwas_type == &quot;even&quot; &amp; test_type == &quot;odd&quot; &amp; contrasts == &quot;UK10K&quot; &amp; gwas_sample == &quot;WBS&quot;)%&gt;% ggplot(aes(x = PC, y = B2)) + geom_bar(stat = &quot;identity&quot;, color = &quot;darkgreen&quot;,  fill = &quot;darkgreen&quot;) + facet_grid(~gwas_sample) + theme_bw(base_size = 12) + ylab(TeX(&quot;$B_{i}^2$&quot;)) + ggtitle(&quot;UK10K&quot;) + theme(plot.title = element_text(hjust = 0.5)) + ylim(0,0.012)
+
+# Han
+Han &lt;- dfPC %&gt;% filter(gwas_type == &quot;even&quot; &amp; test_type == &quot;odd&quot; &amp; contrasts == &quot;Han&quot;&amp; gwas_sample == &quot;WBS&quot;)%&gt;% ggplot(aes(x = PC, y = B2)) + geom_bar(stat = &quot;identity&quot;, color = &quot;darkgreen&quot;,  fill = &quot;darkgreen&quot;) + facet_grid(~gwas_sample) + theme_bw(base_size = 12) + ylab(TeX(&quot;$B_{i}^2$&quot;)) + ggtitle(&quot;Han&quot;) + theme(plot.title = element_text(hjust = 0.5)) + ylim(0, 0.012)
+
+# Print plots
+p &lt;- ggarrange(UK, Han, nrow = 1, common.legend = TRUE)
+p</code></pre>
+<p><img src="figure/SDS.Rmd/unnamed-chunk-22-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-22-1">
+Past versions of unnamed-chunk-22-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-22-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/blob/553129da6a322e914aa249b57d2ef96ce3e77f9d/docs/figure/SDS.Rmd/unnamed-chunk-22-1.png" target="_blank">553129d</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-30
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Both set’s of contrasts are fairly highly correlated with the first
+PC of the whole biobank and then moderately correlated with some of the
+top 10, though different ones for each contrast. Further investigation
+can look into which ancestries each of those PCs separates. In the WBS,
+the UK10K are much more correlated with a few top PCs compared to the
+Han contrasts which makes a lot of sense given the fact that the UK
+contrasts explain more variane in the WBS subset than the Han.</p>
+<p><strong>Cumulative variance explained</strong></p>
+<p>Look at correlation between <span
+class="math inline">\(R^2_{K}\)</span></p>
+<pre class="r"><code># UK 
+dfFilter &lt;- dfOverlap %&gt;% filter(contrasts == &quot;UK10K&quot;) %&gt;% mutate(gwas_sample = gwas_type)
+UK &lt;- dfPC %&gt;% filter(gwas_type == &quot;even&quot; &amp; test_type == &quot;odd&quot; &amp; contrasts == &quot;UK10K&quot;) %&gt;% ggplot(aes(x = PC, y = r2)) + geom_bar(stat = &quot;identity&quot;,color = &quot;darkgreen&quot;,  fill = &quot;darkgreen&quot;) + theme_bw(base_size = 12) + ylab(TeX(&quot;$R_{K}^2$&quot;)) + geom_hline(data = dfFilter, aes(yintercept = signal), color = &quot;red&quot;, linetype = 2)  + facet_grid(~gwas_sample) + ggtitle(&quot;UK10K&quot;) + theme(plot.title = element_text(hjust = 0.5)) + ylim(c(0,1))
+
+# Han 
+dfFilter &lt;- dfOverlap %&gt;% filter(contrasts == &quot;Han&quot;) %&gt;% mutate(gwas_sample = gwas_type)
+Han &lt;- dfPC %&gt;% filter(gwas_type == &quot;even&quot; &amp; test_type == &quot;odd&quot; &amp; contrasts == &quot;Han&quot;) %&gt;% ggplot(aes(x = PC, y = r2)) + geom_bar(stat = &quot;identity&quot;, color = &quot;darkgreen&quot;,  fill = &quot;darkgreen&quot;) + theme_bw(base_size = 12) + ylab(TeX(&quot;$R_{K}^2$&quot;)) + geom_hline(data = dfFilter, aes(yintercept = signal), color = &quot;red&quot;, linetype = 2)  + facet_grid(~gwas_sample) + ggtitle(&quot;Han&quot;) + theme(plot.title = element_text(hjust = 0.5))  + ylim(c(0,1))
+
+# Print plots
+p &lt;- ggarrange(UK, Han, nrow = 2, common.legend = TRUE)
+p</code></pre>
+<p><img src="figure/SDS.Rmd/unnamed-chunk-23-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-23-1">
+Past versions of unnamed-chunk-23-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-23-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/blob/553129da6a322e914aa249b57d2ef96ce3e77f9d/docs/figure/SDS.Rmd/unnamed-chunk-23-1.png" target="_blank">553129d</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-30
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Limit to “ALL”</p>
+<pre class="r"><code># UK 
+dfFilter &lt;- dfOverlap %&gt;% filter(contrasts == &quot;UK10K&quot; &amp; gwas_type == &quot;ALL&quot;) %&gt;% mutate(gwas_sample = gwas_type)
+UK &lt;- dfPC %&gt;% filter(gwas_type == &quot;even&quot; &amp; test_type == &quot;odd&quot; &amp; contrasts == &quot;UK10K&quot; &amp; gwas_sample == &quot;ALL&quot;) %&gt;% ggplot(aes(x = PC, y = r2)) + geom_bar(stat = &quot;identity&quot;, color = &quot;darkgreen&quot;,  fill = &quot;darkgreen&quot;) + theme_bw(base_size = 12) + ylab(TeX(&quot;$R_{K}^2$&quot;)) + geom_hline(data = dfFilter, aes(yintercept = signal), color = &quot;red&quot;, linetype = 2)  + facet_grid(~gwas_sample) + ggtitle(&quot;UK10K&quot;) + theme(plot.title = element_text(hjust = 0.5))  + ylim(c(0,1))
+
+# Han 
+dfFilter &lt;- dfOverlap %&gt;% filter(contrasts == &quot;Han&quot;&amp; gwas_type == &quot;ALL&quot;) %&gt;% mutate(gwas_sample = gwas_type)
+Han &lt;- dfPC %&gt;% filter(gwas_type == &quot;even&quot; &amp; test_type == &quot;odd&quot; &amp; contrasts == &quot;Han&quot; &amp; gwas_sample == &quot;ALL&quot;) %&gt;% ggplot(aes(x = PC, y = r2)) + geom_bar(stat = &quot;identity&quot;, color = &quot;darkgreen&quot;,  fill = &quot;darkgreen&quot;) + theme_bw(base_size = 12) + ylab(TeX(&quot;$R_{K}^2$&quot;)) + geom_hline(data = dfFilter, aes(yintercept = signal), color = &quot;red&quot;, linetype = 2)  + facet_grid(~gwas_sample) + ggtitle(&quot;Han&quot;) + theme(plot.title = element_text(hjust = 0.5))  + ylim(c(0,1))
+
+# Print plots
+p &lt;- ggarrange(UK, Han, nrow = 1, common.legend = TRUE)
+p</code></pre>
+<p><img src="figure/SDS.Rmd/unnamed-chunk-24-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-24-1">
+Past versions of unnamed-chunk-24-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-24-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/blob/553129da6a322e914aa249b57d2ef96ce3e77f9d/docs/figure/SDS.Rmd/unnamed-chunk-24-1.png" target="_blank">553129d</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-30
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Limit to “WBS”</p>
+<pre class="r"><code># UK 
+dfFilter &lt;- dfOverlap %&gt;% filter(contrasts == &quot;UK10K&quot; &amp; gwas_type == &quot;WBS&quot;) %&gt;% mutate(gwas_sample = gwas_type)
+UK &lt;- dfPC %&gt;% filter(gwas_type == &quot;even&quot; &amp; test_type == &quot;odd&quot; &amp; contrasts == &quot;UK10K&quot; &amp; gwas_sample == &quot;WBS&quot;) %&gt;% ggplot(aes(x = PC, y = r2)) + geom_bar(stat = &quot;identity&quot;, color = &quot;darkgreen&quot;,  fill = &quot;darkgreen&quot;) + theme_bw(base_size = 12) + ylab(TeX(&quot;$R_{K}^2$&quot;)) + geom_hline(data = dfFilter, aes(yintercept = signal), color = &quot;red&quot;, linetype = 2)  + facet_grid(~gwas_sample) + ggtitle(&quot;UK10K&quot;) + theme(plot.title = element_text(hjust = 0.5))  + ylim(c(0,1))
+
+# Han 
+dfFilter &lt;- dfOverlap %&gt;% filter(contrasts == &quot;Han&quot;&amp; gwas_type == &quot;WBS&quot;) %&gt;% mutate(gwas_sample = gwas_type)
+Han &lt;- dfPC %&gt;% filter(gwas_type == &quot;even&quot; &amp; test_type == &quot;odd&quot; &amp; contrasts == &quot;Han&quot; &amp; gwas_sample == &quot;WBS&quot;) %&gt;% ggplot(aes(x = PC, y = r2)) + geom_bar(stat = &quot;identity&quot;, color = &quot;darkgreen&quot;,  fill = &quot;darkgreen&quot;) + theme_bw(base_size = 12) + ylab(TeX(&quot;$R_{K}^2$&quot;)) + geom_hline(data = dfFilter, aes(yintercept = signal), color = &quot;red&quot;, linetype = 2)  + facet_grid(~gwas_sample) + ggtitle(&quot;Han&quot;) + theme(plot.title = element_text(hjust = 0.5))  + ylim(c(0,1))
+
+# Print plots
+p &lt;- ggarrange(UK, Han, nrow = 1, common.legend = TRUE)
+p</code></pre>
+<p><img src="figure/SDS.Rmd/unnamed-chunk-25-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-25-1">
+Past versions of unnamed-chunk-25-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-25-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/jgblanc/polygenic_selection_stratification/blob/553129da6a322e914aa249b57d2ef96ce3e77f9d/docs/figure/SDS.Rmd/unnamed-chunk-25-1.png" target="_blank">553129d</a>
+</td>
+<td>
+Jennifer Blanc
+</td>
+<td>
+2024-07-30
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.2.1 (2022-06-23)
+Platform: x86_64-apple-darwin17.0 (64-bit)
+Running under: macOS Big Sur ... 10.16
+
+Matrix products: default
+BLAS:   /Library/Frameworks/R.framework/Versions/4.2/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/4.2/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+ [1] latex2exp_0.9.5   ggpubr_0.4.0      forcats_0.5.2     stringr_1.4.1    
+ [5] dplyr_1.0.10      purrr_0.3.4       readr_2.1.2       tidyr_1.2.1      
+ [9] tibble_3.1.8      ggplot2_3.5.0     tidyverse_1.3.2   data.table_1.14.2
+[13] workflowr_1.7.1  
+
+loaded via a namespace (and not attached):
+ [1] fs_1.5.2            lubridate_1.8.0     bit64_4.0.5        
+ [4] httr_1.4.4          rprojroot_2.0.3     tools_4.2.1        
+ [7] backports_1.4.1     bslib_0.4.0         utf8_1.2.2         
+[10] R6_2.5.1            DBI_1.1.3           colorspace_2.0-3   
+[13] withr_2.5.0         gridExtra_2.3       tidyselect_1.1.2   
+[16] processx_3.7.0      bit_4.0.4           compiler_4.2.1     
+[19] git2r_0.32.0        cli_3.4.0           rvest_1.0.3        
+[22] xml2_1.3.3          labeling_0.4.2      sass_0.4.2         
+[25] scales_1.3.0        callr_3.7.2         digest_0.6.29      
+[28] rmarkdown_2.16      R.utils_2.12.0      pkgconfig_2.0.3    
+[31] htmltools_0.5.3     highr_0.9           dbplyr_2.2.1       
+[34] fastmap_1.1.0       rlang_1.1.3         readxl_1.4.1       
+[37] rstudioapi_0.14     farver_2.1.1        jquerylib_0.1.4    
+[40] generics_0.1.3      jsonlite_1.8.0      car_3.1-0          
+[43] R.oo_1.25.0         googlesheets4_1.0.1 magrittr_2.0.3     
+[46] Rcpp_1.0.9          munsell_0.5.0       fansi_1.0.3        
+[49] abind_1.4-5         lifecycle_1.0.4     R.methodsS3_1.8.2  
+[52] stringi_1.7.8       whisker_0.4         yaml_2.3.5         
+[55] carData_3.0-5       grid_4.2.1          promises_1.2.0.1   
+[58] crayon_1.5.1        haven_2.5.1         cowplot_1.1.1      
+[61] hms_1.1.2           knitr_1.40          ps_1.7.1           
+[64] pillar_1.8.1        ggsignif_0.6.3      reprex_2.0.2       
+[67] glue_1.6.2          evaluate_0.16       getPass_0.2-2      
+[70] modelr_0.1.9        vctrs_0.6.5         tzdb_0.3.0         
+[73] httpuv_1.6.6        cellranger_1.1.0    gtable_0.3.1       
+[76] assertthat_0.2.1    cachem_1.0.6        xfun_0.33          
+[79] broom_1.0.1         rstatix_0.7.0       later_1.3.0        
+[82] googledrive_2.0.0   gargle_1.2.1        ellipsis_0.3.2     </code></pre>
+</div>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
