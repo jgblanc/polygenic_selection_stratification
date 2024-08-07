@@ -90,7 +90,7 @@ Similar to the analysis in [Chen et al](https://www.sciencedirect.com/science/ar
 dfEur <- dfFilter %>% filter(project_meta.project_pop %in% c("nfe"))
 dfEur <- dfEur %>% select("IID", "project_meta.project_pop", "population","latitude", "longitude") 
 colnames(dfEur) <- c("IID", "pop", "subpop", "lat", "long")
-dfEur <- dfEur %>% mutate(SDI = case_when(subpop == "Sardinian" ~ "sdi", TRUE ~ "eur"))
+dfEur <- dfEur %>% mutate(SDI = case_when(subpop == "Sardinian" ~ "sdi", TRUE ~ "eur")) %>% select(IID, SDI, everything())
 dfEur <- dfEur %>% mutate(FID = 0) %>% select(FID, everything())
 
 # Save IDs 

@@ -9,7 +9,7 @@ GWAS=["ALL", "WBS", "q1", "q2", "q3", "q4"]
 
 rule all:
     input:
-        expand("data/HGDP1KG/r/{gwas}/sdi-eur_chr{chr}.rvec", chr=CHR, gwas=GWAS, contrasts=CONTRASTS, subdataset=SUBDATASET)
+        expand("data/HGDP1KG/variants/{gwas}/eas-nfe/overlappingSNPs_chr{chr}.txt", chr=CHR, gwas=GWAS, contrasts=CONTRASTS, subdataset=SUBDATASET)
 
 
 ## Recode SNPs to match UKBB
@@ -190,6 +190,34 @@ rule compute_r_all:
         Rscript code/HGDP1KG/compute_pairwase_contrasts.R {input.eas} {input.nfe} {input.sas} {input.afr} {input.amr} {output.p1} {output.p2} {output.p3} {output.p4} {output.p5} {output.p6} {output.p7} {output.p8} {output.p9} {output.p10}
         """
 
+rule rename_overlap_snps_all:
+    input:
+        "data/HGDP1KG/variants/{gwas}/all/overlappingSNPs_chr{chr}.txt"
+    output:
+        p1="data/HGDP1KG/variants/{gwas}/eas-nfe/overlappingSNPs_chr{chr}.txt",
+        p2="data/HGDP1KG/variants/{gwas}/eas-sas/overlappingSNPs_chr{chr}.txt",
+        p3="data/HGDP1KG/variants/{gwas}/eas-afr/overlappingSNPs_chr{chr}.txt",
+        p4="data/HGDP1KG/variants/{gwas}/eas-amr/overlappingSNPs_chr{chr}.txt",
+        p5="data/HGDP1KG/variants/{gwas}/nfe-sas/overlappingSNPs_chr{chr}.txt",
+        p6="data/HGDP1KG/variants/{gwas}/nfe-afr/overlappingSNPs_chr{chr}.txt",
+        p7="data/HGDP1KG/variants/{gwas}/nfe-amr/overlappingSNPs_chr{chr}.txt",
+        p8="data/HGDP1KG/variants/{gwas}/sas-afr/overlappingSNPs_chr{chr}.txt",
+        p9="data/HGDP1KG/variants/{gwas}/sas-amr/overlappingSNPs_chr{chr}.txt",
+        p10="data/HGDP1KG/variants/{gwas}/afr-amr/overlappingSNPs_chr{chr}.txt",
+    shell:
+        """
+        cp {input} {output.p1}
+        cp {input} {output.p2}
+        cp {input} {output.p3}
+        cp {input} {output.p4}
+        cp {input} {output.p5}
+        cp {input} {output.p6}
+        cp {input} {output.p7}
+        cp {input} {output.p8}
+        cp {input} {output.p9}
+        cp {input} {output.p10}
+        """
+
 ## Sardinia Frequency contrasts
 
 rule get_popAF_sdi:
@@ -229,4 +257,14 @@ rule compute_r_sdi:
     shell:
         """
         Rscript code/HGDP1KG/compute_sdi_contrasts.R {input.sdi} {input.eur} {output}
+        """
+
+rule rename_overlap_snps_sdi:
+    input:
+        "data/HGDP1KG/variants/{gwas}/nfe/overlappingSNPs_chr{chr}.txt"
+    output:
+        "data/HGDP1KG/variants/{gwas}/sdi-eur/overlappingSNPs_chr{chr}.txt"
+    shell:
+        """
+        cp {input} {output}
         """
