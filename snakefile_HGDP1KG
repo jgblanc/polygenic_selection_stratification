@@ -158,8 +158,8 @@ rule get_popAF_all:
 	      --extract {input.snps} \
         --keep {input.test} \
 	      --freq \
-        --within {input.test} pop \
-	      --loop-cats pop \
+        --within {input.test} POP \
+	      --loop-cats POP \
 	      --threads 8 \
         --memory 38000 \
         --out {params.prefix_out}
