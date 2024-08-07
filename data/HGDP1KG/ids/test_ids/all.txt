@@ -1,4 +1,4 @@
-FID	IID	lat	long	pop	subpop
+FID	IID	LAT	LONG	POP	SUBPOP
 0	HGDP00001	30.5	66.5	sas	Brahui
 0	HGDP00003	30.5	66.5	sas	Brahui
 0	HGDP00005	30.5	66.5	sas	Brahui
