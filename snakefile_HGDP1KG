@@ -9,7 +9,7 @@ GWAS=["ALL", "WBS", "q1", "q2", "q3", "q4"]
 
 rule all:
     input:
-        expand("data/HGDP1KG/r/{gwas}/eas-nfe_chr{chr}.rvec", chr=CHR, gwas=GWAS, contrasts=CONTRASTS, subdataset=SUBDATASET)
+        expand("data/HGDP1KG/r/{gwas}/sdi-eur_chr{chr}.rvec", chr=CHR, gwas=GWAS, contrasts=CONTRASTS, subdataset=SUBDATASET)
 
 
 ## Recode SNPs to match UKBB
@@ -190,3 +190,43 @@ rule compute_r_all:
         Rscript code/HGDP1KG/compute_pairwase_contrasts.R {input.eas} {input.nfe} {input.sas} {input.afr} {input.amr} {output.p1} {output.p2} {output.p3} {output.p4} {output.p5} {output.p6} {output.p7} {output.p8} {output.p9} {output.p10}
         """
 
+## Sardinia Frequency contrasts
+
+rule get_popAF_sdi:
+    input:
+        test="data/HGDP1KG/variantFreq/all_{chr}.afreq",
+        snps="data/HGDP1KG/variants/{gwas}/nfe/overlappingSNPs_chr{chr}.txt"
+    output:
+        "data/HGDP1KG/popAF/{gwas}/all/popAF_{chr}.sdi.afreq",
+        "data/HGDP1KG/popAF/{gwas}/all/popAF_{chr}.eur.afreq"
+    params:
+        prefix_in="/gpfs/data/berg-lab/data/HGDP1KG/plink2-files-hg19/gnomad.genomes.v3.1.2.hgdp_tgp.chr{chr}",
+        prefix_out="data/HGDP1KG/popAF/{gwas}/all/popAF_{chr}"
+    resources:
+        mem_mb=38000,
+        time="00:30:00"
+    shell:
+        """
+        plink2 --pfile {params.prefix_in} \
+	      --extract {input.snps} \
+        --keep {input.test} \
+	      --freq \
+        --within {input.test} SDI \
+	      --loop-cats SDI \
+	      --threads 8 \
+        --memory 38000 \
+        --out {params.prefix_out}
+        """
+
+# Compute r vectors
+
+rule compute_r_sdi:
+    input:
+        sdi="data/HGDP1KG/popAF/{gwas}/all/popAF_{chr}.sdi.afreq",
+        eur="data/HGDP1KG/popAF/{gwas}/all/popAF_{chr}.eur.afreq"
+    output:
+        "data/HGDP1KG/r/{gwas}/sdi-eur_chr{chr}.rvec"
+    shell:
+        """
+        Rscript code/HGDP1KG/compute_sdi_contrasts.R {input.eas} {input.sdi} {input.eur} {output}
+        """

@@ -46,11 +46,12 @@ Similar to the analysis in [Berg et al](https://elifesciences.org/articles/39725
 # Select Eurasian Sample
 dfEurAsia <- dfFilter %>% filter(project_meta.project_pop %in% c("fin", "nfe", "eas", "sas")) %>% 
   filter(population != "CEU") # Remove CEU due to LAT/LONG on AMERICA
-dfEurAsia <- dfEurAsia %>% select("IID", "latitude", "longitude", "project_meta.project_pop", "population")
-colnames(dfEurAsia) <- c("#IID", "lat", "long", "pop", "subpop")
+dfEurAsia <- dfEurAsia %>% select("IID", "project_meta.project_pop", "population","latitude", "longitude")
+colnames(dfEurAsia) <- c("IID","pop", "subpop", "lat", "long")
+dfEurAsia <- dfEurAsia %>% mutate(FID = 0) %>% select(FID, everything())
 
 # Save IDs 
-#fwrite(dfEurAsia,"../data/HGDP1KG/ids/test_ids/eurasia.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+fwrite(dfEurAsia,"../data/HGDP1KG/ids/test_ids/eurasia.txt", row.names = F, col.names = T, quote = F, sep = "\t")
 
 # Plot Map
 ggplot() + geom_polygon(data = world_map, aes(x = long, y = lat, group = group), fill = "white", color = "black") +
@@ -66,9 +67,10 @@ Similar to the analysis in [Berg et al](https://elifesciences.org/articles/39725
 ```{r}
 # Select Eurasian Sample
 dfEur <- dfFilter %>% filter(project_meta.project_pop %in% c("nfe"))
-dfEur <- dfEur %>% select("IID", "latitude", "longitude", "project_meta.project_pop", "population") %>% 
+dfEur <- dfEur %>% select("IID", "project_meta.project_pop", "population", "latitude", "longitude") %>% 
   filter(population != "CEU")
-colnames(dfEur) <- c("#IID", "lat", "long", "pop", "subpop")
+colnames(dfEur) <- c("IID","pop", "subpop", "lat", "long")
+dfEur <- dfEur %>% mutate(FID = 0) %>% select(FID, everything())
 
 # Save IDs 
 fwrite(dfEur,"../data/HGDP1KG/ids/test_ids/nfe_no_ceu.txt", row.names = F, col.names = T, quote = F, sep = "\t")
@@ -86,9 +88,10 @@ Similar to the analysis in [Chen et al](https://www.sciencedirect.com/science/ar
 ```{r}
 # Select Eurasian Sample
 dfEur <- dfFilter %>% filter(project_meta.project_pop %in% c("nfe"))
-dfEur <- dfEur %>% select("IID", "latitude", "longitude", "project_meta.project_pop", "population") 
-colnames(dfEur) <- c("#IID", "lat", "long", "pop", "subpop")
+dfEur <- dfEur %>% select("IID", "project_meta.project_pop", "population","latitude", "longitude") 
+colnames(dfEur) <- c("IID", "pop", "subpop", "lat", "long")
 dfEur <- dfEur %>% mutate(SDI = case_when(subpop == "Sardinian" ~ "sdi", TRUE ~ "eur"))
+dfEur <- dfEur %>% mutate(FID = 0) %>% select(FID, everything())
 
 # Save IDs 
 fwrite(dfEur,"../data/HGDP1KG/ids/test_ids/nfe.txt", row.names = F, col.names = T, quote = F, sep = "\t")
@@ -108,8 +111,9 @@ Here we include the 5 major populations and will test for overlap in "continenta
 - AMR: 552  
 
 ```{r}
-dfAll <- dfFilter %>%  filter(project_meta.project_pop %in% c("nfe", "afr", "amr", "eas", "sas")) %>% select("IID", "latitude", "longitude", "project_meta.project_pop", "population")
-colnames(dfAll) <- c("#IID", "lat", "long", "pop", "subpop")
+dfAll <- dfFilter %>%  filter(project_meta.project_pop %in% c("nfe", "afr", "amr", "eas", "sas")) %>% select("IID","project_meta.project_pop", "population", "latitude", "longitude")
+colnames(dfAll) <- c("IID", "pop", "subpop", "lat", "long")
+dfAll <- dfAll %>% mutate(FID = 0) %>% select(FID, everything())
 
 # Save IDs 
 fwrite(dfAll,"../data/HGDP1KG/ids/test_ids/all.txt", row.names = F, col.names = T, quote = F, sep = "\t")
