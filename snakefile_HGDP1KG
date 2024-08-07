@@ -194,7 +194,7 @@ rule compute_r_all:
 
 rule get_popAF_sdi:
     input:
-        test="data/HGDP1KG/variantFreq/all_{chr}.afreq",
+        test="data/HGDP1KG/ids/test_ids/nfe.txt",
         snps="data/HGDP1KG/variants/{gwas}/nfe/overlappingSNPs_chr{chr}.txt"
     output:
         "data/HGDP1KG/popAF/{gwas}/all/popAF_{chr}.sdi.afreq",
@@ -228,5 +228,5 @@ rule compute_r_sdi:
         "data/HGDP1KG/r/{gwas}/sdi-eur_chr{chr}.rvec"
     shell:
         """
-        Rscript code/HGDP1KG/compute_sdi_contrasts.R {input.eas} {input.sdi} {input.eur} {output}
+        Rscript code/HGDP1KG/compute_sdi_contrasts.R {input.sdi} {input.eur} {output}
         """
