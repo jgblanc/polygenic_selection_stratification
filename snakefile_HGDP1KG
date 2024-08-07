@@ -9,7 +9,7 @@ GWAS=["ALL", "WBS", "q1", "q2", "q3", "q4"]
 
 rule all:
     input:
-        expand(""data/HGDP1KG/r/{gwas}/eas-nfe_chr{chr}.rvec", chr=CHR, gwas=GWAS, contrasts=CONTRASTS, subdataset=SUBDATASET)
+        expand("data/HGDP1KG/r/{gwas}/eas-nfe_chr{chr}.rvec", chr=CHR, gwas=GWAS, contrasts=CONTRASTS, subdataset=SUBDATASET)
 
 
 ## Recode SNPs to match UKBB
@@ -138,7 +138,7 @@ rule get_overlapping_snps:
 
 rule get_popAF_all:
     input:
-        test="data/HGDP1KG/variantFreq/all_{chr}.afreq",
+        test="data/HGDP1KG/ids/test_ids/all.txt",
         snps="data/HGDP1KG/variants/{gwas}/all/overlappingSNPs_chr{chr}.txt"
     output:
         "data/HGDP1KG/popAF/{gwas}/all/popAF_{chr}.afr.afreq",
@@ -147,7 +147,7 @@ rule get_popAF_all:
         "data/HGDP1KG/popAF/{gwas}/all/popAF_{chr}.nfe.afreq",
         "data/HGDP1KG/popAF/{gwas}/all/popAF_{chr}.sas.afreq"
     params:
-        prefix_in="/gpfs/data/berg-lab/data/HGDP1KG/plink2-files-hg19/gnomad.genomes.v3.1.2.hgdp_tgp.chr{chr}",
+        prefix_in="data/HGDP1KG/plink2-files/gnomad.genomes.v3.1.2.hgdp_tgp.chr{chr}",
         prefix_out="data/HGDP1KG/popAF/{gwas}/all/popAF_{chr}"
     resources:
         mem_mb=38000,
@@ -187,6 +187,6 @@ rule compute_r_all:
         p10 = "data/HGDP1KG/r/{gwas}/afr-amr_chr{chr}.rvec"
     shell:
         """
-        Rscript code/HGDP1KG/compute_pairwase_contrasts.R {input.eas} {input.nfe} {input.sas} {input.afr} {input.amr} {output.p1} {output.p2} {output.p3} {output.p4} {output.p5} {output.p6} {ouptput.p7} {output.p8} {output.p9} {output.p10}
+        Rscript code/HGDP1KG/compute_pairwase_contrasts.R {input.eas} {input.nfe} {input.sas} {input.afr} {input.amr} {output.p1} {output.p2} {output.p3} {output.p4} {output.p5} {output.p6} {output.p7} {output.p8} {output.p9} {output.p10}
         """
 
