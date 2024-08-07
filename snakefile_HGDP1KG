@@ -9,8 +9,7 @@ GWAS=["ALL", "WBS", "q1", "q2", "q3", "q4"]
 
 rule all:
     input:
-        expand("data/HGDP1KG/popAF/{gwas}/all/popAF_{chr}.afr.afreq", chr=CHR, gwas=GWAS, contrasts=CONTRASTS)
-
+        expand("data/HGDP1KG/plink2-files/gnomad.genomes.v3.1.2.hgdp_tgp.chr{chr}.psam", chr=CHR, gwas=GWAS, contrasts=CONTRASTS)
 
 
 ## Recode SNPs to match UKBB
@@ -40,13 +39,13 @@ rule HGDP_freq:
 
 rule recode_list:
     input:
-        freq_hgdp="data/hgdp/variants-raw/hgdp_wgs.20190516.full.chr{chr}.afreq",
+        freq_hgdp="data/HGDP1KG/variants-raw/gnomad.genomes.v3.1.2.hgdp_tgp.chr{chr}.afreq",
         freq_ukbb="data/ukbb/variants/ukb_imp_chr{chr}_v3.afreq"
     output:
         "data/HGDP1KG/variants-fliped/flipped_snps_{chr}.txt"
     shell:
         """
-        Rscript code/hgdp/flip_snps.R {input.freq_ukbb} {input.freq_hgdp} {output}
+        Rscript code/HGDP1KG/flip_snps.R {input.freq_ukbb} {input.freq_hgdp} {output}
         """
 
 # Recode HGDP with UKBB ref/alt alleles and save to new directory
@@ -55,8 +54,8 @@ rule HGDP_recode:
     input:
         psam="/gpfs/data/berg-lab/data/HGDP1KG/plink2-files-hg19/gnomad.genomes.v3.1.2.hgdp_tgp.chr{chr}.psam",
         pvar="/gpfs/data/berg-lab/data/HGDP1KG/plink2-files-hg19/gnomad.genomes.v3.1.2.hgdp_tgp.chr{chr}.pvar",
-        pgen="/gpfs/data/berg-lab/data/HGDP1KG/plink2-files-hg19/gnomad.genomes.v3.1.2.hgdp_tgp.chr{chr}.pgen"
-      	snp_list="data/hgdp/variants-fliped/flipped_snps_{chr}.txt"
+        pgen="/gpfs/data/berg-lab/data/HGDP1KG/plink2-files-hg19/gnomad.genomes.v3.1.2.hgdp_tgp.chr{chr}.pgen",
+      	snp_list="data/HGDP1KG/variants-fliped/flipped_snps_{chr}.txt"
     output:
         psam="data/HGDP1KG/plink2-files/gnomad.genomes.v3.1.2.hgdp_tgp.chr{chr}.psam",
         pvar="data/HGDP1KG/plink2-files/gnomad.genomes.v3.1.2.hgdp_tgp.chr{chr}.pvar",
@@ -68,7 +67,7 @@ rule HGDP_recode:
         """
         plink2 --pfile {params.prefix_in} \
         --extract {input.snp_list} \
-	      --ref-allele {input.snp_list} \
+	      --ref-allele force {input.snp_list} \
 	      --make-pgen \
         --out {params.prefix_out}
         """

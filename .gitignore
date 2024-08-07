@@ -18,6 +18,8 @@ data/HGDP1KG/variants-raw/*
 data/*/raw/*
 data/liftover/*
 data/ukbb/variants/*
+data/HGDP1KG/variants-fliped/*
+data/HGDP1KG/plink2-files/*
 output/*
 logs/*
 .snakemake/
