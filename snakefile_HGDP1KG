@@ -9,7 +9,7 @@ GWAS=["ALL", "WBS", "q1", "q2", "q3", "q4"]
 
 rule all:
     input:
-        expand("data/HGDP1KG/variants/{gwas}/{subdataset}/overlappingSNPs_chr{chr}.txt", chr=CHR, gwas=GWAS, contrasts=CONTRASTS, subdataset=SUBDATASET)
+        expand(""data/HGDP1KG/r/{gwas}/eas-nfe_chr{chr}.rvec", chr=CHR, gwas=GWAS, contrasts=CONTRASTS, subdataset=SUBDATASET)
 
 
 ## Recode SNPs to match UKBB
@@ -131,3 +131,62 @@ rule get_overlapping_snps:
         """
         Rscript code/HGDP1KG/overlapping_snps.R {input.freq_gwas} {input.freq_test} {output}
         """
+
+## ALL Frequency constrasts
+
+# Get allele freqeuncy contrasts
+
+rule get_popAF_all:
+    input:
+        test="data/HGDP1KG/variantFreq/all_{chr}.afreq",
+        snps="data/HGDP1KG/variants/{gwas}/all/overlappingSNPs_chr{chr}.txt"
+    output:
+        "data/HGDP1KG/popAF/{gwas}/all/popAF_{chr}.afr.afreq",
+        "data/HGDP1KG/popAF/{gwas}/all/popAF_{chr}.amr.afreq",
+        "data/HGDP1KG/popAF/{gwas}/all/popAF_{chr}.eas.afreq",
+        "data/HGDP1KG/popAF/{gwas}/all/popAF_{chr}.nfe.afreq",
+        "data/HGDP1KG/popAF/{gwas}/all/popAF_{chr}.sas.afreq"
+    params:
+        prefix_in="/gpfs/data/berg-lab/data/HGDP1KG/plink2-files-hg19/gnomad.genomes.v3.1.2.hgdp_tgp.chr{chr}",
+        prefix_out="data/HGDP1KG/popAF/{gwas}/all/popAF_{chr}"
+    resources:
+        mem_mb=38000,
+        time="00:30:00"
+    shell:
+        """
+        plink2 --pfile {params.prefix_in} \
+	      --extract {input.snps} \
+        --keep {input.test} \
+	      --freq \
+        --within {input.test} pop \
+	      --loop-cats pop \
+	      --threads 8 \
+        --memory 38000 \
+        --out {params.prefix_out}
+        """
+
+# Compute r vectors
+
+rule compute_r_all:
+    input:
+        eas="data/HGDP1KG/popAF/{gwas}/all/popAF_{chr}.eas.afreq",
+        nfe="data/HGDP1KG/popAF/{gwas}/all/popAF_{chr}.nfe.afreq",
+        sas="data/HGDP1KG/popAF/{gwas}/all/popAF_{chr}.sas.afreq",
+        afr="data/HGDP1KG/popAF/{gwas}/all/popAF_{chr}.afr.afreq",
+        amr="data/HGDP1KG/popAF/{gwas}/all/popAF_{chr}.amr.afreq"
+    output:
+        p1 = "data/HGDP1KG/r/{gwas}/eas-nfe_chr{chr}.rvec",
+        p2 = "data/HGDP1KG/r/{gwas}/eas-sas_chr{chr}.rvec",
+        p3 = "data/HGDP1KG/r/{gwas}/eas-afr_chr{chr}.rvec",
+        p4 = "data/HGDP1KG/r/{gwas}/eas-amr_chr{chr}.rvec",
+        p5 = "data/HGDP1KG/r/{gwas}/nfe-sas_chr{chr}.rvec",
+        p6 = "data/HGDP1KG/r/{gwas}/nfe-afr_chr{chr}.rvec",
+        p7 = "data/HGDP1KG/r/{gwas}/nfe-amr_chr{chr}.rvec",
+        p8 = "data/HGDP1KG/r/{gwas}/sas-afr_chr{chr}.rvec",
+        p9 = "data/HGDP1KG/r/{gwas}/sas-amr_chr{chr}.rvec",
+        p10 = "data/HGDP1KG/r/{gwas}/afr-amr_chr{chr}.rvec"
+    shell:
+        """
+        Rscript code/HGDP1KG/compute_pairwase_contrasts.R {input.eas} {input.nfe} {input.sas} {input.afr} {input.amr} {output.p1} {output.p2} {output.p3} {output.p4} {output.p5} {output.p6} {ouptput.p7} {output.p8} {output.p9} {output.p10}
+        """
+
