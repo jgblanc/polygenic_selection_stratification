@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(data.table)
 library(tidyverse)
 library(maps)
+library(latex2exp)
 ```
 
 # Construct GWAS and Test Panels 
@@ -210,3 +211,45 @@ dfGWAS <- df %>% filter(distance <=  q2)%>% sample_n(10000) %>% select("#FID", "
 dfGWAS <- df %>% filter(distance <=  q1)%>% sample_n(10000) %>% select("#FID", "IID", "POP")
 #fwrite(dfGWAS,"../data/HGDP1KG/ids/gwas_ids/q1.txt", row.names = F, col.names = T, quote = F, sep = "\t")
 ```
+
+
+# Results 
+
+## Continental Constrasts
+
+### Overlap Statistics
+
+Load data and format 
+```{r}
+dfOverlap <- fread("../endpoints/HGDP1KG/OverlapStats.txt")
+dfOverlap <- dfOverlap %>% mutate(gwas_type2 = case_when(gwas %in% c("q1", "q2", "q3", "q4") ~ "distance",
+         gwas %in% c("ALL", "WBS") ~ "full"))
+dfOverlap$gwas <- factor(dfOverlap$gwas, levels = c("ALL", "WBS", "q1", "q2", "q3", "q4"))
+#dfOverlap <- dfOverlap %>% filter(contrasts != "sdi-eur")
+```
+
+**GWAS type vs proportion of variance explained** 
+```{r}
+dfOverlap %>% filter(contrasts == "eas-nfe") %>% ggplot(aes(x = gwas, y = Z, fill = gwas_type2)) + geom_bar(stat = "identity") + xlab("GWAS Type") + ylab("Proportion of variance explained (Z)") + theme_bw(base_size = 14) + scale_fill_manual(values = c("purple4", "lightseagreen"))  + guides(fill="none") + theme(plot.title = element_text(hjust = 0.5)) + ylim(0, 7e-5)
+```
+
+
+Load and format results
+```{r}
+dfPC <- fread("../endpoints/HGDP1KG/PCStats.txt")
+dfPC <- dfPC %>% mutate(gwas_sample = case_when(gwas %in% c("q1", "q2", "q3", "q4") ~ "distance",
+         gwas %in% c("ALL", "WBS") ~ "full"))
+dfPC$gwas <- factor(dfPC$gwas, levels = c("ALL", "WBS", "q1", "q2", "q3", "q4"))
+```
+
+```{r}
+dfPC %>% filter(gwas_type == "even" & test_type == "odd" & contrasts == "nfe-afr")%>% ggplot(aes(x = PC, y = B2)) + geom_bar(stat = "identity", fill = "darkgreen", color = "darkgreen") + facet_grid(~gwas) + theme_bw(base_size = 12) + ylab(TeX("$B_{i}^2$"))  + theme(plot.title = element_text(hjust = 0.5))
+```
+
+
+
+
+
+
+
+
