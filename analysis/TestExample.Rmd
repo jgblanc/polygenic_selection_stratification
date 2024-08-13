@@ -118,7 +118,7 @@ p
 
 Load data and process 
 ```{r}
-dfOverlap <- fread("../endpoints/TestExample/OverlapStats.txt")
+dfOverlap <- fread("../endpoints/TestExample/OverlapStats_bigblocks.txt")
 dfOverlap <- dfOverlap %>% mutate(prop_eur  = case_when(gwas == "complete" ~ 0.5, 
                                                         gwas == "none" ~ 1, 
                                                         gwas == "half" ~ 0.75,
@@ -193,4 +193,26 @@ As expected, there is a high correlation between PC 1 and $\hat{F}_{Gr}$ in GWAS
 dfPC %>% filter(gwas_type == "even" & test_type == "odd") %>% ggplot(aes(x = PC, y = r2)) + geom_bar(stat = "identity", fill = "darkgreen", color = "darkgreen") + facet_grid(~prop_eur) + theme_bw(base_size = 12) + ylab(TeX("$R_{K}^2$")) + geom_hline(data = dfOverlap, aes(yintercept = signal), color = "red", linetype = 2, linewidth = 1.5)
 ```
 Something is wrong with the theory (or analysis) here. We thought that most variance PCs could explain was $1 - error$ or ($1 - error^2$?) but in the no overlap situation, its clear that even the first PC explains more than $1 - error$.  
+
+
+
+```{r}
+df <- fread("~/Downloads/fourier_ls-all_parsed.bed")
+dfBB <- df %>% group_by(chr)  %>%
+  mutate(block_group = (block_number - 1) %/% 3) %>%
+  group_by(chr, block_group) %>%
+  summarize(
+    start = min(start),
+    stop = max(stop),
+    block_number = paste(unique(block_number), collapse = "-"),
+    .groups = 'drop'
+  )
+dfBB$block_number <- seq(1, nrow(dfBB))
+dfBB <- dfBB %>% select(chr, start, stop, block_number)
+
+fwrite(dfBB,"~/polygenic_selection_stratification/data/LD_Blocks/big_blocks.bed", row.names = F, col.names = T, quote = F, sep = "\t")
+```
+
+
+
 

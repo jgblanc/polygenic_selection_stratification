@@ -76,68 +76,53 @@ se <- sqrt(varD)
 pval <- pnorm(abs(D -expD) ,mean =0, sd = se, lower.tail = FALSE)
 
 
-
-# Compute LOCO
-#nblocks <- ncol(data)
+# Compute SE for entries of FGr - Mair Notes
 #allFGrs <- matrix(NA, nrow = nrow(data), ncol = nblocks)
-#allDs <- rep(NA, nblocks)
 #for (i in 1:nblocks) {
-
-#  print(paste0("block num ",i))
-  # Drop ith  column
-#  loco <- data[,-i]
-
-  # Drop block nsnps
-#  block_snps <- snp_nums[i, 2]
-#  locoL <- as.integer(L - block_snps)
-#  print(locoL)
-
-  # Compute loco FGR
-#  FGr_loco <- apply(loco, 1, sum,na.rm=TRUE) * (1/locoL) # Fix to get SNPs without block
-#  allFGrs[,i] <- FGr_loco
-
-  # Compute Loco D
-#  D_loco <- t(FGr_loco) %*% FGr_loco * (locoL^2) # Fix to get SNPs without block
-#  allDs[i] <- D_loco
+#
+#  mi <- as.numeric(snp_nums[i, 2])
+#  FGri <- data[,i] * (1/mi)
+#  allFGrs[,i] <- (mi / (L - mi)) * (FGri - FGr_hat)^2
 
 #}
-# Calculate variance of D
-#varD <-  ((nblocks -1)/nblocks) * sum((allDs - mean(allDs, na.rm=TRUE))^2)
-
-# Test D for significance
-#pval <- pnorm(abs(D -expD) ,mean =0, sd = sqrt(varD), lower.tail = FALSE) * 2
-
-# Compute SE for entries of FGr
-allFGrs <- matrix(NA, nrow = nrow(data), ncol = nblocks)
-for (i in 1:nblocks) {
-
-  mi <- as.numeric(snp_nums[i, 2])
-  FGri <- data[,i] * (1/mi)
-  allFGrs[,i] <- (mi / (L - mi)) * (FGri - FGr_hat)^2
-
-}
-allSigma2 <- rowMeans(allFGrs)
-jkVar <- mean(allSigma2)
-
-# Find Error
-varFGr <- var(FGr_hat, na.rm = TRUE)
-error <- jkVar / varFGr
-
-
-# Calculate variance of all entries of FGr
-#Fbar <- apply(allFGrs, 1, mean)
-#sigmas <- rep(0, nrow(data))
-#for (i in 1:nrow(data)) {
-
-#  sigmas[i] <- ((nblocks - 1)/nblocks) * sum((allFGrs[i,] - Fbar[i])^2)
-
-#}
-#jkVar <- mean(sigmas, na.rm = TRUE)
-
+#allSigma2 <- rowMeans(allFGrs)
+#jkVar <- mean(allSigma2)
 
 # Find Error
 #varFGr <- var(FGr_hat, na.rm = TRUE)
 #error <- jkVar / varFGr
+
+# Comput SE for entries of FGr - Patterson notes
+
+## Get jackknife estimate of FGr
+weighted_FGrsLOCO <- matrix(NA, nrow = nrow(data), ncol = nblocks)
+for (i in 1:nblocks) {
+  print(i)
+  mi <- as.numeric(snp_nums[i, 2])
+  weighted_FGrsLOCO <- ((L - mi) / L) * (apply(data[,-i], 1, sum) * (1/(L- mi)))
+
+}
+thetaJ <- (nblocks * FGr_hat) - rowSums(weighted_FGrsLOCO)
+
+## Get jackknife estimate of se
+tau <- matrix(NA, nrow = nrow(data), ncol = nblocks)
+for (i in 1:nblocks) {
+  mi <- as.numeric(snp_nums[i, 2])
+  hi <- (L / mi)
+  tau[,i] <- (hi * FGr_hat) - ((hi - 1) * (apply(data[,-i], 1, sum) * (1/(L- mi))))
+}
+tmp <- matrix(NA, nrow = nrow(data), ncol = nblocks)
+for (i in 1:nblocks) {
+  mi <- as.numeric(snp_nums[i, 2])
+  hi <- (L / mi)
+  tmp[i] <- (tau[,i] - thetaJ)^2  / (hi - 1)
+}
+allSigma2 <- rowMeans(tmp)
+jkVar <- mean(allSigma2)
+
+# Find Error
+varFGr <- var(thetaJ)
+error <- jkVar / varFGr
 
 # Final signal
 signal <- 1 - error
