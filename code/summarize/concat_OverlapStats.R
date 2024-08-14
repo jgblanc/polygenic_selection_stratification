@@ -30,7 +30,10 @@ for (i in 2:length(args)) {
 
   # Extract constrasts
   tmp <- strsplit(filename, "/")[[1]][6]
-  constrasts <- strsplit(tmp, ".txt")[[1]][1]
+  constrasts <- strsplit(tmp, "_")[[1]][1]
+
+  # Extract L
+  nsnp <- strsplit(strsplit(tmp, "-")[[1]][1], ".txt")[[1]][1]
 
   # Read in results
   df <- fread(filename)
@@ -38,7 +41,8 @@ for (i in 2:length(args)) {
   df$dataset <- dataset
   df$gwas <- gwas
   df$contrasts <- constrasts
-  colnames(dfOut) <- c(names_from_file, "dataset", "gwas", "contrasts")
+  df$L <- nsnp
+  colnames(dfOut) <- c(names_from_file, "dataset", "gwas", "contrasts", "L")
   dfOut <- rbind(dfOut, df)
 
 

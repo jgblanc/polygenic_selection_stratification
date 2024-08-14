@@ -14,7 +14,7 @@ NSNP = ["L-1000" ,"L-3162", "L-10000","L-31623",  "L-100000","L-316228", "L-1000
 
 rule all:
     input:
-        expand("data/{dataset}/pruned_snps/{gwas}/{contrasts}/{nsnp}/all_snps.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST, nsnp=NSNP),
+        expand("endpoints/{dataset}/OverlapStats_L.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST, nsnp=NSNP),
 
 
 # Downsample SNPs used to compute corrections
@@ -59,13 +59,13 @@ rule downsample_snps:
 rule get_dosage_file:
     input:
         gwas="data/{dataset}/ids/gwas_ids/{gwas}.txt",
-        snps="data/{dataset}/variants/{gwas}/{contrasts}/overlappingSNPs_chr{chr}.txt",
+        snps="data/{dataset}/pruned_snps/{gwas}/{contrasts}/{nsnp}/all_snps.txt",
         gp_genos="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen"
     output:
-        temp("/scratch/jgblanc/stratification-data_analysis/data/{dataset}/{gwas}/{contrasts}/dosages/dosages_{chr}.traw")
+        temp("/scratch/jgblanc/stratification-data_analysis/data/{dataset}/{gwas}/{contrasts}/{nsnp}/dosages/dosages_{chr}.traw")
     params:
         prefix_in="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
-        prefix_out="/scratch/jgblanc/stratification-data_analysis/data/{dataset}/{gwas}/{contrasts}/dosages/dosages_{chr}"
+        prefix_out="/scratch/jgblanc/stratification-data_analysis/data/{dataset}/{gwas}/{contrasts}/{nsnp}/dosages/dosages_{chr}"
     resources:
         mem_mb=38000,
         time="00:30:00"
@@ -82,9 +82,9 @@ rule get_dosage_file:
 
 rule calculate_GWAS_variance:
     input:
-        "/scratch/jgblanc/stratification-data_analysis/data/{dataset}/{gwas}/{contrasts}/dosages/dosages_{chr}.traw"
+        "/scratch/jgblanc/stratification-data_analysis/data/{dataset}/{gwas}/{contrasts}/{nsnp}/dosages/dosages_{chr}.traw"
     output:
-        "data/{dataset}/gwas_variance/{gwas}/{contrasts}/variance_{chr}.txt"
+        "data/{dataset}/gwas_variance/{gwas}/{contrasts}/{nsnp}/variance_{chr}.txt"
     resources:
 	      time="24:00:00",
 	      mem_mb=100000,
@@ -98,12 +98,12 @@ rule calculate_GWAS_variance:
 rule standardize_r:
     input:
         r=expand("data/{{dataset}}/r/{{gwas}}/{{contrasts}}_chr{chr}.rvec", chr=CHR),
-        variance=expand("data/{{dataset}}/gwas_variance/{{gwas}}/{{contrasts}}/variance_{chr}.txt", chr=CHR)
+        variance=expand("data/{{dataset}}/gwas_variance/{{gwas}}/{{contrasts}}/{{nsnp}}/variance_{chr}.txt", chr=CHR)
     output:
-        "data/{dataset}/r/{gwas}/{contrasts}_all_standardized.rvec"
+        "data/{dataset}/r/{gwas}/{nsnp}/{contrasts}_{nsnp}_all_standardized.rvec"
     params:
-        variance_prefix="data/{dataset}/gwas_variance/{gwas}/{contrasts}/variance_",
-        r_prefix="data/{dataset}/r/{gwas}/{contrasts}_chr",
+        variance_prefix="data/{dataset}/gwas_variance/{gwas}/{contrasts}/{nsnp}/variance_",
+        r_prefix="data/{dataset}/r/{gwas}/{contrasts}_{nsnp}_chr",
     shell:
         """
         Rscript code/calculate_FGr/standardize_r.R {params.r_prefix} {params.variance_prefix} {output}
@@ -113,22 +113,22 @@ rule standardize_r:
 
 rule compute_FGr_block:
     input:
-        r="data/{dataset}/r/{gwas}/{contrasts}_all_standardized.rvec",
+        r="data/{dataset}/r/{gwas}/{contrasts}_nsnp_all_standardized.rvec",
         gp_genos="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen",
-        overlap_snps="data/{dataset}/variants/{gwas}/{contrasts}/overlappingSNPs_chr{chr}.txt",
+        overlap_snps="data/{dataset}/pruned_snps/{gwas}/{contrasts}/{nsnp}/all_snps.txt",
         ldBlocks="data/LD_blocks/big_blocks.bed",
         ids="data/{dataset}/ids/gwas_ids/{gwas}.txt"
     output:
-        FGr="output/calculate_FGr/{dataset}/blocks/{gwas}/FGr_{contrasts}_{chr}.txt",
-        snps="output/calculate_FGr/{dataset}/blocks/{gwas}/{contrasts}_{chr}_SNPcount.txt",
-        scoring_weights="output/calculate_FGr/{dataset}/blocks/{gwas}/{contrasts}_{chr}_scoringWeights.txt"
+        FGr="output/calculate_FGr/{dataset}/blocks/{gwas}/FGr_{contrasts}_{nsnp}_{chr}.txt",
+        snps="output/calculate_FGr/{dataset}/blocks/{gwas}/{contrasts}_{nsnp}_{chr}_SNPcount.txt",
+        scoring_weights="output/calculate_FGr/{dataset}/blocks/{gwas}/{contrasts}_{nsnp}_{chr}_scoringWeights.txt"
     threads: 16
     resources:
         mem_mb=38000,
 	time="06:00:00"
     params:
         gp_prefix="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
-        out_prefix="output/calculate_FGr/{dataset}/blocks/{gwas}/{contrasts}_{chr}",
+        out_prefix="output/calculate_FGr/{dataset}/blocks/{gwas}/{contrasts}_{nsnp}_{chr}",
     shell:
         """
         Rscript code/calculate_FGr/calc_FGr_block.R {params.gp_prefix} {params.out_prefix} {input.r} {input.overlap_snps} {input.ldBlocks} {output.FGr} {output.snps} {input.ids} {wildcards.chr}
@@ -138,17 +138,17 @@ rule compute_FGr_block:
 
 rule compute_FGr_error:
     input:
-        FGr=expand("output/calculate_FGr/{{dataset}}/blocks/{{gwas}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR),
-        SNP_Counts=expand("output/calculate_FGr/{{dataset}}/blocks/{{gwas}}/{{contrasts}}_{chr}_SNPcount.txt", chr=CHR)
+        FGr=expand("output/calculate_FGr/{{dataset}}/blocks/{{gwas}}/FGr_{{contrasts}}_{{nsnp}}_{chr}.txt", chr = CHR),
+        SNP_Counts=expand("output/calculate_FGr/{{dataset}}/blocks/{{gwas}}/{{contrasts}}_{{nsnp}}_{chr}_SNPcount.txt", chr=CHR)
     output:
-      "output/calculate_FGr/{dataset}/overlap_stats/{gwas}/{contrasts}.txt"
+      "output/calculate_FGr/{dataset}/overlap_stats/{gwas}/{contrasts}_{nsnp}.txt"
     threads: 16
     resources:
         mem_mb=100000,
         time="24:00:00"
     params:
-      prefix_in="output/calculate_FGr/{dataset}/blocks/{gwas}/FGr_{contrasts}",
-      SNP_prefix="output/calculate_FGr/{dataset}/blocks/{gwas}/{contrasts}"
+      prefix_in="output/calculate_FGr/{dataset}/blocks/{gwas}/FGr_{contrasts}_{nsnp}",
+      SNP_prefix="output/calculate_FGr/{dataset}/blocks/{gwas}/{contrasts}_{nsnp}"
     shell:
       """
       Rscript code/calculate_FGr/compute_error_jacknife_blocks.R {params.prefix_in} {output} {params.SNP_prefix}
@@ -234,9 +234,9 @@ rule compute_PC_FGr:
 
 rule concat_overlap_stats:
     input:
-        expand("output/calculate_FGr/{{dataset}}/overlap_stats/{gwas}/{contrasts}.txt", gwas=GWAS, contrasts = CONTRASTS)
+        expand("output/calculate_FGr/{{dataset}}/overlap_stats/{gwas}/{contrasts}_{nsnp}.txt", gwas=GWAS, contrasts = CONTRASTS, nsnp=NSNP)
     output:
-        "endpoints/{dataset}/OverlapStats_patterson.txt"
+        "endpoints/{dataset}/OverlapStats_L.txt"
     shell:
         """
         Rscript code/summarize/concat_OverlapStats.R {output} {input}
