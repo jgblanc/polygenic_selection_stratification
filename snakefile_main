@@ -13,7 +13,7 @@ CHRTYPE_TEST = ["test-odd", "test-all"]
 
 rule all:
     input:
-        expand(""endpoints/{dataset}/OverlapStats_patterson.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST),
+        expand("endpoints/{dataset}/OverlapStats_patterson.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST),
 
 
 # Get sample variance of GWAS panel genotypes

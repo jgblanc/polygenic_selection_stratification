@@ -99,7 +99,7 @@ weighted_FGrsLOCO <- matrix(NA, nrow = nrow(data), ncol = nblocks)
 for (i in 1:nblocks) {
   print(i)
   mi <- as.numeric(snp_nums[i, 2])
-  weighted_FGrsLOCO <- ((L - mi) / L) * (apply(data[,-i], 1, sum) * (1/(L- mi)))
+  weighted_FGrsLOCO[,i] <- ((L - mi) / L) * (apply(data[,-i], 1, sum) * (1/(L- mi)))
 
 }
 thetaJ <- (nblocks * FGr_hat) - rowSums(weighted_FGrsLOCO)
@@ -115,7 +115,7 @@ tmp <- matrix(NA, nrow = nrow(data), ncol = nblocks)
 for (i in 1:nblocks) {
   mi <- as.numeric(snp_nums[i, 2])
   hi <- (L / mi)
-  tmp[i] <- (tau[,i] - thetaJ)^2  / (hi - 1)
+  tmp[,i] <- (tau[,i] - thetaJ)^2  / (hi - 1)
 }
 allSigma2 <- rowMeans(tmp)
 jkVar <- mean(allSigma2)
