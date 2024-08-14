@@ -9,11 +9,47 @@ GWAS=["complete", "half", "quarter", "threequarter", "none"]
 #CONTRASTS = ["eas-sas"]
 CHRTYPE_GWAS = ["chr-even", "chr-all"]
 CHRTYPE_TEST = ["test-odd", "test-all"]
+NSNP = ["L-1000" ,"L-3162", "L-10000","L-31623",  "L-100000","L-316228", "L-1000000"]
 
 
 rule all:
     input:
-        expand("endpoints/{dataset}/OverlapStats_patterson.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST),
+        expand("data/{dataset}/pruned_snps/{gwas}/{contrasts}/{nsnp}/all_snps.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST, nsnp=NSNP),
+
+
+# Downsample SNPs used to compute corrections
+
+rule prune_SNPs:
+    input:
+        gp_genos="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen",
+        IDs="data/{dataset}/ids/gwas_ids/{gwas}.txt",
+        snps="data/{dataset}/variants/{gwas}/{contrasts}/overlappingSNPs_chr{chr}.txt"
+    output:
+        "data/{dataset}/pruned_snps/{gwas}/{contrasts}/pruned_{chr}.prune.in"
+    resources:
+        time="06:00:00"
+    params:
+        prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
+        prefix_out = "data/{dataset}/pruned_snps/{gwas}/{contrasts}/pruned_{chr}"
+    shell:
+        """
+        plink2 --pfile {params.prefix_plink} \
+        --keep {input.IDs} \
+        --extract {input.snps} \
+        --indep-pairwise 100kb 0.8 \
+        --out {params.prefix_out}
+        """
+
+rule downsample_snps:
+    input:
+        expand("data/{{dataset}}/pruned_snps/{{gwas}}/{{contrasts}}/pruned_{chr}.prune.in", chr = CHR, newline="\n")
+    output:
+        all = "data/{dataset}/pruned_snps/{gwas}/{contrasts}/all.in",
+        sample = "data/{dataset}/pruned_snps/{gwas}/{contrasts}/{nsnp}/all_snps.txt"
+    shell:
+        """
+        Rscript code/calculate_FGr/sample_snps.R {output.all} {output.sample} {wildcards.nsnp} {input}
+        """
 
 
 # Get sample variance of GWAS panel genotypes

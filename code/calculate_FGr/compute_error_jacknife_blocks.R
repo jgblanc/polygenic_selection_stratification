@@ -77,20 +77,20 @@ pval <- pnorm(abs(D -expD) ,mean =0, sd = se, lower.tail = FALSE)
 
 
 # Compute SE for entries of FGr - Mair Notes
-#allFGrs <- matrix(NA, nrow = nrow(data), ncol = nblocks)
-#for (i in 1:nblocks) {
-#
-#  mi <- as.numeric(snp_nums[i, 2])
-#  FGri <- data[,i] * (1/mi)
-#  allFGrs[,i] <- (mi / (L - mi)) * (FGri - FGr_hat)^2
+allFGrs <- matrix(NA, nrow = nrow(data), ncol = nblocks)
+for (i in 1:nblocks) {
 
-#}
-#allSigma2 <- rowMeans(allFGrs)
-#jkVar <- mean(allSigma2)
+  mi <- as.numeric(snp_nums[i, 2])
+  FGri <- data[,i] * (1/mi)
+  allFGrs[,i] <- (mi / (L - mi)) * (FGri - FGr_hat)^2
+
+}
+allSigma2 <- rowMeans(allFGrs)
+jkVar <- mean(allSigma2)
 
 # Find Error
-#varFGr <- var(FGr_hat, na.rm = TRUE)
-#error <- jkVar / varFGr
+varFGr <- var(FGr_hat, na.rm = TRUE, )
+error <- jkVar / varFGr
 
 # Comput SE for entries of FGr - Patterson notes
 
@@ -107,12 +107,14 @@ thetaJ <- (nblocks * FGr_hat) - rowSums(weighted_FGrsLOCO)
 ## Get jackknife estimate of se
 tau <- matrix(NA, nrow = nrow(data), ncol = nblocks)
 for (i in 1:nblocks) {
+  print(i)
   mi <- as.numeric(snp_nums[i, 2])
   hi <- (L / mi)
-  tau[,i] <- (hi * FGr_hat) - ((hi - 1) * (apply(data[,-i], 1, sum) * (1/(L- mi))))
+  tau[,i] <- (hi * FGr_hat) - ((hi - 1) * (apply(data[,-i], 1, sum) * (1/(L-mi))))
 }
 tmp <- matrix(NA, nrow = nrow(data), ncol = nblocks)
 for (i in 1:nblocks) {
+  print(i)
   mi <- as.numeric(snp_nums[i, 2])
   hi <- (L / mi)
   tmp[,i] <- (tau[,i] - thetaJ)^2  / (hi - 1)
