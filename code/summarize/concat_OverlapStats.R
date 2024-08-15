@@ -13,7 +13,7 @@ suppressWarnings(suppressMessages({
 
 outfile = args[1]
 
-dfOut <- matrix(NA, nrow = 1, ncol = 14)
+dfOut <- matrix(NA, nrow = 1, ncol = 15)
 
 for (i in 2:length(args)) {
 
@@ -33,7 +33,7 @@ for (i in 2:length(args)) {
   constrasts <- strsplit(tmp, "_")[[1]][1]
 
   # Extract L
-  nsnp <- strsplit(strsplit(tmp, "-")[[1]][1], ".txt")[[1]][1]
+  nsnp <- strsplit(strsplit(tmp, "L-")[[1]][2], ".txt")[[1]][1]
 
   # Read in results
   df <- fread(filename)

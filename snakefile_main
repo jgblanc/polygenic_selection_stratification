@@ -100,10 +100,10 @@ rule standardize_r:
         r=expand("data/{{dataset}}/r/{{gwas}}/{{contrasts}}_chr{chr}.rvec", chr=CHR),
         variance=expand("data/{{dataset}}/gwas_variance/{{gwas}}/{{contrasts}}/{{nsnp}}/variance_{chr}.txt", chr=CHR)
     output:
-        "data/{dataset}/r/{gwas}/{nsnp}/{contrasts}_{nsnp}_all_standardized.rvec"
+        "data/{dataset}/r/{gwas}/{contrasts}_{nsnp}_all_standardized.rvec"
     params:
         variance_prefix="data/{dataset}/gwas_variance/{gwas}/{contrasts}/{nsnp}/variance_",
-        r_prefix="data/{dataset}/r/{gwas}/{contrasts}_{nsnp}_chr",
+        r_prefix="data/{dataset}/r/{gwas}/{contrasts}_chr",
     shell:
         """
         Rscript code/calculate_FGr/standardize_r.R {params.r_prefix} {params.variance_prefix} {output}
@@ -113,7 +113,7 @@ rule standardize_r:
 
 rule compute_FGr_block:
     input:
-        r="data/{dataset}/r/{gwas}/{contrasts}_nsnp_all_standardized.rvec",
+        r="data/{dataset}/r/{gwas}/{contrasts}_{nsnp}_all_standardized.rvec",
         gp_genos="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen",
         overlap_snps="data/{dataset}/pruned_snps/{gwas}/{contrasts}/{nsnp}/all_snps.txt",
         ldBlocks="data/LD_blocks/big_blocks.bed",
