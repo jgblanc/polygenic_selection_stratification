@@ -21,6 +21,7 @@ data/ukbb/variants/*
 data/HGDP1KG/variants-fliped/*
 data/HGDP1KG/plink2-files/*
 data/*/pruned_snps/*
+data/HGDP/*
 output/*
 logs/*
 .snakemake/

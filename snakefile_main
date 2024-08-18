@@ -1,20 +1,20 @@
 # Snakefile to run the main pipeline for any dataset
-DATASET = ["TestExample"]
+DATASET = ["HGDP"]
 CHR =[]
 for i in range(1, 23):
   CHR.append(str(i))
-CONTRASTS = ["Afr-Eur"]
-GWAS=["complete", "half", "quarter", "threequarter", "none"]
-#GWAS= ["q1"]
+CONTRASTS = ["AFRICA-EUROPE", "Lat", "Long"]
+#GWAS=["complete", "half", "quarter", "threequarter", "none"]
+GWAS= ["q1", "q2", "q3", "q4"]
 #CONTRASTS = ["eas-sas"]
 CHRTYPE_GWAS = ["chr-even", "chr-all"]
 CHRTYPE_TEST = ["test-odd", "test-all"]
-NSNP = ["L-1000" ,"L-3162", "L-10000","L-31623",  "L-100000","L-316228", "L-1000000"]
-
+NSNP = ["L-1000" ,"L-3162", "L-10000","L-31623",  "L-100000","L-316228", "L-1000000", "L-pruneall", "L-all"]
+#NSNP = ["L-1000000", "L-pruneall", "L-all"] 
 
 rule all:
     input:
-        expand("endpoints/{dataset}/OverlapStats_L.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST, nsnp=NSNP),
+        expand("endpoints/{dataset}/OverlapStats.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST, nsnp=NSNP),
 
 
 # Downsample SNPs used to compute corrections
@@ -43,13 +43,14 @@ rule prune_SNPs:
 
 rule downsample_snps:
     input:
-        expand("data/{{dataset}}/pruned_snps/{{gwas}}/{{contrasts}}/pruned_{chr}.prune.in", chr = CHR)
+        snps=expand("data/{{dataset}}/pruned_snps/{{gwas}}/{{contrasts}}/pruned_{chr}.prune.in", chr = CHR),
+	overlap=expand("data/{{dataset}}/variants/{{gwas}}/{{contrasts}}/overlappingSNPs_chr{chr}.txt", chr = CHR)
     output:
         all = "data/{dataset}/pruned_snps/{gwas}/{contrasts}/{nsnp}/all.in",
         sample = "data/{dataset}/pruned_snps/{gwas}/{contrasts}/{nsnp}/all_snps.txt"
     shell:
         """
-        Rscript code/calculate_FGr/sample_snps.R {output.all} {output.sample} {wildcards.nsnp} {input}
+        Rscript code/calculate_FGr/sample_snps.R {output.all} {output.sample} {wildcards.nsnp} {input.snps} {input.overlap}
         """
 
 
@@ -236,7 +237,7 @@ rule concat_overlap_stats:
     input:
         expand("output/calculate_FGr/{{dataset}}/overlap_stats/{gwas}/{contrasts}_{nsnp}.txt", gwas=GWAS, contrasts = CONTRASTS, nsnp=NSNP)
     output:
-        "endpoints/{dataset}/OverlapStats_L.txt"
+        "endpoints/{dataset}/OverlapStats.txt"
     shell:
         """
         Rscript code/summarize/concat_OverlapStats.R {output} {input}
