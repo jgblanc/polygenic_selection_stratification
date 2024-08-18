@@ -118,13 +118,22 @@ p
 
 Load data and process 
 ```{r}
-dfOverlap <- fread("../endpoints/TestExample/OverlapStats_bigblocks.txt")
+dfOverlap <- fread("../endpoints/TestExample/OverlapStats_L.txt")
 dfOverlap <- dfOverlap %>% mutate(prop_eur  = case_when(gwas == "complete" ~ 0.5, 
                                                         gwas == "none" ~ 1, 
                                                         gwas == "half" ~ 0.75,
                                                         gwas == "quarter" ~ 0.875,
                                                         gwas == "threequarter" ~ 0.625)) 
 ```
+
+```{r}
+ggplot(dfOverlap, aes(x= L, y = error, color = prop_eur)) + geom_point() + scale_x_log10()
+```
+
+
+
+
+
 
 **Overlap vs proportion of variance explained** 
 ```{r}
