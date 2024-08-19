@@ -13,7 +13,7 @@ suppressWarnings(suppressMessages({
 
 outfile = args[1]
 
-dfOut <- matrix(NA, nrow = 1, ncol = 11)
+dfOut <- matrix(NA, nrow = 1, ncol = 12)
 
 for (i in 2:length(args)) {
 
@@ -37,25 +37,29 @@ for (i in 2:length(args)) {
   test_type <- strsplit(tmp, "-")[[1]][2]
 
   # Extract contrasts
-  tmp <- strsplit(strsplit(filename, "/")[[1]][6], "_")[[1]][3]
-  contrasts <- strsplit(tmp, ".txt")[[1]][1]
+  contrasts <- strsplit(strsplit(filename, "/")[[1]][6], "_")[[1]][3]
+
+  # Extract contrasts
+  tmp <- strsplit(strsplit(filename, "/")[[1]][6], "_")[[1]][4]
+  nsnp <- strsplit(strsplit(tmp, "L-")[[1]][2], ".txt")[[1]][1]
 
   # Read in results
   df <- fread(filename)[,1:6]
   names_from_file <- colnames(df)
-  colnames(dfOut) <- c(names_from_file,"dataset", "gwas", "contrasts", "gwas_type", "test_type")
+  colnames(dfOut) <- c(names_from_file,"dataset", "gwas", "contrasts", "gwas_type", "test_type", "L")
   df$dataset <- dataset
   df$gwas <- gwas
   df$contrasts <- contrasts
   df$gwas_type <- gwas_type
   df$test_type <- test_type
+  df$L <- nsnp
   dfOut <- rbind(dfOut, df)
 
 }
 
 # Remove first row
 dfOut <- as.data.frame(dfOut[2:nrow(dfOut),])
-colnames(dfOut) <- c(names_from_file,"dataset", "gwas", "contrasts", "gwas_type", "test_type")
+colnames(dfOut) <- c(names_from_file,"dataset", "gwas", "contrasts", "gwas_type", "test_type", "L")
 
 # Save file
 print(dfOut)
