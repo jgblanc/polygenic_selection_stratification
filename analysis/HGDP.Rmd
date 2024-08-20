@@ -1,0 +1,100 @@
+---
+title: "HGDP"
+author: "Jennifer Blanc"
+date: "2024-08-19"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(data.table)
+library(tidyverse)
+library(ggpubr)
+library(latex2exp)
+```
+
+### Overlap statistics
+
+Load data and format
+```{r}
+dfOverlap <- fread("../endpoints/HGDP/OverlapStats.txt")
+dfOverlap$L <- factor(dfOverlap$L, levels = c("1000", "3162", "10000", "31623", "100000", "316228",   "1000000","pruneall", "all"))
+```
+
+**Error vs L**
+```{r}
+AE <- dfOverlap %>% filter(contrasts == "AFRICA-EUROPE") %>% group_by(gwas) %>% mutate(min_error = ifelse(error == min(error), "min_error", "other")) %>% ggplot(aes(x = L, y = error, color = gwas, shape = min_error)) + geom_point(size = 3) + scale_shape_manual(values = c("min_error" = 17, "other" = 16)) + theme_bw()+ ylim(0,1.1) + theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(angle = 45, hjust = 1)) + ggtitle("Africa-Europe")
+AE
+
+Lat <- dfOverlap %>% filter(contrasts == "Lat") %>% group_by(gwas) %>% mutate(min_error = ifelse(error == min(error), "min_error", "other")) %>% ggplot(aes(x = L, y = error, color = gwas, shape = min_error)) + geom_point(size = 3) + scale_shape_manual(values = c("min_error" = 17, "other" = 16)) + theme_bw()+ ylim(0,1.1) + theme(plot.title = element_text(hjust = 0.5),  axis.text.x = element_text(angle = 45, hjust = 1)) + ggtitle("Latitude")
+Lat 
+
+Long <- dfOverlap %>% filter(contrasts == "Long") %>% group_by(gwas) %>% mutate(min_error = ifelse(error == min(error), "min_error", "other")) %>% ggplot(aes(x = L, y = error, color = gwas, shape = min_error)) + geom_point(size = 3) + scale_shape_manual(values = c("min_error" = 17, "other" = 16)) + theme_bw()+ ylim(0,1.1) + theme(plot.title = element_text(hjust = 0.5),  axis.text.x = element_text(angle = 45, hjust = 1)) + ggtitle("Longitude")
+Long
+
+p <- ggarrange(AE, Lat, Long, nrow = 1, common.legend = T)
+p
+```
+
+**Z vs L**
+```{r}
+AE <- dfOverlap %>% filter(contrasts == "AFRICA-EUROPE")  %>% ggplot(aes(x = L, y = Z, color = gwas)) + geom_point(size = 3) + theme_bw() + theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(angle = 45, hjust = 1)) + ggtitle("Africa-Europe")
+AE
+
+Lat <- dfOverlap %>% filter(contrasts == "Lat")  %>% ggplot(aes(x = L, y = Z, color = gwas)) + geom_point(size = 3) + theme_bw() + theme(plot.title = element_text(hjust = 0.5),  axis.text.x = element_text(angle = 45, hjust = 1)) + ggtitle("Latitude")
+Lat
+
+Long <- dfOverlap %>% filter(contrasts == "Long")  %>% ggplot(aes(x = L, y = Z, color = gwas)) + geom_point(size = 3) + theme_bw() + theme(plot.title = element_text(hjust = 0.5),  axis.text.x = element_text(angle = 45, hjust = 1)) + ggtitle("Longitude")
+Long
+
+
+p <- ggarrange(AE, Lat, Long, nrow = 1, common.legend = T)
+p
+```
+
+```{r}
+dfOverlap %>% filter(L == "pruneall") %>% ggplot(aes(x = Z, y = error, color = gwas)) + geom_point(size = 3) + theme_bw() + scale_x_log10() + scale_y_log10()
+```
+
+```{r}
+dfOverlap %>% filter(contrasts == "AFRICA-EUROPE")  %>% ggplot(aes(x = L, y = D, color = gwas)) + geom_point(size = 3) + theme_bw() + theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(angle = 45, hjust = 1)) + ggtitle("Africa-Europe")
+```
+
+
+### PC statistics
+
+Load and format results
+```{r}
+dfPC <- fread("../endpoints/HGDP/PCStats.txt")
+```
+
+**Cumulative variance explained** 
+
+```{r}
+dfFilter <- dfOverlap %>% filter(contrasts == "AFRICA-EUROPE" & L == "pruneall") %>% mutate(gwas_sample = gwas)
+AE <- dfPC %>% filter(gwas_type == "even" & test_type == "odd" & contrasts == "AFRICA-EUROPE" & L == "pruneall") %>% ggplot(aes(x = PC, y = r2)) + geom_bar(stat = "identity",color = "darkgreen",  fill = "darkgreen") + theme_bw(base_size = 12) + ylab(TeX("$R_{K}^2$")) + geom_hline(data = dfFilter, aes(yintercept = signal), color = "red", linetype = 2)  + facet_grid(~gwas) + ggtitle("AFRICA-EUROPE") + theme(plot.title = element_text(hjust = 0.5)) + ylim(c(0,1.05))
+AE
+
+dfFilter <- dfOverlap %>% filter(contrasts == "Lat" & L == "pruneall") %>% mutate(gwas_sample = gwas)
+Lat <- dfPC %>% filter(gwas_type == "even" & test_type == "odd" & contrasts == "Lat" & L == "pruneall") %>% ggplot(aes(x = PC, y = r2)) + geom_bar(stat = "identity",color = "darkgreen",  fill = "darkgreen") + theme_bw(base_size = 12) + ylab(TeX("$R_{K}^2$")) + geom_hline(data = dfFilter, aes(yintercept = signal), color = "red", linetype = 2)  + facet_grid(~gwas) + ggtitle("Lat") + theme(plot.title = element_text(hjust = 0.5)) + ylim(c(0,1.05))
+Lat
+
+dfFilter <- dfOverlap %>% filter(contrasts == "Long" & L == "pruneall") %>% mutate(gwas_sample = gwas)
+Long <- dfPC %>% filter(gwas_type == "even" & test_type == "odd" & contrasts == "Long" & L == "pruneall") %>% ggplot(aes(x = PC, y = r2)) + geom_bar(stat = "identity",color = "darkgreen",  fill = "darkgreen") + theme_bw(base_size = 12) + ylab(TeX("$R_{K}^2$")) + geom_hline(data = dfFilter, aes(yintercept = signal), color = "red", linetype = 2)  + facet_grid(~gwas) + ggtitle("Long") + theme(plot.title = element_text(hjust = 0.5)) + ylim(c(0,1.05))
+Long
+```
+
+**Squared correlation between $PC_i$ between $\hat{F}_{Gr}$**
+```{r}
+AE <- dfPC %>% filter(gwas_type == "even" & test_type == "odd" & contrasts == "AFRICA-EUROPE" & L == "pruneall")%>% ggplot(aes(x = PC, y = B2)) + geom_bar(stat = "identity", color = "darkgreen", fill = "darkgreen") + facet_grid(~gwas) + theme_bw(base_size = 12) + ylab(TeX("$B_{i}^2$")) + ggtitle("Africa-Europe") + theme(plot.title = element_text(hjust = 0.5))
+AE
+
+Lat <- dfPC %>% filter(gwas_type == "even" & test_type == "odd" & contrasts == "Lat" & L == "pruneall")%>% ggplot(aes(x = PC, y = B2)) + geom_bar(stat = "identity", color = "darkgreen", fill = "darkgreen") + facet_grid(~gwas) + theme_bw(base_size = 12) + ylab(TeX("$B_{i}^2$")) + ggtitle("Lat") + theme(plot.title = element_text(hjust = 0.5))
+Lat
+
+Long <- dfPC %>% filter(gwas_type == "even" & test_type == "odd" & contrasts == "Long" & L == "pruneall")%>% ggplot(aes(x = PC, y = B2)) + geom_bar(stat = "identity", color = "darkgreen", fill = "darkgreen") + facet_grid(~gwas) + theme_bw(base_size = 12) + ylab(TeX("$B_{i}^2$")) + ggtitle("Long") + theme(plot.title = element_text(hjust = 0.5))
+Long
+
+
+```
+
