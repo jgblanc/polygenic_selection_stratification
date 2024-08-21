@@ -230,7 +230,7 @@ dfOverlap$gwas <- factor(dfOverlap$gwas, levels = c("ALL", "WBS", "q1", "q2", "q
 
 **GWAS type vs proportion of variance explained** 
 ```{r}
-dfOverlap %>% filter(contrasts == "eas-nfe") %>% ggplot(aes(x = gwas, y = Z, fill = gwas_type2)) + geom_bar(stat = "identity") + xlab("GWAS Type") + ylab("Proportion of variance explained (Z)") + theme_bw(base_size = 14) + scale_fill_manual(values = c("purple4", "lightseagreen"))  + guides(fill="none") + theme(plot.title = element_text(hjust = 0.5)) + ylim(0, 7e-5)
+dfOverlap %>% filter(contrasts == "ARFICA-EUROPE") %>% ggplot(aes(x = gwas, y = Z, fill = gwas_type2)) + geom_bar(stat = "identity") + xlab("GWAS Type") + ylab("Proportion of variance explained (Z)") + theme_bw(base_size = 14) + scale_fill_manual(values = c("purple4", "lightseagreen"))  + guides(fill="none") + theme(plot.title = element_text(hjust = 0.5)) + ylim(0, 7e-5)
 ```
 
 

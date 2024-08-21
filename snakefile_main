@@ -17,13 +17,50 @@ rule all:
         expand("endpoints/{dataset}/OverlapStats.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST, nsnp=NSNP),
         expand("endpoints/{dataset}/PCStats.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST, nsnp=NSNP)
 
+# Get sample variance of GWAS panel genotypes for all GWAS panels
+
+rule get_dosage_file:
+    input:
+        gwas="data/ids/gwas_ids/{gwas}.txt",
+        gp_genos="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen"
+    output:
+        temp("/scratch/jgblanc/polygenic_selection_stratification/data/{gwas}/dosages/dosages_{chr}.traw")
+    params:
+        prefix_in="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
+        prefix_out="/scratch/jgblanc/polygenic_selection_stratification/data/{gwas}/dosages/dosages_{chr}"
+    resources:
+        mem_mb=38000,
+        time="01:00:00"
+    shell:
+        """
+        plink2 --pfile {params.prefix_in} \
+        --keep {input.gwas} \
+        --recode A-transpose \
+	      --threads 8 \
+        --memory 38000 \
+        --out {params.prefix_out}
+        """
+
+rule calculate_GWAS_variance:
+    input:
+        "/scratch/jgblanc/polygenic_selection_stratification/data/{gwas}/dosages/dosages_{chr}.traw"
+    output:
+        "data/gwas_variance/{gwas}/variance_{chr}.txt"
+    resources:
+	      time="48:00:00",
+	      mem_mb=100000,
+    shell:
+        """
+        Rscript code/calculate_FGr/compute_GWAS_variance.R {input} {output}
+        """
+
 
 # Downsample SNPs used to compute corrections
 
 rule prune_SNPs:
     input:
         gp_genos="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen",
-        IDs="data/{dataset}/ids/gwas_ids/{gwas}.txt",
+        IDs="data/ids/gwas_ids/{gwas}.txt",
         snps="data/{dataset}/variants/{gwas}/{contrasts}/overlappingSNPs_chr{chr}.txt"
     output:
         "data/{dataset}/pruned_snps/{gwas}/{contrasts}/pruned_{chr}.prune.in"
@@ -54,46 +91,6 @@ rule downsample_snps:
         Rscript code/calculate_FGr/sample_snps.R {output.all} {output.sample} {wildcards.nsnp} {input.snps} {input.overlap}
         """
 
-
-
-# Get sample variance of GWAS panel genotypes
-
-rule get_dosage_file:
-    input:
-        gwas="data/{dataset}/ids/gwas_ids/{gwas}.txt",
-        snps="data/{dataset}/pruned_snps/{gwas}/{contrasts}/{nsnp}/all_snps.txt",
-        gp_genos="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen"
-    output:
-        temp("/scratch/jgblanc/stratification-data_analysis/data/{dataset}/{gwas}/{contrasts}/{nsnp}/dosages/dosages_{chr}.traw")
-    params:
-        prefix_in="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
-        prefix_out="/scratch/jgblanc/stratification-data_analysis/data/{dataset}/{gwas}/{contrasts}/{nsnp}/dosages/dosages_{chr}"
-    resources:
-        mem_mb=38000,
-        time="00:30:00"
-    shell:
-        """
-        plink2 --pfile {params.prefix_in} \
-        --extract {input.snps} \
-        --keep {input.gwas} \
-        --recode A-transpose \
-	      --threads 8 \
-        --memory 38000 \
-        --out {params.prefix_out}
-        """
-
-rule calculate_GWAS_variance:
-    input:
-        "/scratch/jgblanc/stratification-data_analysis/data/{dataset}/{gwas}/{contrasts}/{nsnp}/dosages/dosages_{chr}.traw"
-    output:
-        "data/{dataset}/gwas_variance/{gwas}/{contrasts}/{nsnp}/variance_{chr}.txt"
-    resources:
-	      time="24:00:00",
-	      mem_mb=100000,
-    shell:
-        """
-        Rscript code/calculate_FGr/compute_GWAS_variance.R {input} {output}
-        """
 
 # Standardize r to have length 1
 

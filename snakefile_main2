@@ -1,0 +1,48 @@
+# Snakefile to run the main pipeline for any dataset
+CHR =[]
+for i in range(1, 23):
+  CHR.append(str(i))
+GWAS=["complete", "half", "quarter", "threequarter", "none"]
+#GWAS= ["q1", "q2", "q3", "q4", "ALL", "WBS"]
+
+
+rule all:
+    input:
+        expand("data/gwas_variance/{gwas}/variance_{chr}.txt", gwas=GWAS)
+
+rule get_dosage_file:
+    input:
+        gwas="data/ids/gwas_ids/{gwas}.txt",
+        gp_genos="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen"
+    output:
+        temp("/scratch/jgblanc/polygenic_selection_stratification/data/{gwas}/dosages/dosages_{chr}.traw")
+    params:
+        prefix_in="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
+        prefix_out="/scratch/jgblanc/polygenic_selection_stratification/data/{gwas}/dosages/dosages_{chr}"
+    resources:
+        mem_mb=38000,
+        time="01:00:00"
+    shell:
+        """
+        plink2 --pfile {params.prefix_in} \
+        --keep {input.gwas} \
+        --recode A-transpose \
+	      --threads 8 \
+        --memory 38000 \
+        --out {params.prefix_out}
+        """
+
+rule calculate_GWAS_variance:
+    input:
+        "/scratch/jgblanc/polygenic_selection_stratification/data/{gwas}/dosages/dosages_{chr}.traw"
+    output:
+        "data/gwas_variance/{gwas}/variance_{chr}.txt"
+    resources:
+	      time="48:00:00",
+	      mem_mb=100000,
+    shell:
+        """
+        Rscript code/calculate_FGr/compute_GWAS_variance.R {input} {output}
+        """
+
+
