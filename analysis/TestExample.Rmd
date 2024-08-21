@@ -16,7 +16,7 @@ library(latex2exp)
 
 # Construct Test and GWAS panels 
 
-### Explore PCA of Whole Biobank
+## Explore PCA of Whole Biobank
 
 Plot PC1 vs PC2 colored by self-identified ethnic background
 ```{r, warning=FALSE, message=FALSE}
@@ -46,7 +46,7 @@ ggplot(data = tmp, aes(x = PC1, y = PC2, color = continental)) + geom_point() + 
 ```
 Most (though not all) self-identified African individuals fall on one side of PC1 while the self-identified Europeans are on the other side.  
 
-### Sample GWAS panel
+## Sample GWAS panel
 
 Make mixed panels with different amounts of overlap:  
 
@@ -89,6 +89,34 @@ tmpEur <- dfEur  %>% sample_n(6250) %>% mutate(POP = "Eur")
 dfGWAS <- rbind(tmpAfr, tmpEur) %>% select("#FID", "IID", "POP")
 #fwrite(dfGWAS,"../data/ids/gwas_ids/threequarter.txt", row.names = F, col.names = T, quote = F, sep = "\t")
 ```
+
+## Explore HGDP1KG data 
+
+```{r}
+# Read in data
+df <- fread("../data/HGDP1KG/gnomad_meta_updated.tsv", sep = "\t")
+
+# Select relevant columns (for now)
+dfFilter <- df %>% select("s","project_meta.project_subpop" , "latitude" ,  "longitude",
+                   "population",  "region", "project_meta.project_pop")
+colnames(dfFilter)[1] <- "IID"
+
+# Plot data by lat and long
+world_map <- map_data("world")
+ggplot() + geom_polygon(data = world_map, aes(x = long, y = lat, group = group), fill = "white", color = "black") + geom_point(data = dfFilter, aes(x = longitude, y = latitude, color = project_meta.project_pop), size = 2) +
+  theme_minimal(base_size = 14) + xlab("Longitude") + ylab("Latitude") +labs(colour="POP") + theme(legend.position = "bottom")
+```
+
+## Sample test panel
+
+Sample 600 inviduals from the "afr" and "nfe" populations
+```{r}
+set.seed(1212)
+dfTest <- dfFilter %>% filter(project_meta.project_pop == "afr" | project_meta.project_pop == "nfe") %>% mutate(POP = case_when(project_meta.project_pop == "afr" ~ "Afr", project_meta.project_pop == "nfe" ~ "Eur")) %>% select("IID", "POP") %>% group_by(POP) %>% sample_n(600) %>% ungroup()
+#fwrite(dfGWAS,"../data/TestExample/ids/test_ids/test.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+```
+
+
 
 # Results 
 

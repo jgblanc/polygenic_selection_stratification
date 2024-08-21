@@ -8,30 +8,10 @@ GWAS=["complete", "half", "quarter", "threequarter", "none"]
 
 rule all:
     input:
-        expand("data/TestExample/r/{gwas}/{contrasts}_chr{chr}.rvec", chr=CHR, gwas=GWAS, contrasts=CONTRASTS)
+        expand("data/TestExample/variantFreq/test_{chr}.afreq", chr=CHR, gwas=GWAS, contrasts=CONTRASTS)
+
 
 # Get allele frequencies
-
-rule get_AF_GWAS:
-    input:
-        gwas="data/TestExample/ids/gwas_ids/{gwas}.txt"
-    output:
-        gwas="data/TestExample/variantFreq/{gwas}_{chr}.afreq"
-    params:
-        prefix_in="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
-        prefix_out_gwas="data/TestExample/variantFreq/{gwas}_{chr}"
-    resources:
-        mem_mb=38000,
-        time="00:30:00"
-    shell:
-        """
-        plink2 --pfile {params.prefix_in} \
-        --freq \
-        --keep {input.gwas} \
-	      --threads 8 \
-        --memory 38000 \
-        --out {params.prefix_out_gwas}
-        """
 
 rule get_AF_Test:
     input:
@@ -39,7 +19,7 @@ rule get_AF_Test:
     output:
         test="data/TestExample/variantFreq/test_{chr}.afreq"
     params:
-        prefix_in="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
+        prefix_in="data/HGDP1KG/plink2-files/gnomad.genomes.v3.1.2.hgdp_tgp.chr{chr}",
         prefix_out_test="data/TestExample/variantFreq/test_{chr}"
     resources:
         mem_mb=38000,
