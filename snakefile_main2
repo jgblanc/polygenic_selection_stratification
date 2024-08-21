@@ -8,7 +8,7 @@ GWAS=["complete", "half", "quarter", "threequarter", "none"]
 
 rule all:
     input:
-        expand("data/gwas_variance/{gwas}/variance_{chr}.txt", gwas=GWAS)
+        expand("data/gwas_variance/{gwas}/variance_{chr}.txt", gwas=GWAS, chr=CHR)
 
 rule get_dosage_file:
     input:
