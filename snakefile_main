@@ -13,7 +13,7 @@ NSNP = ["L-1000" ,"L-3162", "L-10000","L-31623",  "L-100000","L-316228", "L-1000
 
 rule all:
     input:
-        expand("data/{dataset}/r/{gwas}/{nsnp}/{contrasts}_all_standardized.rvec", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST, nsnp=NSNP)
+        expand("output/calculate_FGr/{dataset}/blocks/{gwas}/{nsnp}/FGr_{contrasts}_{chr}.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST, nsnp=NSNP)
 
 # Get sample variance of GWAS panel genotypes for all GWAS panels
 
@@ -134,22 +134,22 @@ rule standardize_r:
 
 rule compute_FGr_block:
     input:
-        r="data/{dataset}/r/{gwas}/{contrasts}_{nsnp}_all_standardized.rvec",
+        r="data/{dataset}/r/{gwas}/{nsnp}/{contrasts}_all_standardized.rvec",
         gp_genos="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen",
-        overlap_snps="data/{dataset}/pruned_snps/{gwas}/{contrasts}/{nsnp}/all_snps.txt",
+        overlap_snps="data/{dataset}/pruned_snps/{gwas}/{contrasts}/{nsnp}.txt",
         ldBlocks="data/LD_blocks/big_blocks.bed",
-        ids="data/{dataset}/ids/gwas_ids/{gwas}.txt"
+        ids="data/ids/gwas_ids/{gwas}.txt"
     output:
-        FGr="output/calculate_FGr/{dataset}/blocks/{gwas}/FGr_{contrasts}_{nsnp}_{chr}.txt",
-        snps="output/calculate_FGr/{dataset}/blocks/{gwas}/{contrasts}_{nsnp}_{chr}_SNPcount.txt",
-        scoring_weights="output/calculate_FGr/{dataset}/blocks/{gwas}/{contrasts}_{nsnp}_{chr}_scoringWeights.txt"
+        FGr="output/calculate_FGr/{dataset}/blocks/{gwas}/{nsnp}/FGr_{contrasts}_{chr}.txt",
+        snps="output/calculate_FGr/{dataset}/blocks/{gwas}/{nsnp}/{contrasts}_{chr}_SNPcount.txt",
+        scoring_weights="output/calculate_FGr/{dataset}/blocks/{gwas}/{nsnp}/{contrasts}_{chr}_scoringWeights.txt"
     threads: 16
     resources:
         mem_mb=38000,
 	time="06:00:00"
     params:
         gp_prefix="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
-        out_prefix="output/calculate_FGr/{dataset}/blocks/{gwas}/{contrasts}_{nsnp}_{chr}",
+        out_prefix="output/calculate_FGr/{dataset}/blocks/{gwas}/{nsnp}/{contrasts}_{chr}",
     shell:
         """
         Rscript code/calculate_FGr/calc_FGr_block.R {params.gp_prefix} {params.out_prefix} {input.r} {input.overlap_snps} {input.ldBlocks} {output.FGr} {output.snps} {input.ids} {wildcards.chr}
