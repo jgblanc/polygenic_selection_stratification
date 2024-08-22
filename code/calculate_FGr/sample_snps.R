@@ -9,7 +9,7 @@ suppressWarnings(suppressMessages({
   library(dplyr)
 }))
 
-outAll = args[1]
+outSample = args[1]
 nsnp = strsplit(args[2], "L-")[[1]][2]
 
 if (nsnp == "all") {
@@ -19,14 +19,14 @@ if (nsnp == "all") {
        tmp <- fread(args[i], header=FALSE)
        df <- rbind(df, tmp)
        }
-   fwrite(df, outSample ,row.names=F,quote=F,sep="\t", col.names = T)
+   fwrite(df, outSample ,row.names=F,quote=F,sep="\t", col.names = F)
 } else if (nsnp == "pruneall") {
    df <- fread(args[3], header=FALSE)
    for (i in 4:24) {
        tmp <- fread(args[i], header=FALSE)
        df <- rbind(df, tmp)
        }
-   fwrite(df, outSample ,row.names=F,quote=F,sep="\t", col.names = T)
+   fwrite(df, outSample ,row.names=F,quote=F,sep="\t", col.names = F)
 } else {
   nsnp = as.numeric(nsnp)
   df <- fread(args[3], header=FALSE)
@@ -35,7 +35,7 @@ if (nsnp == "all") {
       df <- rbind(df, tmp)
       }
   df <- df %>% sample_n(nsnp)
-  fwrite(df, outSample ,row.names=F,quote=F,sep="\t", col.names = T)
+  fwrite(df, outSample ,row.names=F,quote=F,sep="\t", col.names = F)
 }
 
 

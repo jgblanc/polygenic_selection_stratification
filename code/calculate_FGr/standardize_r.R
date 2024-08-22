@@ -21,6 +21,7 @@ num_chr=22
 # Read in pruned SNPs
 psnps <- fread(snps, header = FALSE)
 colnames(psnps) <- "ID"
+print(head(psnps))
 
 # Read in all Rs
 r_file <- paste0(r_prefix, "1.rvec")
@@ -43,7 +44,7 @@ for (i in 2:num_chr) {
 
 # Join dataframes and standrdize everything
 df <- inner_join(r, dfVar)
-df <- inner_join(df, snps)
+df <- inner_join(df, psnps)
 df$r[is.na(df$r)] <- 0
 df$r <- df$r * (1/sqrt(df$Var))
 df$r <- df$r - mean(df$r)

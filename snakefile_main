@@ -13,7 +13,7 @@ NSNP = ["L-1000" ,"L-3162", "L-10000","L-31623",  "L-100000","L-316228", "L-1000
 
 rule all:
     input:
-        expand("data/{dataset}/pruned_snps/{gwas}/{contrasts}/{nsnp}.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST, nsnp=NSNP)
+        expand("data/{dataset}/r/{gwas}/{nsnp}/{contrasts}_all_standardized.rvec", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST, nsnp=NSNP)
 
 # Get sample variance of GWAS panel genotypes for all GWAS panels
 
@@ -83,7 +83,9 @@ rule prune_SNPs:
         IDs="data/ids/gwas_ids/{gwas}.txt",
         snps="data/{dataset}/variants/{gwas}/{contrasts}/overlappingSNPs_chr{chr}.txt"
     output:
-        "data/{dataset}/pruned_snps/{gwas}/{contrasts}/pruned_{chr}.prune.in"
+        temp("data/{dataset}/pruned_snps/{gwas}/{contrasts}/pruned_{chr}.prune.in"),
+	temp("data/{dataset}/pruned_snps/{gwas}/{contrasts}/pruned_{chr}.prune.out"),
+	temp("data/{dataset}/pruned_snps/{gwas}/{contrasts}/pruned_{chr}.log")
     resources:
         time="06:00:00",
 	mem_mb=100000
@@ -107,7 +109,7 @@ rule downsample_snps:
         sample = "data/{dataset}/pruned_snps/{gwas}/{contrasts}/{nsnp}.txt"
     shell:
         """
-        Rscript code/calculate_FGr/sample_snps.R {output.all} {output.sample} {wildcards.nsnp} {input.snps} {input.overlap}
+        Rscript code/calculate_FGr/sample_snps.R {output.sample} {wildcards.nsnp} {input.snps} {input.overlap}
         """
 
 
@@ -116,7 +118,7 @@ rule downsample_snps:
 rule standardize_r:
     input:
         r=expand("data/{{dataset}}/r/{{gwas}}/{{contrasts}}_chr{chr}.rvec", chr=CHR),
-        variance=expand("data/gwas_variance/{{gwas}}/variance_{chr}.txt", chr=CHR)
+        variance=expand("data/gwas_variance/{{gwas}}/variance_{chr}.txt", chr=CHR),
         snps="data/{dataset}/pruned_snps/{gwas}/{contrasts}/{nsnp}.txt"
     output:
         "data/{dataset}/r/{gwas}/{nsnp}/{contrasts}_all_standardized.rvec"
