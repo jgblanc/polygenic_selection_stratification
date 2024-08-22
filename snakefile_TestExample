@@ -8,7 +8,7 @@ GWAS=["complete", "half", "quarter", "threequarter", "none"]
 
 rule all:
     input:
-        expand("data/TestExample/variantFreq/test_{chr}.afreq", chr=CHR, gwas=GWAS, contrasts=CONTRASTS)
+        expand("data/TestExample/r/{gwas}/{contrasts}_chr{chr}.rvec", chr=CHR, gwas=GWAS, contrasts=CONTRASTS)
 
 
 # Get allele frequencies
@@ -39,7 +39,7 @@ rule get_AF_Test:
 rule get_overlapping_snps:
     input:
         freq_test="data/TestExample/variantFreq/test_{chr}.afreq",
-	      freq_gwas="data/TestExample/variantFreq/{gwas}_{chr}.afreq"
+	      freq_gwas="data/ukbb/variantFreq/{gwas}_{chr}.afreq"
     output:
         "data/TestExample/variants/{gwas}/{contrasts}/overlappingSNPs_chr{chr}.txt"
     shell:
@@ -57,7 +57,7 @@ rule get_popAF:
         "data/TestExample/popAF/{gwas}/{contrasts}/popAF_{chr}.Afr.afreq",
         "data/TestExample/popAF/{gwas}/{contrasts}/popAF_{chr}.Eur.afreq"
     params:
-        prefix_in="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
+        prefix_in="data/HGDP1KG/plink2-files/gnomad.genomes.v3.1.2.hgdp_tgp.chr{chr}",
         prefix_out="data/TestExample/popAF/{gwas}/{contrasts}/popAF_{chr}"
     resources:
         mem_mb=38000,

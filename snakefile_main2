@@ -2,13 +2,13 @@
 CHR =[]
 for i in range(1, 23):
   CHR.append(str(i))
-GWAS=["complete", "half", "quarter", "threequarter", "none"]
+GWAS=["complete", "half", "quarter", "threequarter", "none", "ALL", "WBS"]
 #GWAS= ["q1", "q2", "q3", "q4", "ALL", "WBS"]
 
 
 rule all:
     input:
-        expand("data/ukbb/variantFreq/{gwas}_{chr}.afreq", gwas=GWAS)
+        expand("data/gwas_variance/{gwas}/variance_{chr}.txt", gwas=GWAS, chr=CHR)
 
 rule get_dosage_file:
     input:
