@@ -4,18 +4,17 @@ CHR =[]
 for i in range(1, 23):
   CHR.append(str(i))
 CONTRASTS = ["eas-nfe", "eas-sas", "eas-afr", "eas-amr", "nfe-sas", "nfe-afr", "nfe-amr", "sas-afr", "sas-amr", "afr-amr"]
-#GWAS=["complete", "half", "quarter", "threequarter", "none"]
-GWAS= ["q1", "q2", "q3", "q4", "ALL", "WBS"]
+GWAS=["complete", "half", "quarter", "threequarter", "none"]
+#GWAS= ["q1", "q2", "q3", "q4", "ALL", "WBS"]
 #CONTRASTS = ["eas-sas"]
 CHRTYPE_GWAS = ["chr-even", "chr-all"]
 CHRTYPE_TEST = ["test-odd", "test-all"]
-NSNP = ["L-pruneall"]
+NSNP = ["L-pruneall", "L-1000"]
 #NSNP = ["L-1000000", "L-pruneall", "L-all"]
 
 rule all:
     input:
-        expand("endpoints/{dataset}/OverlapStats.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST, nsnp=NSNP),
-        expand("endpoints/{dataset}/PCStats.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST, nsnp=NSNP)
+        expand("data/ukbb/variantFreq/{gwas}_{chr}.afreq", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST, nsnp=NSNP)
 
 # Get sample variance of GWAS panel genotypes for all GWAS panels
 
@@ -54,6 +53,28 @@ rule calculate_GWAS_variance:
         Rscript code/calculate_FGr/compute_GWAS_variance.R {input} {output}
         """
 
+# Get frequency of alleles in GWAS panels
+
+rule get_AF_GWAS:
+    input:
+        gwas="data/ids/gwas_ids/{gwas}.txt"
+    output:
+        gwas="data/ukbb/variantFreq/{gwas}_{chr}.afreq"
+    params:
+        prefix_in="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
+        prefix_out_gwas="data/ukbb/variantFreq/{gwas}_{chr}"
+    resources:
+        mem_mb=38000,
+        time="00:30:00"
+    shell:
+        """
+        plink2 --pfile {params.prefix_in} \
+        --freq \
+        --keep {input.gwas} \
+	      --threads 8 \
+        --memory 38000 \
+        --out {params.prefix_out_gwas}
+        """
 
 # Downsample SNPs used to compute corrections
 
@@ -84,8 +105,7 @@ rule downsample_snps:
         snps=expand("data/{{dataset}}/pruned_snps/{{gwas}}/{{contrasts}}/pruned_{chr}.prune.in", chr = CHR),
 	overlap=expand("data/{{dataset}}/variants/{{gwas}}/{{contrasts}}/overlappingSNPs_chr{chr}.txt", chr = CHR)
     output:
-        all = "data/{dataset}/pruned_snps/{gwas}/{contrasts}/{nsnp}/all.in",
-        sample = "data/{dataset}/pruned_snps/{gwas}/{contrasts}/{nsnp}/all_snps.txt"
+        sample = "data/{dataset}/pruned_snps/{gwas}/{contrasts}/{nsnp}.txt"
     shell:
         """
         Rscript code/calculate_FGr/sample_snps.R {output.all} {output.sample} {wildcards.nsnp} {input.snps} {input.overlap}
@@ -97,15 +117,16 @@ rule downsample_snps:
 rule standardize_r:
     input:
         r=expand("data/{{dataset}}/r/{{gwas}}/{{contrasts}}_chr{chr}.rvec", chr=CHR),
-        variance=expand("data/{{dataset}}/gwas_variance/{{gwas}}/{{contrasts}}/{{nsnp}}/variance_{chr}.txt", chr=CHR)
+        variance=expand("data/gwas_variance/{{gwas}}/variance_{chr}.txt", chr=CHR)
+        snps="data/{dataset}/pruned_snps/{gwas}/{contrasts}/{nsnp}.txt"
     output:
-        "data/{dataset}/r/{gwas}/{contrasts}_{nsnp}_all_standardized.rvec"
+        "data/{dataset}/r/{gwas}/{nsnp}/{contrasts}_all_standardized.rvec"
     params:
-        variance_prefix="data/{dataset}/gwas_variance/{gwas}/{contrasts}/{nsnp}/variance_",
+        variance_prefix="data/gwas_variance/{gwas}/variance_",
         r_prefix="data/{dataset}/r/{gwas}/{contrasts}_chr",
     shell:
         """
-        Rscript code/calculate_FGr/standardize_r.R {params.r_prefix} {params.variance_prefix} {output}
+        Rscript code/calculate_FGr/standardize_r.R {params.r_prefix} {params.variance_prefix} {output} {input.snps}
         """
 
 # Compute FGr per block

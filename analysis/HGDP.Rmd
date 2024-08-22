@@ -17,7 +17,7 @@ library(latex2exp)
 
 Load data and format
 ```{r}
-dfOverlap <- fread("../endpoints/HGDP/OverlapStats.txt")
+dfOverlap <- fread("../endpoints/HGDP1KG/OverlapStats.txt")
 dfOverlap$L <- factor(dfOverlap$L, levels = c("1000", "3162", "10000", "31623", "100000", "316228",   "1000000","pruneall", "all"))
 ```
 

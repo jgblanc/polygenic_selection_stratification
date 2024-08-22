@@ -14,8 +14,13 @@ suppressWarnings(suppressMessages({
 r_prefix = args[1]
 variance_prefix = args[2]
 outfile = args[3]
+snps = args[4]
 
 num_chr=22
+
+# Read in pruned SNPs
+psnps <- fread(snps, header = FALSE)
+colnames(psnps) <- "ID"
 
 # Read in all Rs
 r_file <- paste0(r_prefix, "1.rvec")
@@ -38,6 +43,7 @@ for (i in 2:num_chr) {
 
 # Join dataframes and standrdize everything
 df <- inner_join(r, dfVar)
+df <- inner_join(df, snps)
 df$r[is.na(df$r)] <- 0
 df$r <- df$r * (1/sqrt(df$Var))
 df$r <- df$r - mean(df$r)

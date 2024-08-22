@@ -112,8 +112,8 @@ ggplot() + geom_polygon(data = world_map, aes(x = long, y = lat, group = group),
 Sample 600 inviduals from the "afr" and "nfe" populations
 ```{r}
 set.seed(1212)
-dfTest <- dfFilter %>% filter(project_meta.project_pop == "afr" | project_meta.project_pop == "nfe") %>% mutate(POP = case_when(project_meta.project_pop == "afr" ~ "Afr", project_meta.project_pop == "nfe" ~ "Eur")) %>% select("IID", "POP") %>% group_by(POP) %>% sample_n(600) %>% ungroup()
-#fwrite(dfGWAS,"../data/TestExample/ids/test_ids/test.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+dfTest <- dfFilter %>% filter(project_meta.project_pop == "afr" | project_meta.project_pop == "nfe") %>% mutate(POP = case_when(project_meta.project_pop == "afr" ~ "Afr", project_meta.project_pop == "nfe" ~ "Eur")) %>% select("IID", "POP") %>% group_by(POP) %>% sample_n(600) %>% ungroup() %>% mutate(FID = 0) %>% select(FID, IID, POP)
+#fwrite(dfTest,"../data/TestExample/ids/test_ids/test.txt", row.names = F, col.names = T, quote = F, sep = "\t")
 ```
 
 
