@@ -152,12 +152,12 @@ df <- df %>% mutate(POP = continental)
 
 # Use all genotyped individuals 
 dfALL <- df %>% select("#FID", "IID", "POP")
-fwrite(dfALL,"../data/HGDP1KG/ids/gwas_ids/ALL.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+#fwrite(dfALL,"../data/ids/gwas_ids/ALL.txt", row.names = F, col.names = T, quote = F, sep = "\t")
 
 # Use only WBS 
 WBS <- fread("../data/ukbb/WBS.ids")
 dfWBS <- inner_join(df, WBS) %>% select("#FID", "IID", "POP")
-fwrite(dfWBS,"../data/HGDP1KG/ids/gwas_ids/WBS.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+#fwrite(dfWBS,"../data/ids/gwas_ids/WBS.txt", row.names = F, col.names = T, quote = F, sep = "\t")
 ```
 
 
@@ -197,19 +197,19 @@ q4 <- interval * 4
 
 ## Sample everyone 
 dfGWAS <- df %>% filter(distance <=  q4) %>% sample_n(10000) %>% select("#FID", "IID", "POP")
-#fwrite(dfGWAS,"../data/HGDP1KG/ids/gwas_ids/q4.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+#fwrite(dfGWAS,"../data/ids/gwas_ids/q4.txt", row.names = F, col.names = T, quote = F, sep = "\t")
 
 ## Sample q3
 dfGWAS <- df %>% filter(distance <=  q3)%>% sample_n(10000) %>% select("#FID", "IID", "POP")
-#fwrite(dfGWAS,"../data/HGDP1KG/ids/gwas_ids/q3.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+#fwrite(dfGWAS,"../data/ids/gwas_ids/q3.txt", row.names = F, col.names = T, quote = F, sep = "\t")
 
 ## Sample q4
 dfGWAS <- df %>% filter(distance <=  q2)%>% sample_n(10000) %>% select("#FID", "IID", "POP")
-#fwrite(dfGWAS,"../data/HGDP1KG/ids/gwas_ids/q2.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+#fwrite(dfGWAS,"../data/ids/gwas_ids/q2.txt", row.names = F, col.names = T, quote = F, sep = "\t")
 
 ## 1st quartile
 dfGWAS <- df %>% filter(distance <=  q1)%>% sample_n(10000) %>% select("#FID", "IID", "POP")
-#fwrite(dfGWAS,"../data/HGDP1KG/ids/gwas_ids/q1.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+#fwrite(dfGWAS,"../data/ids/gwas_ids/q1.txt", row.names = F, col.names = T, quote = F, sep = "\t")
 ```
 
 
