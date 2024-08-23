@@ -13,7 +13,8 @@ NSNP = ["L-1000" ,"L-3162", "L-10000","L-31623",  "L-100000","L-316228", "L-1000
 
 rule all:
     input:
-        expand("output/calculate_FGr/{dataset}/PC_stats/{gwas}/{nsnp}/{chrtype_gwas}_{chrtype_test}_{contrasts}.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST, nsnp=NSNP)
+        expand("endpoints/{dataset}/OverlapStats.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST, nsnp=NSNP),
+        expand("endpoints/{dataset}/PCStats.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST, nsnp=NSNP)
 
 # Get sample variance of GWAS panel genotypes for all GWAS panels
 
@@ -258,7 +259,7 @@ rule compute_PC_FGr:
 
 rule concat_overlap_stats:
     input:
-        expand("output/calculate_FGr/{{dataset}}/overlap_stats/{gwas}/{contrasts}_{nsnp}.txt", gwas=GWAS, contrasts = CONTRASTS, nsnp=NSNP)
+        expand("output/calculate_FGr/{{dataset}}/overlap_stats/{gwas}/{nsnp}/{contrasts}.txt", gwas=GWAS, contrasts = CONTRASTS, nsnp=NSNP)
     output:
         "endpoints/{dataset}/OverlapStats.txt"
     shell:
@@ -268,7 +269,7 @@ rule concat_overlap_stats:
 
 rule concat_pc_stats:
     input:
-        expand("output/calculate_FGr/{{dataset}}/PC_stats/{gwas}/{chrtype_gwas}_{chrtype_test}_{contrasts}_{nsnp}.txt", gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test=CHRTYPE_TEST ,contrasts = CONTRASTS, nsnp=NSNP)
+        expand("output/calculate_FGr/{{dataset}}/PC_stats/{gwas}/{nsnp}/{chrtype_gwas}_{chrtype_test}_{contrasts}.txt", gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test=CHRTYPE_TEST ,contrasts = CONTRASTS, nsnp=NSNP)
     output:
         "endpoints/{dataset}/PCStats.txt"
     shell:

@@ -28,20 +28,20 @@ for (i in 2:length(args)) {
   # Extract gwas
   gwas <- strsplit(filename, "/")[[1]][5]
 
+  # Extract NSNP
+  nsnp <- strsplit(filename, "/")[[1]][6]
+
   # Extract gwas type
-  tmp <- strsplit(strsplit(filename, "/")[[1]][6], "_")[[1]][1]
+  tmp <- strsplit(strsplit(filename, "/")[[1]][7], "_")[[1]][1]
   gwas_type <- strsplit(tmp, "-")[[1]][2]
 
   # Extract test type
-  tmp <- strsplit(strsplit(filename, "/")[[1]][6], "_")[[1]][2]
+  tmp <- strsplit(strsplit(filename, "/")[[1]][7], "_")[[1]][2]
   test_type <- strsplit(tmp, "-")[[1]][2]
 
   # Extract contrasts
-  contrasts <- strsplit(strsplit(filename, "/")[[1]][6], "_")[[1]][3]
-
-  # Extract contrasts
-  tmp <- strsplit(strsplit(filename, "/")[[1]][6], "_")[[1]][4]
-  nsnp <- strsplit(strsplit(tmp, "L-")[[1]][2], ".txt")[[1]][1]
+  tmp <- strsplit(strsplit(filename, "/")[[1]][7], "_")[[1]][3]
+  contrasts <- strsplit(tmp, ".txt")[[1]][1]
 
   # Read in results
   df <- fread(filename)[,1:6]

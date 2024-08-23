@@ -28,12 +28,13 @@ for (i in 2:length(args)) {
   # Extract which GWAS
   gwas <- strsplit(filename, "/")[[1]][5]
 
-  # Extract constrasts
+  # Extract NSNP
   tmp <- strsplit(filename, "/")[[1]][6]
-  constrasts <- strsplit(tmp, "_")[[1]][1]
+  nsnp <- strsplit(tmp, "L-")[[1]][2]
 
-  # Extract L
-  nsnp <- strsplit(strsplit(tmp, "L-")[[1]][2], ".txt")[[1]][1]
+  # Extract constrasts
+  tmp <- strsplit(filename, "/")[[1]][7]
+  constrasts <- strsplit(tmp, ".txt")[[1]][1]
 
   # Read in results
   df <- fread(filename)
