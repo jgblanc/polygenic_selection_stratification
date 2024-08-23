@@ -92,45 +92,8 @@ jkVar <- mean(allSigma2)
 varFGr <- var(FGr_hat, na.rm = TRUE)
 error <- jkVar / varFGr
 
-# Comput SE for entries of FGr - Patterson notes
-
-## Get jackknife estimate of FGr
-#weighted_FGrsLOCO <- matrix(NA, nrow = nrow(data), ncol = nblocks)
-#for (i in 1:nblocks) {
-#  print(i)
-#  mi <- as.numeric(snp_nums[i, 2])
-#  weighted_FGrsLOCO[,i] <- ((L - mi) / L) * (apply(data[,-i], 1, sum) * (1/(L- mi)))
-
-#}
-#thetaJ <- (nblocks * FGr_hat) - rowSums(weighted_FGrsLOCO)
-
-## Get jackknife estimate of se
-#tau <- matrix(NA, nrow = nrow(data), ncol = nblocks)
-#for (i in 1:nblocks) {
-#  print(i)
-#  mi <- as.numeric(snp_nums[i, 2])
-#  hi <- (L / mi)
-#  tau[,i] <- (hi * FGr_hat) - ((hi - 1) * (apply(data[,-i], 1, sum) * (1/(L-mi))))
-#}
-#tmp <- matrix(NA, nrow = nrow(data), ncol = nblocks)
-#for (i in 1:nblocks) {
-#  print(i)
-#  mi <- as.numeric(snp_nums[i, 2])
-#  hi <- (L / mi)
-#  tmp[,i] <- (tau[,i] - thetaJ)^2  / (hi - 1)
-#}
-#allSigma2 <- rowMeans(tmp)
-#jkVar <- mean(allSigma2)
-
-# Find Error
-#varFGr <- var(thetaJ)
-#error <- jkVar / varFGr
-
 # Final signal
 signal <- 1 - error
-
-# Find gamma F
-gammaF <- 1 - (error^2)
 
 # Find Z
 Z <- D / ((M-1) * L)
@@ -139,9 +102,9 @@ Z <- D / ((M-1) * L)
 trK <- (M-1) * L
 
 # Make output table
-dfOut <- as.data.frame(matrix(NA, nrow = 1, ncol = 11 ))
-colnames(dfOut) <- c("D","ExpD", "varD", "pvalD","Z", "trK", "jkFGr", "varFGr", "error", "signal", "gammaF")
-dfOut[1,] <- c(D, expD, varD, pval, Z, trK, jkVar, varFGr, error, signal, gammaF)
+dfOut <- as.data.frame(matrix(NA, nrow = 1, ncol = 10))
+colnames(dfOut) <- c("D","ExpD", "varD", "pvalD","Z", "trK", "jkFGr", "varFGr", "error", "signal")
+dfOut[1,] <- c(D, expD, varD, pval, Z, trK, jkVar, varFGr, error, signal)
 fwrite(dfOut, outfile, row.names = F, col.names = T, quote = F, sep = "\t")
 
 
