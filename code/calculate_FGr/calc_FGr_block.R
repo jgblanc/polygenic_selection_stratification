@@ -42,7 +42,7 @@ print(head(r))
 
 # Separate ID into CHR and BP
 r_blocks <- r %>% separate("ID", into = c("CHR", "BP"), sep = ":", remove = FALSE) %>% filter(CHR == chr_num)
-print(paste0("r has", nrow(r), " rows"))
+print(paste0("r blocks has", nrow(r_blocks), " rows"))
 
 # Read in LD block file
 ld <- fread(ldFile)
