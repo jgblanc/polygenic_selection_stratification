@@ -16,6 +16,8 @@ PC_file = args[2]
 outfile = args[3]
 test_type = args[4]
 outfileData = args[5]
+snp_prefix = args[6]
+Eval_file = args[7]
 
 # Get test type
 test_type <- strsplit(test_type, "-")[[1]][2]
@@ -81,6 +83,9 @@ for (i in 1:nrow(dfOut)) {
   lc <- ct$conf.int[1]
   uc <- ct$conf.int[2]
 
+  # Compute error bars R2
+  x <- as.matrix(dfCombine[, 5:(4+i)])
+  mod <- lm(dfCombine$FGr ~ x)
 
   # Collect output
   dfOut[i,2] <- B
@@ -91,10 +96,79 @@ for (i in 1:nrow(dfOut)) {
 
 }
 
+# Compute error for FGR
 
-# Save output
+# Add Tm for each chromosome to each other
+data <- fread(paste0(Tm_prefix, "_", chrs[1], ".txt"))
+data <- data[,4:ncol(data)]
+
+for (i in 2:length(chrs)) {
+
+  print(paste0("chr num ",chrs[i]))
+  # Read in new chromosome
+  filename <- paste0(Tm_prefix,"_", chrs[i], ".txt")
+  tmp <- fread(filename)
+  tmp <- tmp[,4:ncol(tmp)]
+  data <- cbind(data, tmp)
+
+}
+data <- as.data.frame(data)
+print(dim(data))
+
+# Find total number of SNPs
+snp_nums <- fread(paste0(snp_prefix, "_", chrs[1], "_SNPcount.txt"))
+for (i in 2:length(chrs)) {
+
+  print(paste0("chr num ",chrs[i]))
+  # Read in new chromosome
+  snp_nums <- rbind(snp_nums, fread(paste0(snp_prefix,"_", chrs[i], "_SNPcount.txt")))
+
+}
+print(dim(snp_nums))
+print(snp_nums)
+
+# Set parameters
+L <- sum(snp_nums$nSNP)
+M <- nrow(data)
+print(paste0("L is ", L))
+print(paste0("M is ", M))
+
+# Compute FGrhat
+FGr_hat <- apply(data, 1, sum) * (1/L)
+nblocks <- ncol(data)
+
+# Compute SE for entries of FGr - Mair Notes
+allFGrs <- matrix(NA, nrow = nrow(data), ncol = nblocks)
+for (i in 1:nblocks) {
+
+  mi <- as.numeric(snp_nums[i, 2])
+  FGri <- data[,i] * (1/mi)
+  allFGrs[,i] <- (mi / (L - mi)) * (FGri - FGr_hat)^2
+
+}
+allSigma2 <- rowMeans(allFGrs)
+jkVar <- mean(allSigma2)
+
+# Find Error
+varFGr <- var(FGr_hat, na.rm = TRUE)
+error <- jkVar / varFGr
+
+
+# Format output
 dfOut <- as.data.frame(dfOut)
 colnames(dfOut) <- c("PC", "B", "B2", "lc", "uc", "r2")
+dfOut$Error <- error
+
+# Find the variance explained by each PC
+dfEval <- fread(Eval_file)
+dfOut$VarExp <- 0
+for (i in 1:PC_nums) {
+
+  dfOut[i, 7] <- dfEval[i, 1] / (M - 1)
+
+}
+
+# Save output
 fwrite(dfOut, outfile, row.names = F, col.names = T, quote = F, sep = "\t")
 
 # Save other output
