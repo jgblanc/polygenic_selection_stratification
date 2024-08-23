@@ -231,8 +231,8 @@ rule merge_GWAS_PCA:
         --threads 16 \
         --out {params.prefix_out}
         rm {params.prefix_out}{wildcards.gwas}-{wildcards.chrtype_gwas}-tmp*
-        rm output/pca/{wildcards.dataset}/{wildcards.gwas}/{wildcards.chrtype_gwas}.p*
-        rm output/pca/{wildcards.dataset}/{wildcards.gwas}/{wildcards.chrtype_gwas}.log
+        rm output/pca/{wildcards.gwas}/{wildcards.chrtype_gwas}.p*
+        rm output/pca/{wildcards.gwas}/{wildcards.chrtype_gwas}.log
         """
 
 # Compute GWAS PCA statistics
