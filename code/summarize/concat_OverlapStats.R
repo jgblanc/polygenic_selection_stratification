@@ -13,7 +13,7 @@ suppressWarnings(suppressMessages({
 
 outfile = args[1]
 
-dfOut <- matrix(NA, nrow = 1, ncol = 15)
+dfOut <- matrix(NA, nrow = 1, ncol = 14)
 
 for (i in 2:length(args)) {
 
@@ -45,7 +45,6 @@ for (i in 2:length(args)) {
   df$L <- nsnp
   colnames(dfOut) <- c(names_from_file, "dataset", "gwas", "contrasts", "L")
   dfOut <- rbind(dfOut, df)
-
 
 }
 
