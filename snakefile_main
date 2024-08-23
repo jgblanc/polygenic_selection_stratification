@@ -247,7 +247,7 @@ rule compute_PC_FGr:
         pcStats="output/calculate_FGr/{dataset}/PC_stats/{gwas}/{nsnp}/{chrtype_gwas}_{chrtype_test}_{contrasts}.txt",
         Fgr="output/calculate_FGr/{dataset}/final_FGr/{gwas}/{nsnp}/{chrtype_gwas}_{chrtype_test}_{contrasts}.txt"
     params:
-        prefix_in="output/calculate_FGr/{dataset}/blocks/{gwas}/{nsnp}/FGr_{contrasts}"
+        prefix_in="output/calculate_FGr/{dataset}/blocks/{gwas}/{nsnp}/FGr_{contrasts}",
         count_in = "output/calculate_FGr/{dataset}/blocks/{gwas}/{nsnp}/{contrasts}"
     shell:
         """

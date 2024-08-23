@@ -63,7 +63,7 @@ print(colnames(dfCombine))
 # Construct data frame to collate results
 totalPCs <-  (ncol(PCs) - 2)
 print(totalPCs)
-dfOut <- matrix(NA, nrow = totalPCs, ncol = 8)
+dfOut <- matrix(NA, nrow = totalPCs, ncol = 6)
 dfOut[,1] <- seq(1,totalPCs)
 
 # Compute multiple R^2 and rho(PC, FGr)
@@ -83,9 +83,6 @@ for (i in 1:nrow(dfOut)) {
   lc <- ct$conf.int[1]
   uc <- ct$conf.int[2]
 
-  # Compute error bars R2
-  x <- as.matrix(dfCombine[, 5:(4+i)])
-  mod <- lm(dfCombine$FGr ~ x)
 
   # Collect output
   dfOut[i,2] <- B
@@ -153,21 +150,23 @@ jkVar <- mean(allSigma2)
 varFGr <- var(FGr_hat, na.rm = TRUE)
 error <- jkVar / varFGr
 
+# Find the variance explained by each PC
+dfEval <- fread(Eval_file)
+varExp <- rep(0, totalPCs)
+for (i in 1:totalPCs) {
+
+  varExp[i] <- dfEval[i, 1] / (M - 1)
+
+}
+
 
 # Format output
 dfOut <- as.data.frame(dfOut)
 colnames(dfOut) <- c("PC", "B", "B2", "lc", "uc", "r2")
 dfOut$Error <- error
+dfOut$VarExp <- varExp
 
-# Find the variance explained by each PC
-dfEval <- fread(Eval_file)
-dfOut$VarExp <- 0
-for (i in 1:PC_nums) {
-
-  dfOut[i, 7] <- dfEval[i, 1] / (M - 1)
-
-}
-
+print(head(dfOut))
 # Save output
 fwrite(dfOut, outfile, row.names = F, col.names = T, quote = F, sep = "\t")
 
