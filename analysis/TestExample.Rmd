@@ -141,7 +141,7 @@ p
 
 Load data and process 
 ```{r}
-dfOverlap <- fread("../endpoints/TestExample/OverlapStats_L.txt")
+dfOverlap <- fread("../endpoints/TestExample/OverlapStats.txt")
 dfOverlap <- dfOverlap %>% mutate(prop_eur  = case_when(gwas == "complete" ~ 0.5, 
                                                         gwas == "none" ~ 1, 
                                                         gwas == "half" ~ 0.75,
@@ -215,14 +215,14 @@ dfPC <- dfPC %>% mutate(prop_eur  = case_when(gwas == "complete" ~ 0.5,
 
 **Squared correlation between $PC_i$ between $\hat{F}_{Gr}$**
 ```{r}
-dfPC %>% filter(gwas_type == "even" & test_type == "odd") %>% ggplot(aes(x = PC, y = B2)) + geom_bar(stat = "identity", fill = "darkgreen", color = "darkgreen") + facet_grid(~prop_eur) + theme_bw(base_size = 12) + ylab(TeX("$B_{i}^2$"))
+dfPC %>% filter(gwas_type == "even" & test_type == "odd" & L == "pruneall") %>% ggplot(aes(x = PC, y = B2)) + geom_bar(stat = "identity", fill = "darkgreen", color = "darkgreen") + facet_grid(~prop_eur) + theme_bw(base_size = 12) + ylab(TeX("$B_{i}^2$"))
 ```
 As expected, there is a high correlation between PC 1 and $\hat{F}_{Gr}$ in GWAS panels that have overlap. What is a little surprising is that there is still some correlation between PC1 and $\hat{F}_{Gr}$ even when there is no overlap between panels. 
 
 
 **Cumulative variance explained** 
 ```{r}
-dfPC %>% filter(gwas_type == "even" & test_type == "odd") %>% ggplot(aes(x = PC, y = r2)) + geom_bar(stat = "identity", fill = "darkgreen", color = "darkgreen") + facet_grid(~prop_eur) + theme_bw(base_size = 12) + ylab(TeX("$R_{K}^2$")) + geom_hline(data = dfOverlap, aes(yintercept = signal), color = "red", linetype = 2, linewidth = 1.5)
+dfPC %>% filter(gwas_type == "even" & test_type == "odd" & L == "pruneall") %>% ggplot(aes(x = PC, y = r2)) + geom_bar(stat = "identity", fill = "darkgreen", color = "darkgreen") + facet_grid(~prop_eur) + theme_bw(base_size = 12) + ylab(TeX("$R_{K}^2$")) + geom_hline( aes(yintercept = 1-Error), color = "red", linetype = 2, linewidth = 1.5)
 ```
 Something is wrong with the theory (or analysis) here. We thought that most variance PCs could explain was $1 - error$ or ($1 - error^2$?) but in the no overlap situation, its clear that even the first PC explains more than $1 - error$.  
 
