@@ -67,14 +67,14 @@ colnames(testID) <- c("IID",  "Sex")
 n <- nrow(testID)
 
 # Compute b for latitude
-r_lat = compute_b(path_to_test = test_prefix, testvec_file = tvec_file_lat, test_type = "latitude", outpath = out_prefix)
+r_lat = compute_b(path_to_test = test_prefix, testvec_file = tvec_file_lat, test_type = "lat", outpath = out_prefix)
 r_lat$BETA  <- r_lat$BETA * (1/n)
 colnames(r_lat)[5] <- "r"
 print(head(r_lat))
 fwrite(r_lat, outfile_lat, row.names = F, col.names = T, quote = F, sep = "\t")
 
 # Compute b for latitude
-r_long = compute_b(path_to_test = test_prefix, testvec_file = tvec_file_long, test_type = "longitude", outpath = out_prefix)
+r_long = compute_b(path_to_test = test_prefix, testvec_file = tvec_file_long, test_type = "long", outpath = out_prefix)
 r_long$BETA  <- r_long$BETA * (1/n)
 colnames(r_long)[5] <- "r"
 print(head(r_long))
