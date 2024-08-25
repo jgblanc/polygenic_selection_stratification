@@ -9,12 +9,11 @@ rule all:
     input:
         expand("data/SDS/r/{gwas}/UK10K_chr{chr}.rvec", chr=CHR, gwas=GWAS, contrasts=CONTRASTS)
 
-
 # Process and match UK10K SNPs
 
 rule flip_all_snps:
     input:
-        gwas_freq="data/SDS/variantFreq/{gwas}_{chr}.afreq",
+        gwas_freq="data/ukbb/variantFreq/{gwas}_{chr}.afreq",
 	      sds="data/SDS/raw/SDS_UK10K_n3195_release_Sep_19_2016.tab.gz"
     output:
         rvec="data/SDS/r/{gwas}/UK10K_chr{chr}.rvec",
@@ -28,7 +27,7 @@ rule flip_all_snps:
 
 rule liftover_snps:
     input:
-        gwas_freq="data/SDS/variantFreq/{gwas}_{chr}.afreq",
+        gwas_freq="data/ukbb/variantFreq/{gwas}_{chr}.afreq",
 	      sds="data/SDS/raw/Han_SDS_liftedover.txt.gz"
     output:
         rvec="data/SDS/r/{gwas}/Han_chr{chr}.rvec",
