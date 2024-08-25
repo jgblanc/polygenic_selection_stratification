@@ -4,8 +4,8 @@ for i in range(1, 23):
   CHR.append(str(i))
 CONTRASTS = ["euraisa-lat", "eurasia-long", "eur-lat", "eur-long", "sdi-eur", "eas-nfe", "eas-sas", "eas-afr", "eas-amr", "nfe-sas", "nfe-afr", "nfe-amr", "sas-afr", "sas-amr", "afr-amr"]
 SUBDATASET = ["eurasia", "all", "nfe", "nfe_no_ceu"]
-GWAS=["ALL", "WBS", "q1", "q2", "q3", "q4"]
-
+#GWAS=["ALL", "WBS", "q1", "q2", "q3", "q4"]
+GWAS=["q1"]
 
 ## Wildcard constraints
 wildcard_constraints:
@@ -16,7 +16,7 @@ wildcard_constraints:
 
 rule all:
     input:
-        expand("data/HGDP1KG/TestVecs/eurasia-lat.txt", chr=CHR, gwas=GWAS, contrasts=CONTRASTS, subdataset=SUBDATASET)
+        expand("data/HGDP1KG/r/{gwas}/eurasia-lat_chr{chr}.rvec", chr=CHR, gwas=GWAS, contrasts=CONTRASTS, subdataset=SUBDATASET)
 
 
 ## Recode SNPs to match UKBB
@@ -262,7 +262,7 @@ rule get_TestVector_Eurasia:
         Long="data/HGDP1KG/TestVecs/eurasia-long.txt"
     shell:
         """
-        Rscript code/HGDP1KG/get_LatLong_Tvec.R {input.metadata} {output.Lat} {output.Long}
+        Rscript code/HGDP1KG/get_LatLong_Tvec.R {input.testids} {output.Lat} {output.Long}
         """
 
 rule compute_r_eurasia:

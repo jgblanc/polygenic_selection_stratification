@@ -3,7 +3,7 @@
 
 args=commandArgs(TRUE)
 
-if(length(args)<4){stop("Rscript get_LatLong_Tvec.R <metadata> <psam> <outfile Lat> <outfile Long>")}
+if(length(args)<3){stop("Rscript get_LatLong_Tvec.R <psam> <outfile Lat> <outfile Long>")}
 
 suppressWarnings(suppressMessages({
   library(data.table)
