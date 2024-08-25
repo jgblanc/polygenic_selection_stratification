@@ -1,0 +1,279 @@
+# Snakefile to run the main pipeline for any dataset
+DATASET = ["SDS"]
+CHR = []
+for i in range(1, 23):
+  CHR.append(str(i))
+CONTRASTS = ["UK10K", "Han"]
+GWAS= ["q1", "q2", "q3", "q4", "ALL", "WBS"]
+CHRTYPE_GWAS = ["chr-even", "chr-all"]
+CHRTYPE_TEST = ["test-odd", "test-all"]
+NSNP = ["L-1000" ,"L-3162", "L-10000","L-31623",  "L-100000","L-316228", "L-1000000", "L-pruneall"]
+
+rule all:
+    input:
+        expand("endpoints/{dataset}/OverlapStats.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST, nsnp=NSNP),
+        expand("endpoints/{dataset}/PCStats.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST, nsnp=NSNP)
+
+# Get sample variance of GWAS panel genotypes for all GWAS panels
+
+rule get_dosage_file:
+    input:
+        gwas="data/ids/gwas_ids/{gwas}.txt",
+        gp_genos="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen"
+    output:
+        temp("/scratch/jgblanc/polygenic_selection_stratification/data/{gwas}/dosages/dosages_{chr}.traw")
+    params:
+        prefix_in="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
+        prefix_out="/scratch/jgblanc/polygenic_selection_stratification/data/{gwas}/dosages/dosages_{chr}"
+    resources:
+        mem_mb=38000,
+        time="01:00:00"
+    shell:
+        """
+        plink2 --pfile {params.prefix_in} \
+        --keep {input.gwas} \
+        --recode A-transpose \
+	      --threads 8 \
+        --memory 38000 \
+        --out {params.prefix_out}
+        """
+
+rule calculate_GWAS_variance:
+    input:
+        "/scratch/jgblanc/polygenic_selection_stratification/data/{gwas}/dosages/dosages_{chr}.traw"
+    output:
+        "data/gwas_variance/{gwas}/variance_{chr}.txt"
+    resources:
+	      time="48:00:00",
+	      mem_mb=100000,
+    shell:
+        """
+        Rscript code/calculate_FGr/compute_GWAS_variance.R {input} {output}
+        """
+
+# Get frequency of alleles in GWAS panels
+
+rule get_AF_GWAS:
+    input:
+        gwas="data/ids/gwas_ids/{gwas}.txt"
+    output:
+        gwas="data/ukbb/variantFreq/{gwas}_{chr}.afreq"
+    params:
+        prefix_in="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
+        prefix_out_gwas="data/ukbb/variantFreq/{gwas}_{chr}"
+    resources:
+        mem_mb=38000,
+        time="00:30:00"
+    shell:
+        """
+        plink2 --pfile {params.prefix_in} \
+        --freq \
+        --keep {input.gwas} \
+	      --threads 8 \
+        --memory 38000 \
+        --out {params.prefix_out_gwas}
+        """
+
+# Downsample SNPs used to compute corrections
+
+rule prune_SNPs:
+    input:
+        gp_genos="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen",
+        IDs="data/ids/gwas_ids/{gwas}.txt",
+        snps="data/{dataset}/variants/{gwas}/{contrasts}/overlappingSNPs_chr{chr}.txt"
+    output:
+        temp("data/{dataset}/pruned_snps/{gwas}/{contrasts}/pruned_{chr}.prune.in"),
+	temp("data/{dataset}/pruned_snps/{gwas}/{contrasts}/pruned_{chr}.prune.out"),
+	temp("data/{dataset}/pruned_snps/{gwas}/{contrasts}/pruned_{chr}.log")
+    resources:
+        time="06:00:00",
+	mem_mb=100000
+    params:
+        prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
+        prefix_out = "data/{dataset}/pruned_snps/{gwas}/{contrasts}/pruned_{chr}"
+    shell:
+        """
+        plink2 --pfile {params.prefix_plink} \
+        --keep {input.IDs} \
+        --extract {input.snps} \
+        --indep-pairwise 100kb 0.8 \
+        --out {params.prefix_out}
+        """
+
+rule downsample_snps:
+    input:
+        snps=expand("data/{{dataset}}/pruned_snps/{{gwas}}/{{contrasts}}/pruned_{chr}.prune.in", chr = CHR),
+	overlap=expand("data/{{dataset}}/variants/{{gwas}}/{{contrasts}}/overlappingSNPs_chr{chr}.txt", chr = CHR)
+    output:
+        sample = "data/{dataset}/pruned_snps/{gwas}/{contrasts}/{nsnp}.txt"
+    shell:
+        """
+        Rscript code/calculate_FGr/sample_snps.R {output.sample} {wildcards.nsnp} {input.snps} {input.overlap}
+        """
+
+
+# Standardize r to have length 1
+
+rule standardize_r:
+    input:
+        r=expand("data/{{dataset}}/r/{{gwas}}/{{contrasts}}_chr{chr}.rvec", chr=CHR),
+        variance=expand("data/gwas_variance/{{gwas}}/variance_{chr}.txt", chr=CHR),
+        snps="data/{dataset}/pruned_snps/{gwas}/{contrasts}/{nsnp}.txt"
+    output:
+        "data/{dataset}/r/{gwas}/{nsnp}/{contrasts}_all_standardized.rvec"
+    params:
+        variance_prefix="data/gwas_variance/{gwas}/variance_",
+        r_prefix="data/{dataset}/r/{gwas}/{contrasts}_chr",
+    shell:
+        """
+        Rscript code/calculate_FGr/standardize_r.R {params.r_prefix} {params.variance_prefix} {output} {input.snps}
+        """
+
+# Compute FGr per block
+
+rule compute_FGr_block:
+    input:
+        r="data/{dataset}/r/{gwas}/{nsnp}/{contrasts}_all_standardized.rvec",
+        gp_genos="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen",
+        overlap_snps="data/{dataset}/pruned_snps/{gwas}/{contrasts}/{nsnp}.txt",
+        ldBlocks="data/LD_blocks/big_blocks.bed",
+        ids="data/ids/gwas_ids/{gwas}.txt"
+    output:
+        FGr="output/calculate_FGr/{dataset}/blocks/{gwas}/{nsnp}/FGr_{contrasts}_{chr}.txt",
+        snps="output/calculate_FGr/{dataset}/blocks/{gwas}/{nsnp}/{contrasts}_{chr}_SNPcount.txt",
+        scoring_weights="output/calculate_FGr/{dataset}/blocks/{gwas}/{nsnp}/{contrasts}_{chr}_scoringWeights.txt"
+    threads: 16
+    resources:
+        mem_mb=38000,
+	time="06:00:00"
+    params:
+        gp_prefix="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
+        out_prefix="output/calculate_FGr/{dataset}/blocks/{gwas}/{nsnp}/{contrasts}_{chr}",
+    shell:
+        """
+        Rscript code/calculate_FGr/calc_FGr_block.R {params.gp_prefix} {params.out_prefix} {input.r} {input.overlap_snps} {input.ldBlocks} {output.FGr} {output.snps} {input.ids} {wildcards.chr}
+        """
+
+# Compute overlap statistics
+
+rule compute_FGr_error:
+    input:
+        FGr=expand("output/calculate_FGr/{{dataset}}/blocks/{{gwas}}/{{nsnp}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR),
+        SNP_Counts=expand("output/calculate_FGr/{{dataset}}/blocks/{{gwas}}/{{nsnp}}/{{contrasts}}_{chr}_SNPcount.txt", chr=CHR)
+    output:
+      "output/calculate_FGr/{dataset}/overlap_stats/{gwas}/{nsnp}/{contrasts}.txt"
+    threads: 16
+    resources:
+        mem_mb=100000,
+        time="24:00:00"
+    params:
+      prefix_in="output/calculate_FGr/{dataset}/blocks/{gwas}/{nsnp}/FGr_{contrasts}",
+      SNP_prefix="output/calculate_FGr/{dataset}/blocks/{gwas}/{nsnp}/{contrasts}"
+    shell:
+      """
+      Rscript code/calculate_FGr/compute_error_jacknife_blocks.R {params.prefix_in} {output} {params.SNP_prefix}
+      """
+
+# GWAS PCA
+
+rule make_tmp_plink2:
+    input:
+        gp="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen",
+        overlap_snps="data/ukbb/ukbb_pc_snps.txt",
+        ids="data/ids/gwas_ids/{gwas}.txt"
+    output:
+        temp("/scratch/jgblanc/ukbb/plink2-files/{gwas}/merged/tmp_{chr}.pgen"),
+        temp("/scratch/jgblanc/ukbb/plink2-files/{gwas}/merged/tmp_{chr}.pvar"),
+        temp("/scratch/jgblanc/ukbb/plink2-files/{gwas}/merged/tmp_{chr}.psam"),
+	temp("/scratch/jgblanc/ukbb/plink2-files/{gwas}/merged/tmp_{chr}.log")
+    params:
+        prefix_out="/scratch/jgblanc/ukbb/plink2-files/{gwas}/merged/tmp_{chr}",
+        prefix_plink="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3"
+    threads: 16
+    resources:
+        mem_mb=38000,
+        time="00:30:00"
+    shell:
+        """
+        plink2 --pfile {params.prefix_plink} \
+        --keep {input.ids} \
+        --extract {input.overlap_snps} \
+        --make-pgen \
+        --out {params.prefix_out}
+        """
+
+rule merge_GWAS_PCA:
+    input:
+        gp_genos=expand("/scratch/jgblanc/ukbb/plink2-files/{{gwas}}/merged/tmp_{chr}.pgen", chr=CHR),
+	gp_psam=expand("/scratch/jgblanc/ukbb/plink2-files/{{gwas}}/merged/tmp_{chr}.psam", chr=CHR),
+	gp_pvar=expand("/scratch/jgblanc/ukbb/plink2-files/{{gwas}}/merged/tmp_{chr}.pvar", chr=CHR),
+	gp_log=expand("/scratch/jgblanc/ukbb/plink2-files/{{gwas}}/merged/tmp_{chr}.log", chr=CHR),
+        snp="data/ukbb/{chrtype_gwas}_pc_snps.txt"
+    output:
+        vec="output/pca/{gwas}/{chrtype_gwas}.eigenvec",
+        val="output/pca/{gwas}/{chrtype_gwas}.eigenval"
+    params:
+        prefix_out="output/pca/{gwas}/{chrtype_gwas}",
+        merge_prefix=expand("/scratch/jgblanc/ukbb/plink2-files/{{gwas}}/merged/tmp_{chr}", chr=CHR, newline="\n")
+    threads: 16
+    resources:
+        mem_mb=60000,
+        time="12:00:00"
+    shell:
+        """
+        echo {params.merge_prefix} > {params.prefix_out}{wildcards.gwas}-{wildcards.chrtype_gwas}-tmp.txt
+        tr ' ' '\n' < "{params.prefix_out}{wildcards.gwas}-{wildcards.chrtype_gwas}-tmp.txt" > "{params.prefix_out}{wildcards.gwas}-{wildcards.chrtype_gwas}-tmp_chrm_list.txt"
+        plink2 --pmerge-list {params.prefix_out}{wildcards.gwas}-{wildcards.chrtype_gwas}-tmp_chrm_list.txt \
+        --pca 40 approx \
+        --extract {input.snp} \
+        --memory 60000 \
+        --threads 16 \
+        --out {params.prefix_out}
+        rm {params.prefix_out}{wildcards.gwas}-{wildcards.chrtype_gwas}-tmp*
+        rm output/pca/{wildcards.gwas}/{wildcards.chrtype_gwas}.p*
+        rm output/pca/{wildcards.gwas}/{wildcards.chrtype_gwas}.log
+        """
+
+# Compute GWAS PCA statistics
+
+rule compute_PC_FGr:
+    input:
+        Fgr=expand("output/calculate_FGr/{{dataset}}/blocks/{{gwas}}/{{nsnp}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR),
+        PCs="output/pca/{gwas}/{chrtype_gwas}.eigenvec",
+        SNP_Counts=expand("output/calculate_FGr/{{dataset}}/blocks/{{gwas}}/{{nsnp}}/{{contrasts}}_{chr}_SNPcount.txt", chr=CHR),
+        Eval = "output/pca/{gwas}/{chrtype_gwas}.eigenval"
+    output:
+        pcStats="output/calculate_FGr/{dataset}/PC_stats/{gwas}/{nsnp}/{chrtype_gwas}_{chrtype_test}_{contrasts}.txt",
+        Fgr="output/calculate_FGr/{dataset}/final_FGr/{gwas}/{nsnp}/{chrtype_gwas}_{chrtype_test}_{contrasts}.txt"
+    params:
+        prefix_in="output/calculate_FGr/{dataset}/blocks/{gwas}/{nsnp}/FGr_{contrasts}",
+        count_in = "output/calculate_FGr/{dataset}/blocks/{gwas}/{nsnp}/{contrasts}"
+    resources:
+        mem_mb=38000,
+        time="01:00:00"
+    shell:
+        """
+        Rscript code/calculate_FGr/compute_PC_FGR_model.R {params.prefix_in} {input.PCs} {output.pcStats} {wildcards.chrtype_test} {output.Fgr} {params.count_in} {input.Eval}
+        """
+
+# Summarize Results
+
+rule concat_overlap_stats:
+    input:
+        expand("output/calculate_FGr/{{dataset}}/overlap_stats/{gwas}/{nsnp}/{contrasts}.txt", gwas=GWAS, contrasts = CONTRASTS, nsnp=NSNP)
+    output:
+        "endpoints/{dataset}/OverlapStats.txt"
+    shell:
+        """
+        Rscript code/summarize/concat_OverlapStats.R {output} {input}
+        """
+
+rule concat_pc_stats:
+    input:
+        expand("output/calculate_FGr/{{dataset}}/PC_stats/{gwas}/{nsnp}/{chrtype_gwas}_{chrtype_test}_{contrasts}.txt", gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test=CHRTYPE_TEST ,contrasts = CONTRASTS, nsnp=NSNP)
+    output:
+        "endpoints/{dataset}/PCStats.txt"
+    shell:
+        """
+        Rscript code/summarize/concat_PCStats.R {output} {input}
+        """

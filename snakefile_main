@@ -3,7 +3,7 @@ DATASET = ["HGDP1KG"]
 CHR = []
 for i in range(1, 23):
   CHR.append(str(i))
-CONTRASTS = [ "eas-nfe", "eas-sas", "eas-afr", "eas-amr", "nfe-sas", "nfe-afr", "nfe-amr", "sas-afr", "sas-amr", "afr-amr", "sdi-eur"]
+CONTRASTS = ["eurasia-lat", "eurasia-long", "eur-lat", "eur-long","sdi-eur", "eas-nfe", "eas-sas", "eas-afr", "eas-amr", "nfe-sas", "nfe-afr", "nfe-amr", "sas-afr", "sas-amr", "afr-amr"]
 #GWAS=["complete"]
 #GWAS=["complete", "half", "quarter", "threequarter", "none"]
 GWAS= ["q1", "q2", "q3", "q4", "ALL", "WBS"]
@@ -250,6 +250,9 @@ rule compute_PC_FGr:
     params:
         prefix_in="output/calculate_FGr/{dataset}/blocks/{gwas}/{nsnp}/FGr_{contrasts}",
         count_in = "output/calculate_FGr/{dataset}/blocks/{gwas}/{nsnp}/{contrasts}"
+    resources:
+        mem_mb=38000,
+        time="01:00:00"
     shell:
         """
         Rscript code/calculate_FGr/compute_PC_FGR_model.R {params.prefix_in} {input.PCs} {output.pcStats} {wildcards.chrtype_test} {output.Fgr} {params.count_in} {input.Eval}
