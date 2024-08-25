@@ -1,12 +1,12 @@
 # Snakefile to run the main pipeline for any dataset
-DATASET = ["TestExample"]
+DATASET = ["HGDP1KG"]
 CHR = []
 for i in range(1, 23):
   CHR.append(str(i))
-CONTRASTS = ["Afr-Eur"]
+CONTRASTS = [ "eas-nfe", "eas-sas", "eas-afr", "eas-amr", "nfe-sas", "nfe-afr", "nfe-amr", "sas-afr", "sas-amr", "afr-amr", "sdi-eur"]
 #GWAS=["complete"]
-GWAS=["complete", "half", "quarter", "threequarter", "none"]
-#GWAS= ["q1", "q2", "q3", "q4", "ALL", "WBS"]
+#GWAS=["complete", "half", "quarter", "threequarter", "none"]
+GWAS= ["q1", "q2", "q3", "q4", "ALL", "WBS"]
 CHRTYPE_GWAS = ["chr-even", "chr-all"]
 CHRTYPE_TEST = ["test-odd", "test-all"]
 NSNP = ["L-1000" ,"L-3162", "L-10000","L-31623",  "L-100000","L-316228", "L-1000000", "L-pruneall"]

@@ -8,15 +8,15 @@ GWAS=["ALL", "WBS", "q1", "q2", "q3", "q4"]
 
 
 ## Wildcard constraints
-wildcard_constraints:
-  constrasts="^[a-zA-Z]{3}-[a-zA-Z]{3}$",
-  subdataset="^(?!.*-).*$|^nfe_no_ceu$",
+#wildcard_constraints:
+#  constrasts="^[a-zA-Z]{3}-[a-zA-Z]{3}$",
+#  subdataset="^(?!.*-).*$|^nfe_no_ceu$",
 
 
 
 rule all:
     input:
-        expand("data/HGDP1KG/r/{gwas}/eas-nfe_chr{chr}.rvec", chr=CHR, gwas=GWAS, contrasts=CONTRASTS, subdataset=SUBDATASET)
+        expand("data/HGDP1KG/variants/{gwas}/sdi-eur/overlappingSNPs_chr{chr}.txt", chr=CHR, gwas=GWAS, contrasts=CONTRASTS, subdataset=SUBDATASET)
 
 
 ## Recode SNPs to match UKBB
@@ -109,8 +109,8 @@ rule get_AF_Test:
 
 rule get_overlapping_snps:
     input:
-        freq_test="data/HGDP1KG/variantFreq/eurasia_{chr}.afreq",
-	      freq_gwas="data/HGDP1KG/variantFreq/{gwas}_{chr}.afreq"
+        freq_test="data/HGDP1KG/variantFreq/{subdataset}_{chr}.afreq",
+	      freq_gwas="data/ukbb/variantFreq/{gwas}_{chr}.afreq"
     output:
         "data/HGDP1KG/variants/{gwas}/{subdataset}/overlappingSNPs_chr{chr}.txt"
     shell:
@@ -211,11 +211,11 @@ rule get_popAF_sdi:
         test="data/HGDP1KG/ids/test_ids/nfe.txt",
         snps="data/HGDP1KG/variants/{gwas}/nfe/overlappingSNPs_chr{chr}.txt"
     output:
-        "data/HGDP1KG/popAF/{gwas}/all/popAF_{chr}.sdi.afreq",
-        "data/HGDP1KG/popAF/{gwas}/all/popAF_{chr}.eur.afreq"
+        "data/HGDP1KG/popAF/{gwas}/nfe/popAF_{chr}.sdi.afreq",
+        "data/HGDP1KG/popAF/{gwas}/nfe/popAF_{chr}.eur.afreq"
     params:
         prefix_in="/gpfs/data/berg-lab/data/HGDP1KG/plink2-files-hg19/gnomad.genomes.v3.1.2.hgdp_tgp.chr{chr}",
-        prefix_out="data/HGDP1KG/popAF/{gwas}/all/popAF_{chr}"
+        prefix_out="data/HGDP1KG/popAF/{gwas}/nfe/popAF_{chr}"
     resources:
         mem_mb=38000,
         time="00:30:00"
@@ -236,8 +236,8 @@ rule get_popAF_sdi:
 
 rule compute_r_sdi:
     input:
-        sdi="data/HGDP1KG/popAF/{gwas}/all/popAF_{chr}.sdi.afreq",
-        eur="data/HGDP1KG/popAF/{gwas}/all/popAF_{chr}.eur.afreq"
+        sdi="data/HGDP1KG/popAF/{gwas}/nfe/popAF_{chr}.sdi.afreq",
+        eur="data/HGDP1KG/popAF/{gwas}/nfe/popAF_{chr}.eur.afreq"
     output:
         "data/HGDP1KG/r/{gwas}/sdi-eur_chr{chr}.rvec"
     shell:
