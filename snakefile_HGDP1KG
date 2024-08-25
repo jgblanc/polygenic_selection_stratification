@@ -8,15 +8,15 @@ GWAS=["ALL", "WBS", "q1", "q2", "q3", "q4"]
 
 
 ## Wildcard constraints
-#wildcard_constraints:
-#  constrasts="^[a-zA-Z]{3}-[a-zA-Z]{3}$",
-#  subdataset="^(?!.*-).*$|^nfe_no_ceu$",
+wildcard_constraints:
+  constrasts="^[a-zA-Z]{3}-[a-zA-Z]{3}$",
+  subdataset="^(?!.*-).*$|^nfe_no_ceu$",
 
 
 
 rule all:
     input:
-        expand("data/HGDP1KG/variants/{gwas}/sdi-eur/overlappingSNPs_chr{chr}.txt", chr=CHR, gwas=GWAS, contrasts=CONTRASTS, subdataset=SUBDATASET)
+        expand("data/HGDP1KG/TestVecs/eurasia-lat.txt", chr=CHR, gwas=GWAS, contrasts=CONTRASTS, subdataset=SUBDATASET)
 
 
 ## Recode SNPs to match UKBB
@@ -118,9 +118,10 @@ rule get_overlapping_snps:
         Rscript code/HGDP1KG/overlapping_snps.R {input.freq_gwas} {input.freq_test} {output}
         """
 
-## ALL Frequency constrasts
 
-# Get allele freqeuncy contrasts
+#################################
+
+## ALL Frequency constrasts ##
 
 rule get_popAF_all:
     input:
@@ -150,8 +151,6 @@ rule get_popAF_all:
         --memory 38000 \
         --out {params.prefix_out}
         """
-
-# Compute r vectors
 
 rule compute_r_all:
     input:
@@ -204,7 +203,7 @@ rule rename_overlap_snps_all:
         cp {input} {output.p10}
         """
 
-## Sardinia Frequency contrasts
+## Sardinia Frequency contrasts ##
 
 rule get_popAF_sdi:
     input:
@@ -214,7 +213,7 @@ rule get_popAF_sdi:
         "data/HGDP1KG/popAF/{gwas}/nfe/popAF_{chr}.sdi.afreq",
         "data/HGDP1KG/popAF/{gwas}/nfe/popAF_{chr}.eur.afreq"
     params:
-        prefix_in="/gpfs/data/berg-lab/data/HGDP1KG/plink2-files-hg19/gnomad.genomes.v3.1.2.hgdp_tgp.chr{chr}",
+        prefix_in="data/HGDP1KG/plink2-files/gnomad.genomes.v3.1.2.hgdp_tgp.chr{chr}",
         prefix_out="data/HGDP1KG/popAF/{gwas}/nfe/popAF_{chr}"
     resources:
         mem_mb=38000,
@@ -231,8 +230,6 @@ rule get_popAF_sdi:
         --memory 38000 \
         --out {params.prefix_out}
         """
-
-# Compute r vectors
 
 rule compute_r_sdi:
     input:
@@ -253,4 +250,47 @@ rule rename_overlap_snps_sdi:
     shell:
         """
         cp {input} {output}
+        """
+
+## Lat Long Eurasia ##
+
+rule get_TestVector_Eurasia:
+    input:
+        testids="data/HGDP1KG/ids/test_ids/eurasia.txt"
+    output:
+        Lat="data/HGDP1KG/TestVecs/eurasia-lat.txt",
+        Long="data/HGDP1KG/TestVecs/eurasia-long.txt"
+    shell:
+        """
+        Rscript code/HGDP1KG/get_LatLong_Tvec.R {input.metadata} {output.Lat} {output.Long}
+        """
+
+rule compute_r_eurasia:
+    input:
+        TvecLat="data/HGDP1KG/TestVecs/eurasia-lat.txt",
+        TvecLong="data/HGDP1KG/TestVecs/eurasia-long.txt",
+        tp_genos="data/HGDP1KG/plink2-files/gnomad.genomes.v3.1.2.hgdp_tgp.chr{chr}.psam",
+        snps="data/HGDP1KG/variants/{gwas}/eurasia/overlappingSNPs_chr{chr}.txt"
+    output:
+        Lat="data/HGDP1KG/r/{gwas}/eurasia-lat_chr{chr}.rvec",
+        Long="data/HGDP1KG/r/{gwas}/eurasia-long_chr{chr}.rvec"
+    params:
+        prefix_tp = "data/HGDP1KG/plink2-files/gnomad.genomes.v3.1.2.hgdp_tgp.chr{chr}",
+        prefix_out = "data/HGDP1KG/r/{gwas}/{chr}"
+    shell:
+        """
+        Rscript code/HGDP1KG/compute_cord_r.R {params.prefix_tp} {input.TvecLat} {input.TvecLong} {params.prefix_out} {input.snps} {output.Lat} {output.Long}
+        rm {params.prefix_out}xt_temp.*
+        """
+
+rule rename_overlap_snps_eurasia:
+    input:
+        "data/HGDP1KG/variants/{gwas}/eurasia/overlappingSNPs_chr{chr}.txt"
+    output:
+        p1 = "data/HGDP1KG/variants/{gwas}/eurasia-lat/overlappingSNPs_chr{chr}.txt",
+        p2 = "data/HGDP1KG/variants/{gwas}/eurasia-long/overlappingSNPs_chr{chr}.txt"
+    shell:
+        """
+        cp {input} {output.p1}
+        cp {input} {output.p2}
         """
