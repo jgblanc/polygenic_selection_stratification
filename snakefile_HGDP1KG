@@ -16,7 +16,7 @@ wildcard_constraints:
 
 rule all:
     input:
-        expand("data/HGDP1KG/r/{gwas}/sdi-eur_chr{chr}.rvec", chr=CHR, gwas=GWAS, contrasts=CONTRASTS, subdataset=SUBDATASET)
+        expand("data/HGDP1KG/r/{gwas}/eur-lat_chr{chr}.rvec", chr=CHR, gwas=GWAS, contrasts=CONTRASTS, subdataset=SUBDATASET)
 
 
 ## Recode SNPs to match UKBB
@@ -289,6 +289,49 @@ rule rename_overlap_snps_eurasia:
     output:
         p1 = "data/HGDP1KG/variants/{gwas}/eurasia-lat/overlappingSNPs_chr{chr}.txt",
         p2 = "data/HGDP1KG/variants/{gwas}/eurasia-long/overlappingSNPs_chr{chr}.txt"
+    shell:
+        """
+        cp {input} {output.p1}
+        cp {input} {output.p2}
+        """
+
+## Lat Long Europe ##
+
+rule get_TestVector_Eur:
+    input:
+        testids="data/HGDP1KG/ids/test_ids/nfe_no_ceu.txt"
+    output:
+        Lat="data/HGDP1KG/TestVecs/eur-lat.txt",
+        Long="data/HGDP1KG/TestVecs/eur-long.txt"
+    shell:
+        """
+        Rscript code/HGDP1KG/get_LatLong_Tvec.R {input.testids} {output.Lat} {output.Long}
+        """
+
+rule compute_r_eur:
+    input:
+        TvecLat="data/HGDP1KG/TestVecs/eur-lat.txt",
+        TvecLong="data/HGDP1KG/TestVecs/eur-long.txt",
+        tp_genos="data/HGDP1KG/plink2-files/gnomad.genomes.v3.1.2.hgdp_tgp.chr{chr}.psam",
+        snps="data/HGDP1KG/variants/{gwas}/nfe_no_ceu/overlappingSNPs_chr{chr}.txt"
+    output:
+        Lat="data/HGDP1KG/r/{gwas}/eur-lat_chr{chr}.rvec",
+        Long="data/HGDP1KG/r/{gwas}/eur-long_chr{chr}.rvec"
+    params:
+        prefix_tp = "data/HGDP1KG/plink2-files/gnomad.genomes.v3.1.2.hgdp_tgp.chr{chr}",
+        prefix_out = "data/HGDP1KG/r/{gwas}/{chr}"
+    shell:
+        """
+        Rscript code/HGDP1KG/compute_cord_r.R {params.prefix_tp} {input.TvecLat} {input.TvecLong} {params.prefix_out} {input.snps} {output.Lat} {output.Long}
+        rm {params.prefix_out}xt_temp.*
+        """
+
+rule rename_overlap_snps_eur:
+    input:
+        "data/HGDP1KG/variants/{gwas}/nfe_no_ceu/overlappingSNPs_chr{chr}.txt"
+    output:
+        p1 = "data/HGDP1KG/variants/{gwas}/eur-lat/overlappingSNPs_chr{chr}.txt",
+        p2 = "data/HGDP1KG/variants/{gwas}/eur-long/overlappingSNPs_chr{chr}.txt"
     shell:
         """
         cp {input} {output.p1}
