@@ -221,7 +221,7 @@ dfGWAS <- df %>% filter(distance <=  q1)%>% sample_n(10000) %>% select("#FID", "
 
 Load data and format 
 ```{r}
-dfOverlap <- fread("../endpoints/HGDP/OverlapStats.txt")
+dfOverlap <- fread("../endpoints/HGDP1KG/OverlapStats.txt")
 dfOverlap <- dfOverlap %>% mutate(gwas_type2 = case_when(gwas %in% c("q1", "q2", "q3", "q4") ~ "distance",
          gwas %in% c("ALL", "WBS") ~ "full"))
 dfOverlap$gwas <- factor(dfOverlap$gwas, levels = c("ALL", "WBS", "q1", "q2", "q3", "q4"))
@@ -230,7 +230,9 @@ dfOverlap$gwas <- factor(dfOverlap$gwas, levels = c("ALL", "WBS", "q1", "q2", "q
 
 **GWAS type vs proportion of variance explained** 
 ```{r}
-dfOverlap %>% filter(contrasts == "ARFICA-EUROPE") %>% ggplot(aes(x = gwas, y = Z, fill = gwas_type2)) + geom_bar(stat = "identity") + xlab("GWAS Type") + ylab("Proportion of variance explained (Z)") + theme_bw(base_size = 14) + scale_fill_manual(values = c("purple4", "lightseagreen"))  + guides(fill="none") + theme(plot.title = element_text(hjust = 0.5)) + ylim(0, 7e-5)
+tnp <- dfOverlap %>% filter(contrasts == "nfe-afr" & L == "pruneall")
+#%>% ggplot(aes(x = gwas, y = Z, fill = gwas)) + geom_bar(stat = "identity") + xlab("GWAS Type") + ylab("Proportion of variance explained (Z)") + theme_bw(base_size = 14) 
+#+ scale_fill_manual(values = c("purple4", "lightseagreen"))  + guides(fill="none") + theme(plot.title = element_text(hjust = 0.5)) + ylim(0, 7e-5)
 ```
 
 
