@@ -7,7 +7,7 @@ GWAS=["ALL", "WBS", "q1", "q2", "q3", "q4"]
 
 rule all:
     input:
-        expand("data/SDS/r/{gwas}/UK10K_chr{chr}.rvec", chr=CHR, gwas=GWAS, contrasts=CONTRASTS)
+        expand("data/SDS/r/{gwas}/Han_chr{chr}.rvec", chr=CHR, gwas=GWAS, contrasts=CONTRASTS)
 
 # Process and match UK10K SNPs
 
