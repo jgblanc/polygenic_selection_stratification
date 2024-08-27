@@ -29,8 +29,9 @@ colnames(dfFilter)[1] <- "IID"
 
 # Plot data by lat and long
 world_map <- map_data("world")
-ggplot() + geom_polygon(data = world_map, aes(x = long, y = lat, group = group), fill = "white", color = "black") + geom_point(data = dfFilter, aes(x = longitude, y = latitude, color = project_meta.project_pop), size = 2) +
+pl <- ggplot() + geom_polygon(data = world_map, aes(x = long, y = lat, group = group), fill = "white", color = "black") + geom_point(data = dfFilter, aes(x = longitude, y = latitude, color = project_meta.project_pop), size = 2) +
   theme_minimal(base_size = 14) + xlab("Longitude") + ylab("Latitude") +labs(colour="POP") + theme(legend.position = "bottom")
+pl
 ```
 
 ### Select different test panels 
@@ -182,7 +183,8 @@ avgPC <- c(avgPC1, avgPC2)
 df$distance <- sqrt(rowSums((df[, 3:4] - avgPC)^2))
 
 # Plot distance
-ggplot(data = df, aes(x = distance, y = PC1, color = POP)) + geom_point() + theme_classic(base_size = 14) + scale_color_manual(values = c("darkred", "navy", "goldenrod4", "gray50"), na.value = "gray70")
+pl <- ggplot(data = df, aes(x = distance, y = PC1, color = POP)) + geom_point() + theme_classic(base_size = 14) + scale_color_manual(values = c("darkred", "navy", "goldenrod4", "gray50"), na.value = "gray70")
+ggsave("~/Desktop/tmp.png", pl)
 ```
 
 ```{r, eval=FALSE}
@@ -222,34 +224,77 @@ dfGWAS <- df %>% filter(distance <=  q1)%>% sample_n(10000) %>% select("#FID", "
 Load data and format 
 ```{r}
 dfOverlap <- fread("../endpoints/HGDP1KG/OverlapStats.txt")
+#dfOverlap <- fread("~/Downloads/OverlapStats.txt")
 dfOverlap <- dfOverlap %>% mutate(gwas_type2 = case_when(gwas %in% c("q1", "q2", "q3", "q4") ~ "distance",
          gwas %in% c("ALL", "WBS") ~ "full"))
 dfOverlap$gwas <- factor(dfOverlap$gwas, levels = c("ALL", "WBS", "q1", "q2", "q3", "q4"))
-#dfOverlap <- dfOverlap %>% filter(contrasts != "sdi-eur")
+dfOverlap <- dfOverlap %>% filter(contrasts != "sdi-eur")
+```
+
+```{r}
+dfPC <- fread("../endpoints/HGDP1KG/PCStats.txt")
+#dfPC <- fread("~/Downloads/PCStats.txt")
+dfPC <- dfPC %>% mutate(gwas_type2 = case_when(gwas %in% c("q1", "q2", "q3", "q4") ~ "distance",
+         gwas %in% c("ALL", "WBS") ~ "full"))
+dfPC$gwas <- factor(dfPC$gwas, levels = c("ALL", "WBS", "q1", "q2", "q3", "q4"))
+dfPC <- dfPC %>% filter(contrasts != "sdi-eur")
 ```
 
 **GWAS type vs proportion of variance explained** 
 ```{r}
-tnp <- dfOverlap %>% filter(contrasts == "nfe-afr" & L == "pruneall")
-#%>% ggplot(aes(x = gwas, y = Z, fill = gwas)) + geom_bar(stat = "identity") + xlab("GWAS Type") + ylab("Proportion of variance explained (Z)") + theme_bw(base_size = 14) 
-#+ scale_fill_manual(values = c("purple4", "lightseagreen"))  + guides(fill="none") + theme(plot.title = element_text(hjust = 0.5)) + ylim(0, 7e-5)
-```
-
-
-Load and format results
-```{r}
-dfPC <- fread("../endpoints/HGDP1KG/PCStats.txt")
-dfPC <- dfPC %>% mutate(gwas_sample = case_when(gwas %in% c("q1", "q2", "q3", "q4") ~ "distance",
-         gwas %in% c("ALL", "WBS") ~ "full"))
-dfPC$gwas <- factor(dfPC$gwas, levels = c("ALL", "WBS", "q1", "q2", "q3", "q4"))
+pl <- dfOverlap %>% filter(L == "pruneall")%>% ggplot(aes(x = gwas, y = Z, fill = gwas_type2)) + geom_bar(stat = "identity") + xlab("GWAS Type") + ylab("Proportion of variance explained (Z)") + theme_bw(base_size = 14) + scale_fill_manual(values = c("purple4", "lightseagreen"))  + guides(fill="none") + theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(size = 10, angle = 45))+facet_wrap(~contrasts, nrow = 2) 
+pl
 ```
 
 ```{r}
-dfPC %>% filter(gwas_type == "even" & test_type == "odd" & contrasts == "nfe-afr")%>% ggplot(aes(x = PC, y = B2)) + geom_bar(stat = "identity", fill = "darkgreen", color = "darkgreen") + facet_grid(~gwas) + theme_bw(base_size = 12) + ylab(TeX("$B_{i}^2$"))  + theme(plot.title = element_text(hjust = 0.5))
+pl <- dfOverlap %>% filter(L == "pruneall")%>% ggplot(aes(x = contrasts, y = Z, fill = gwas_type2)) + geom_bar(stat = "identity") + xlab("Contrast") + ylab("Proportion of variance explained (Z)") + theme_bw(base_size = 14)  + guides(fill="none") + theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(size = 10, angle = 90 )) + facet_wrap(~gwas, nrow = 2, scales = "free") + scale_fill_manual(values = c("purple4", "lightseagreen"))
+pl
+```
+
+
+```{r}
+dfPlot <- dfPC %>% filter(gwas_type == "all" & test_type == "all", L == "pruneall", contrasts == "afr-amr") %>% group_by(gwas) %>% mutate(cumVarExp = cumsum(VarExp)) %>% ungroup()
+
+pl <- ggplot(data = dfPlot, aes(x = PC, y = cumVarExp, fill = gwas_type2)) + geom_bar(stat = "identity") + facet_wrap(~gwas, nrow = 2, scales = "free") + ylab("Cummulative prop. variance explained")  + theme_bw(base_size = 14)  + guides(fill="none") + theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(size = 10 )) + scale_fill_manual(values = c("purple4", "lightseagreen"))
+```
+
+```{r}
+pl <- dfOverlap %>% filter(L == "pruneall") %>% ggplot(aes(x = contrasts, y = error, color = gwas_type2)) + geom_point() + facet_wrap(~gwas, nrow =2) + theme_bw(base_size = 14) + theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(size = 10,angle = 45, hjust = 1)) + scale_color_manual(values = c("purple4", "lightseagreen"))  + guides(color ="none") + xlab("")
+ggsave("~/Desktop/tmp.png",pl,  height = 5)
 ```
 
 
 
+```{r}
+pl <- dfOverlap %>% filter(L != "pruneall" & gwas == "WBS") %>% mutate(L= as.numeric(as.character(L))) %>% ggplot(aes(x = L, y = error)) + geom_point(color = "lightseagreen") + facet_wrap(~contrasts, nrow =2) + scale_x_log10()  + theme_bw(base_size = 14) + theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(size = 10,angle = 45, hjust = 1)) + ggtitle("WBS") + geom_hline(yintercept = 1, color = "red")
+ggsave("~/Desktop/tmp.png",pl,  height = 5)
+```
+
+```{r}
+pl <- dfOverlap %>% filter(L == "pruneall") %>% ggplot(aes(x = Z, y = error, shape = gwas, color = contrasts)) + geom_point() + theme_bw(base_size = 14) + theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(size = 10,angle = 45, hjust = 1)) + xlab("Proportion of variance explained (Z)") + scale_x_log10() + scale_y_log10() + guides(color = guide_legend(ncol = 2),shape = guide_legend(ncol = 2)
+)
+pl
+
+ggsave("~/Desktop/tmp.png",pl,  height = 4)
+```
+
+
+
+```{r}
+pl <- dfPC %>% filter(gwas_type == "even" & test_type == "odd" & L == "pruneall" & PC < 10)%>% ggplot(aes(x = PC, y = B2)) + geom_bar(stat = "identity", fill = "darkgreen", color = "darkgreen") + facet_grid(vars(gwas), vars(contrasts)) + theme_bw(base_size = 12) + ylab(TeX("$B_{i}^2$"))  + theme(plot.title = element_text(hjust = 0.5))+ scale_x_continuous(breaks = seq(2, 10, by = 2))
+pl
+
+ggsave("~/Desktop/tmp.png",pl,  height = 4)
+```
+
+
+
+```{r}
+pl <- dfPC %>% filter(gwas_type == "even" & test_type == "odd" & L == "pruneall" & gwas == "WBS") %>% ggplot(aes(x = PC, y = r2)) + geom_bar(stat = "identity", fill = "darkgreen", color = "darkgreen") + facet_grid(vars(gwas), vars(contrasts)) + theme_bw(base_size = 12) + ylab(TeX("$R_{K}^2$")) + geom_hline( aes(yintercept = 1-Error), color = "red", linetype = 2, linewidth = 1) + scale_x_continuous(breaks = seq(0, 40, by = 10)) + theme(axis.text.x = element_text(size = 6))
+pl
+
+#ggsave("~/Desktop/tmp.png",pl,  height = 4)
+```
 
 
 
