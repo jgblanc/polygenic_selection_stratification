@@ -7,7 +7,7 @@ CONTRASTS = ["UK10K", "Han"]
 GWAS= ["q1", "q2", "q3", "q4", "ALL", "WBS"]
 CHRTYPE_GWAS = ["chr-even", "chr-all"]
 CHRTYPE_TEST = ["test-odd", "test-all"]
-NSNP = ["L-1000" ,"L-3162", "L-10000","L-31623",  "L-100000","L-316228", "L-pruneall"]
+NSNP = ["L-pruneall"]
 
 rule all:
     input:
