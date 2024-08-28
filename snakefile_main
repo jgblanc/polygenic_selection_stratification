@@ -185,12 +185,12 @@ rule make_tmp_plink2:
         overlap_snps="data/{dataset}/pruned_snps/{gwas}/{contrasts}/{nsnp}.txt",
         ids="data/ids/gwas_ids/{gwas}.txt"
     output:
-        temp("/scratch/jgblanc/ukbb/plink2-files/{gwas}/{contrasts}/merged/{nsnp}_{chr}.pgen"),
-        temp("/scratch/jgblanc/ukbb/plink2-files/{gwas}/{contrasts}/merged/{nsnp}_{chr}.pvar"),
-        temp("/scratch/jgblanc/ukbb/plink2-files/{gwas}/{contrasts}/merged/{nsnp}_{chr}.psam"),
-	temp("/scratch/jgblanc/ukbb/plink2-files/{gwas}/merged/{contrasts}/{nsnp}_{chr}.log")
+        temp("/scratch/jgblanc/ukbb/plink2-files/{dataset}/{gwas}/{contrasts}/merged/{nsnp}_{chr}.pgen"),
+        temp("/scratch/jgblanc/ukbb/plink2-files/{dataset}/{gwas}/{contrasts}/merged/{nsnp}_{chr}.pvar"),
+        temp("/scratch/jgblanc/ukbb/plink2-files/{dataset}/{gwas}/{contrasts}/merged/{nsnp}_{chr}.psam"),
+	temp("/scratch/jgblanc/ukbb/plink2-files/{gwas}/{dataset}/merged/{contrasts}/{nsnp}_{chr}.log")
     params:
-        prefix_out="/scratch/jgblanc/ukbb/plink2-files/{gwas}/merged/{nsnp}_{chr}",
+        prefix_out="/scratch/jgblanc/ukbb/plink2-files/{dataset}/{gwas}/merged/{nsnp}_{chr}",
         prefix_plink="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3"
     threads: 16
     resources:
@@ -220,17 +220,17 @@ rule separate_snps:
 
 rule merge_GWAS_PCA:
     input:
-        gp_genos=expand("/scratch/jgblanc/ukbb/plink2-files/{{gwas}}/{{contrasts}}/merged/{nsnp}_{chr}.pgen", chr=CHR),
-	gp_psam=expand("/scratch/jgblanc/ukbb/plink2-files/{{gwas}}/{{contrasts}}/merged/{{nsnp}}_{chr}.psam", chr=CHR),
-	gp_pvar=expand("/scratch/jgblanc/ukbb/plink2-files/{{gwas}}/{{contrasts}}/merged/{{nsnp}}_{chr}.pvar", chr=CHR),
-	gp_log=expand("/scratch/jgblanc/ukbb/plink2-files/{{gwas}}/{{contrasts}}.merged/{{nsnp}}_{chr}.log", chr=CHR),
+        gp_genos=expand("/scratch/jgblanc/ukbb/plink2-files/{{dataset}}/{{gwas}}/{{contrasts}}/merged/{nsnp}_{chr}.pgen", chr=CHR),
+	gp_psam=expand("/scratch/jgblanc/ukbb/plink2-files/{{dataset}}/{{gwas}}/{{contrasts}}/merged/{{nsnp}}_{chr}.psam", chr=CHR),
+	gp_pvar=expand("/scratch/jgblanc/ukbb/plink2-files/{{dataset}}/{{gwas}}/{{contrasts}}/merged/{{nsnp}}_{chr}.pvar", chr=CHR),
+	gp_log=expand("/scratch/jgblanc/ukbb/plink2-files/{{dataset}}/{{gwas}}/{{contrasts}}.merged/{{nsnp}}_{chr}.log", chr=CHR),
         snp="data/{dataset}/pruned_snps/{gwas}/{contrasts}/{nsnp}_{chrtype_gwas}.txt"
     output:
-        vec="output/pca/{gwas}/{contrasts}/{nsnp}/{chrtype_gwas}.eigenvec",
-        val="output/pca/{gwas}/{contrasts}/{nsnp}/{chrtype_gwas}.eigenval"
+        vec="output/pca/{dataset}/{gwas}/{contrasts}/{nsnp}/{chrtype_gwas}.eigenvec",
+        val="output/pca/{dataset}/{gwas}/{contrasts}/{nsnp}/{chrtype_gwas}.eigenval"
     params:
-        prefix_out="output/pca/{gwas}/{contrasts}/{nsnp}/{chrtype_gwas}",
-        merge_prefix=expand("/scratch/jgblanc/ukbb/plink2-files/{{gwas}}/{{contrasts}}/merged/{{nsnp}}_{chr}", chr=CHR, newline="\n")
+        prefix_out="output/pca/{dataset}/{gwas}/{contrasts}/{nsnp}/{chrtype_gwas}",
+        merge_prefix=expand("/scratch/jgblanc/ukbb/plink2-files/{{dataset}}/{{gwas}}/{{contrasts}}/merged/{{nsnp}}_{chr}", chr=CHR, newline="\n")
     threads: 16
     resources:
         mem_mb=60000,
