@@ -32,6 +32,8 @@ dfYoI <- fread("../data/InUKBB/data/YearImmigratedToUK_3659.txt")
 dfYoI <- inner_join(df, dfYoI) %>% filter(YearImmigratedToUK_3659 > 0)
 
 ggplot(data = dfYoI, aes(x = YearImmigratedToUK_3659, y = PC1 ,color = continental)) + geom_point() 
+
+ggplot(data = dfYoI, aes(x = YearImmigratedToUK_3659, color = continental)) + geom_density()
 ```
 Country of Birth UK 
 ```{r}
@@ -56,4 +58,6 @@ Country of Birth Non-UK
 dfCoB <- fread("../data/InUKBB/data/CountryOfBirthNonUK_20115.txt")
 dfSum <- dfCoB %>% group_by(CountryOfBirthNonUK_20115) %>% summarise(count = n())
 ```
+
+
 
