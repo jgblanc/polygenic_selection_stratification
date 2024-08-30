@@ -23,6 +23,7 @@ data/HGDP1KG/plink2-files/*
 data/*/pruned_snps/*
 data/gwas_variance/*
 data/HGDP/*
+data/phenotypes/*
 output/*
 logs/*
 .snakemake/
