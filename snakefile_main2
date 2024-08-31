@@ -13,6 +13,8 @@ CHRTYPE_TEST = ["test-odd", "test-all"]
 PC = [0,40]
 #NSNP = ["L-1000" ,"L-3162", "L-10000","L-31623",  "L-100000","L-316228", "L-1000000", "L-pruneall"]
 NSNP = ["L-pruneall"]
+PHENOTYPE=["StandingHeight_50"]
+COVAR = ["no-FGr", "FGr-LOCO"]
 
 
 def get_chr_num(x):
@@ -25,7 +27,7 @@ wildcard_constraints:
 
 rule all:
     input:
-        expand("output/run_gwas/{dataset}/{gwas}/{contrasts}/{nsnp}/covariates/no-FGr_{chr}-PC{pc}.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST, nsnp=NSNP, pc=PC)
+        expand("/scratch/jgblanc/polygenic_selection_stratification/output/run_gwas/{dataset}/{gwas}/{contrasts}/{nsnp}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST, nsnp=NSNP, pc=PC)
 
 # Get sample variance of GWAS panel genotypes for all GWAS panels
 
@@ -337,6 +339,39 @@ rule assemble_quant_covars_FGr_PCA:
         """
         Rscript code/run_gwas/assemble_quant_covar.R {input.age} {input.covar} {input.pcs} {params.pcNum} {output}
         """
+
+# Run GWAS
+
+rule run_fastGWA:
+    input:
+      pheno="data/phenotypes/{phenotype}.txt",
+      qcovar="output/run_gwas/{dataset}/{gwas}/{contrasts}/{nsnp}/covariates/{covar}_{chr}-PC{pc}.txt",
+      gp_genos="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen",
+      overlap_snps="data/{dataset}/pruned_snps/{gwas}/{contrasts}/{nsnp}.txt",
+      covar="output/run_gwas/fixed_covars.txt",
+      IDs="data/ids/gwas_ids/{gwas}.txt"
+    output:
+      "/scratch/jgblanc/polygenic_selection_stratification/output/run_gwas/{dataset}/{gwas}/{contrasts}/{nsnp}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",
+    params:
+        prefix_out = "/scratch/jgblanc/polygenic_selection_stratification/output/run_gwas/{dataset}/{gwas}/{contrasts}/{nsnp}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}",
+        prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3"
+    threads: 16
+    resources:
+        mem_mb=100,
+        time="00:30:00"
+    shell:
+        """
+        gcta  --pheno {input.pheno} \
+        --keep {input.IDs} \
+        --qcovar {input.qcovar} \
+        --covar {input.covar} \
+        --extract {input.overlap_snps} \
+        --fastGWA-lr \
+        --threads {threads} \
+        --pfile {params.prefix_plink} \
+        --out {params.prefix_out}
+        """
+
 
 
 # Summarize Results
