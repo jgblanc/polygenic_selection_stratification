@@ -237,7 +237,7 @@ rule merge_GWAS_PCA:
     threads: 16
     resources:
         mem_mb=100000,
-        time="12:00:00"
+        time="24:00:00"
     shell:
         """
         echo {params.merge_prefix} > {params.prefix_out}{wildcards.gwas}-{wildcards.chrtype_gwas}-tmp.txt

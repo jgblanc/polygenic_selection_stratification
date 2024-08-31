@@ -4,7 +4,7 @@ CHR = []
 for i in range(1, 23):
   CHR.append(str(i))
 #CONTRASTS = ["eurasia-lat", "eurasia-long", "eur-lat", "eur-long","sdi-eur", "eas-nfe", "eas-sas", "eas-afr", "eas-amr", "nfe-sas", "nfe-afr", "nfe-amr", "sas-afr", "sas-amr", "afr-amr"]
-CONTRASTS = ["eurasia-lat"]
+CONTRASTS = ["eurasia-long"]
 #GWAS=["complete", "half", "quarter", "threequarter", "none"]
 #GWAS= ["q1", "q2", "q3", "q4", "ALL", "WBS"]
 GWAS= ["q1"]
@@ -15,7 +15,7 @@ PC = [0,40]
 NSNP = ["L-pruneall"]
 
 
-def get_PC_num(x):
+def get_chr_num(x):
   out = int(x)
   return out
 
@@ -25,7 +25,7 @@ wildcard_constraints:
 
 rule all:
     input:
-        expand("output/calculate_FGr/{dataset}/FGr_LOCO/{gwas}/{nsnp}/FGr-LOCO_{contrasts}_{chr}.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST, nsnp=NSNP)
+        expand("output/run_gwas/{dataset}/{gwas}/{contrasts}/{nsnp}/covariates/no-FGr_{chr}-PC{pc}.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST, nsnp=NSNP, pc=PC)
 
 # Get sample variance of GWAS panel genotypes for all GWAS panels
 
@@ -316,9 +316,9 @@ rule assemble_quant_covars_PCA:
         age="data/phenotypes/age_at_recruitment_21022.txt",
         pcs="output/pca/{dataset}/{gwas}/{contrasts}/{nsnp}/chr-all.eigenvec"
     output:
-        "output/run_gwas/{dataset}/{gwas}/{constrasts}/{nsnp}/covariates/no-FGr_{chr}-PC{pc}.txt"
+        "output/run_gwas/{dataset}/{gwas}/{contrasts}/{nsnp}/covariates/no-FGr_{chr}-PC{pc}.txt"
     params:
-        pcNum = lambda wildcards: get_pc_num(wildcards.pc)
+        pcNum = lambda wildcards: get_chr_num(wildcards.pc)
     shell:
         """
         Rscript code/run_gwas/assemble_quant_covar_control.R {input.age} {input.pcs} {params.pcNum} {output}
@@ -330,9 +330,9 @@ rule assemble_quant_covars_FGr_PCA:
         covar="output/calculate_FGr/{dataset}/FGr_LOCO/{gwas}/{nsnp}/FGr-LOCO_{contrasts}_{chr}.txt",
         pcs="output/pca/{dataset}/{gwas}/{contrasts}/{nsnp}/chr-all.eigenvec"
     output:
-        "output/run_gwas/{dataset}/{gwas}/{constrasts}/{nsnp}/covariates/FGr-LOCO_{chr}-PC{pc}.txt"
+        "output/run_gwas/{dataset}/{gwas}/{contrasts}/{nsnp}/covariates/FGr-LOCO_{chr}-PC{pc}.txt"
     params:
-        pcNum = lambda wildcards: get_pc_num(wildcards.pc)
+        pcNum = lambda wildcards: get_chr_num(wildcards.pc)
     shell:
         """
         Rscript code/run_gwas/assemble_quant_covar.R {input.age} {input.covar} {input.pcs} {params.pcNum} {output}
