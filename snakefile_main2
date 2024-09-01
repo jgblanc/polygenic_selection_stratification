@@ -15,6 +15,7 @@ PC = [0,40]
 NSNP = ["L-pruneall"]
 PHENOTYPE=["StandingHeight_50"]
 COVAR = ["no-FGr", "FGr-LOCO"]
+PVALUE_THRESHOLD = "1e-5"
 
 
 def get_chr_num(x):
@@ -27,7 +28,7 @@ wildcard_constraints:
 
 rule all:
     input:
-        expand("/scratch/jgblanc/polygenic_selection_stratification/output/run_gwas/{dataset}/{gwas}/{contrasts}/{nsnp}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST, nsnp=NSNP, pc=PC, phenotype=PHENOTYPE, covar=COVAR)
+        expand("/scratch/jgblanc/polygenic_selection_stratification/output/pga_test/{dataset}/{gwas}/{contrasts}/{nsnp}/{phenotype}/formated_ss_LR/{covar}_{contrasts}_{chr}-PC{pc}.betas", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST, nsnp=NSNP, pc=PC, phenotype=PHENOTYPE, covar=COVAR)
 
 # Get sample variance of GWAS panel genotypes for all GWAS panels
 
@@ -372,6 +373,22 @@ rule run_fastGWA:
         --out {params.prefix_out}
         """
 
+## Pick minimum p-value per block
+
+rule assign_snps_to_blocks:
+    input:
+        ldBlocks="data/LD_blocks/fourier_ls-all_parsed.bed",
+        ss="/scratch/jgblanc/polygenic_selection_stratification/output/run_gwas/{dataset}/{gwas}/{contrasts}/{nsnp}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",
+        r="data/{dataset}/r/{gwas}/{contrasts}_chr{chr}.rvec",
+    output:
+        betas="/scratch/jgblanc/polygenic_selection_stratification/output/pga_test/{dataset}/{gwas}/{contrasts}/{nsnp}/{phenotype}/formated_ss_LR/{covar}_{contrasts}_{chr}-PC{pc}.betas"
+    params:
+        pt = PVALUE_THRESHOLD
+    shell:
+        """
+        Rscript code/pga_test/assign_snps_to_blocks_LR.R {input.ldBlocks} {input.ss} {input.r} {output.betas} {params.pt}
+        rm {input.ss}
+        """
 
 
 # Summarize Results
@@ -395,3 +412,4 @@ rule concat_pc_stats:
         """
         Rscript code/summarize/concat_PCStats.R {output} {input}
         """
+
