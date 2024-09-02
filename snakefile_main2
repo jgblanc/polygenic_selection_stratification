@@ -3,11 +3,11 @@ DATASET = ["HGDP1KG"]
 CHR = []
 for i in range(1, 23):
   CHR.append(str(i))
-#CONTRASTS = ["eurasia-lat", "eurasia-long", "eur-lat", "eur-long","sdi-eur", "eas-nfe", "eas-sas", "eas-afr", "eas-amr", "nfe-sas", "nfe-afr", "nfe-amr", "sas-afr", "sas-amr", "afr-amr"]
-CONTRASTS = ["eurasia-long"]
+CONTRASTS = ["eurasia-lat", "eurasia-long", "eur-lat", "eur-long","sdi-eur", "eas-nfe", "eas-sas", "eas-afr", "eas-amr", "nfe-sas", "nfe-afr", "nfe-amr", "sas-afr", "sas-amr", "afr-amr"]
+#CONTRASTS = ["eurasia-long"]
 #GWAS=["complete", "half", "quarter", "threequarter", "none"]
-#GWAS= ["q1", "q2", "q3", "q4", "ALL", "WBS"]
-GWAS= ["q1"]
+GWAS= ["q1", "q2", "q3", "q4"]
+#GWAS= ["q1"]
 CHRTYPE_GWAS = ["chr-even", "chr-all"]
 CHRTYPE_TEST = ["test-odd", "test-all"]
 PC = [0,40]
@@ -15,7 +15,7 @@ PC = [0,40]
 NSNP = ["L-pruneall"]
 PHENOTYPE=["StandingHeight_50"]
 COVAR = ["no-FGr", "FGr-LOCO"]
-PVALUE_THRESHOLD = "1e-5"
+PVALUE_THRESHOLD = "1e-3"
 
 
 def get_chr_num(x):
@@ -352,7 +352,7 @@ rule run_fastGWA:
       covar="output/run_gwas/fixed_covars.txt",
       IDs="data/ids/gwas_ids/{gwas}.txt"
     output:
-      "/scratch/jgblanc/polygenic_selection_stratification/output/run_gwas/{dataset}/{gwas}/{contrasts}/{nsnp}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",
+      temp("/scratch/jgblanc/polygenic_selection_stratification/output/run_gwas/{dataset}/{gwas}/{contrasts}/{nsnp}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA"),
     params:
         prefix_out = "/scratch/jgblanc/polygenic_selection_stratification/output/run_gwas/{dataset}/{gwas}/{contrasts}/{nsnp}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}",
         prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3"
@@ -381,13 +381,12 @@ rule assign_snps_to_blocks:
         ss="/scratch/jgblanc/polygenic_selection_stratification/output/run_gwas/{dataset}/{gwas}/{contrasts}/{nsnp}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",
         r="data/{dataset}/r/{gwas}/{contrasts}_chr{chr}.rvec",
     output:
-        betas="/scratch/jgblanc/polygenic_selection_stratification/output/pga_test/{dataset}/{gwas}/{contrasts}/{nsnp}/{phenotype}/formated_ss_LR/{covar}_{contrasts}_{chr}-PC{pc}.betas"
+        betas=temp("/scratch/jgblanc/polygenic_selection_stratification/output/pga_test/{dataset}/{gwas}/{contrasts}/{nsnp}/{phenotype}/formated_ss_LR/{covar}_{contrasts}_{chr}-PC{pc}.betas")
     params:
         pt = PVALUE_THRESHOLD
     shell:
         """
         Rscript code/pga_test/assign_snps_to_blocks_LR.R {input.ldBlocks} {input.ss} {input.r} {output.betas} {params.pt}
-        rm {input.ss}
         """
 
 # Run selection test
@@ -400,21 +399,17 @@ rule concat_snps:
     shell:
         """
         cat {input} > {output}
-        rm {input}
         """
 
 rule pga_test:
     input:
         "output/pga_test/{dataset}/{gwas}/{contrasts}/{nsnp}/{phenotype}/formated_ss_LR/{covar}_{contrasts}.all-PC{pc}.betas"
     output:
-        results="output/pga_test/{dataset}/{gwas}/{contrasts}/{nsnp}/{phenotype}/results_LR/{covar}_{contrasts}.all-PC{pc}.results",
-	gzip="output/pga_test/{dataset}/{gwas}/{contrasts}/{nsnp}/{phenotype}/formated_ss_LR/{covar}_{contrasts}.all-PC{pc}.betas.gz"
+        results="output/pga_test/{dataset}/{gwas}/{contrasts}/{nsnp}/{phenotype}/results_LR/{covar}_{contrasts}.all-PC{pc}.results"
     shell:
         """
         Rscript code/pga_test/run_test_jacknife_LR.R {input} {output.results}
-	gzip {input}
         """
-
 
 
 # Summarize Results

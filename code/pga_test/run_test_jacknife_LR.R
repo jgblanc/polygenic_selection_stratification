@@ -75,11 +75,12 @@ main <- function(df) {
 
 
 # Set up output table
-out <- as.data.frame(matrix(nrow = 1, ncol =4))
-colnames(out) <- c("q", "pval", "q_NoSign", "pval_NoSign")
+out <- as.data.frame(matrix(nrow = 1, ncol =5))
+colnames(out) <- c("q", "pval", "q_NoSign", "pval_NoSign", "nsnp")
 out[1,1:2] <- main(df)
 df$BETA <- sign(df$BETA)
 out[1,3:4] <- main(df)
+out[1,5] <- nrow(df)
 
 
 # Save output

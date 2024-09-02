@@ -4,13 +4,12 @@ CHR = []
 for i in range(1, 23):
   CHR.append(str(i))
 CONTRASTS = ["eurasia-lat", "eurasia-long", "eur-lat", "eur-long","sdi-eur", "eas-nfe", "eas-sas", "eas-afr", "eas-amr", "nfe-sas", "nfe-afr", "nfe-amr", "sas-afr", "sas-amr", "afr-amr"]
-#CONTRASTS = ["eurasia-lat"]
+#CONTRASTS = ["eurasia-long", "eurasia-lat",  "eur-lat", "eur-long"]
 #GWAS=["complete", "half", "quarter", "threequarter", "none"]
-GWAS= ["q1", "q2", "q3", "q4", "ALL", "WBS"]
+GWAS= ["ALL", "WBS"]
 #GWAS= ["q1"]
 CHRTYPE_GWAS = ["chr-even", "chr-all"]
 CHRTYPE_TEST = ["test-odd", "test-all"]
-#NSNP = ["L-1000" ,"L-3162", "L-10000","L-31623",  "L-100000","L-316228", "L-1000000", "L-pruneall"]
 NSNP = ["L-pruneall"]
 
 wildcard_constraints:
@@ -18,7 +17,7 @@ wildcard_constraints:
 
 rule all:
     input:
-        expand("endpoints/{dataset}/PCStats.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST, nsnp=NSNP)
+        expand("output/pca/{dataset}/{gwas}/{contrasts}/{nsnp}/{chrtype_gwas}.eigenvec", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST, nsnp=NSNP)
 
 # Get sample variance of GWAS panel genotypes for all GWAS panels
 
@@ -237,7 +236,7 @@ rule merge_GWAS_PCA:
     threads: 16
     resources:
         mem_mb=100000,
-        time="24:00:00"
+        time="48:00:00"
     shell:
         """
         echo {params.merge_prefix} > {params.prefix_out}{wildcards.gwas}-{wildcards.chrtype_gwas}-tmp.txt
