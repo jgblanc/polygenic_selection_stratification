@@ -235,7 +235,7 @@ rule merge_GWAS_PCA:
         merge_prefix=expand("/scratch/jgblanc/ukbb/plink2-files/{{dataset}}/{{gwas}}/{{contrasts}}/merged/{{nsnp}}_{chr}", chr=CHR, newline="\n")
     threads: 16
     resources:
-        mem_mb=100000,
+        mem_mb=200000,
         time="48:00:00"
     shell:
         """
@@ -244,7 +244,7 @@ rule merge_GWAS_PCA:
         plink2 --pmerge-list {params.prefix_out}{wildcards.gwas}-{wildcards.chrtype_gwas}-tmp_chrm_list.txt \
         --pca 40 approx \
         --extract {input.snp} \
-        --memory 100000 \
+        --memory 200000 \
         --threads 16 \
         --out {params.prefix_out}
         cp {params.prefix_out}.eigenvec {output.vec}
