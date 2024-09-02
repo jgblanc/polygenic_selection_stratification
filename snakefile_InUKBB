@@ -10,7 +10,7 @@ GWAS=["q1", "q2", "q3", "q4"]
 
 rule all:
     input:
-        expand("data/InUKBB/popAF/{gwas}/popAF_{chr}.England.afreq, chr=CHR, gwas=GWAS, contrasts=CONTRASTS)
+        expand("data/InUKBB/popAF/{gwas}/popAF_{chr}.England.afreq", chr=CHR, gwas=GWAS, contrasts=CONTRASTS)
 
 
 ## Get overlapping SNPs for each subdataset
