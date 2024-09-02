@@ -10,7 +10,7 @@ GWAS=["q1", "q2", "q3", "q4"]
 
 rule all:
     input:
-        expand("data/HGDP1KG/r/{gwas}/England-NorthernIreland_chr{chr}.rvec", chr=CHR, gwas=GWAS, contrasts=CONTRASTS)
+        expand("data/InUKBB/r/{gwas}/England-NorthernIreland_chr{chr}.rvec", chr=CHR, gwas=GWAS, contrasts=CONTRASTS)
 
 
 ## Get overlapping SNPs for each subdataset
@@ -85,41 +85,41 @@ rule get_popAF_all:
 
 rule compute_r_all:
     input:
-        E="data/HGDP1KG/popAF/{gwas}/popAF_{chr}.England.afreq",
-        NI="data/HGDP1KG/popAF/{gwas}/popAF_{chr}.NorthernIreland.afreq",
-        RoI="data/HGDP1KG/popAF/{gwas}/popAF_{chr}.RepublicOfIrelend.afreq",
-        S="data/HGDP1KG/popAF/{gwas}/popAF_{chr}.Scotland.afreq",
-        W="data/HGDP1KG/popAF/{gwas}/popAF_{chr}.Wales.afreq"
+        E="data/InUKBB/popAF/{gwas}/popAF_{chr}.England.afreq",
+        NI="data/InUKBB/popAF/{gwas}/popAF_{chr}.NorthernIreland.afreq",
+        RoI="data/InUKBB/popAF/{gwas}/popAF_{chr}.RepublicOfIrelend.afreq",
+        S="data/InUKBB/popAF/{gwas}/popAF_{chr}.Scotland.afreq",
+        W="data/InUKBB/popAF/{gwas}/popAF_{chr}.Wales.afreq"
     output:
-        p1 = "data/HGDP1KG/r/{gwas}/England-NorthernIreland_chr{chr}.rvec",
-        p2 = "data/HGDP1KG/r/{gwas}/England-RepublicOfIrelend_chr{chr}.rvec",
-        p3 = "data/HGDP1KG/r/{gwas}/England-Scotland_chr{chr}.rvec",
-        p4 = "data/HGDP1KG/r/{gwas}/England-Wales_chr{chr}.rvec",
-        p5 = "data/HGDP1KG/r/{gwas}/NorthernIreland-RepublicOfIrelend_chr{chr}.rvec",
-        p6 = "data/HGDP1KG/r/{gwas}/NorthernIreland-Scotland_chr{chr}.rvec",
-        p7 = "data/HGDP1KG/r/{gwas}/NorthernIreland-Wales_chr{chr}.rvec",
-        p8 = "data/HGDP1KG/r/{gwas}/RepublicOfIrelend-Scotland_chr{chr}.rvec",
-        p9 = "data/HGDP1KG/r/{gwas}/RepublicOfIrelend-Wales_chr{chr}.rvec",
-        p10 = "data/HGDP1KG/r/{gwas}/Scotland-Wales_chr{chr}.rvec"
+        p1 = "data/InUKBB/r/{gwas}/England-NorthernIreland_chr{chr}.rvec",
+        p2 = "data/InUKBB/r/{gwas}/England-RepublicOfIrelend_chr{chr}.rvec",
+        p3 = "data/InUKBB/r/{gwas}/England-Scotland_chr{chr}.rvec",
+        p4 = "data/InUKBB/r/{gwas}/England-Wales_chr{chr}.rvec",
+        p5 = "data/InUKBB/r/{gwas}/NorthernIreland-RepublicOfIrelend_chr{chr}.rvec",
+        p6 = "data/InUKBB/r/{gwas}/NorthernIreland-Scotland_chr{chr}.rvec",
+        p7 = "data/InUKBB/r/{gwas}/NorthernIreland-Wales_chr{chr}.rvec",
+        p8 = "data/InUKBB/r/{gwas}/RepublicOfIrelend-Scotland_chr{chr}.rvec",
+        p9 = "data/InUKBB/r/{gwas}/RepublicOfIrelend-Wales_chr{chr}.rvec",
+        p10 = "data/InUKBB/r/{gwas}/Scotland-Wales_chr{chr}.rvec"
     shell:
         """
-        Rscript code/HGDP1KG/compute_pairwase_contrasts.R {input.E} {input.NI} {input.RoI} {input.S} {input.W} {output.p1} {output.p2} {output.p3} {output.p4} {output.p5} {output.p6} {output.p7} {output.p8} {output.p9} {output.p10}
+        Rscript code/InUKBB/compute_pairwase_contrasts.R {input.E} {input.NI} {input.RoI} {input.S} {input.W} {output.p1} {output.p2} {output.p3} {output.p4} {output.p5} {output.p6} {output.p7} {output.p8} {output.p9} {output.p10}
         """
 
 rule rename_overlap_snps_all:
     input:
         "data/InUKBB/variants/{gwas}/overlappingSNPs_chr{chr}.txt"
     output:
-        p1="data/HGDP1KG/variants/{gwas}/England-NorthernIreland/overlappingSNPs_chr{chr}.txt",
-        p2="data/HGDP1KG/variants/{gwas}/England-RepublicOfIrelend/overlappingSNPs_chr{chr}.txt",
-        p3="data/HGDP1KG/variants/{gwas}/England-Scotland/overlappingSNPs_chr{chr}.txt",
-        p4="data/HGDP1KG/variants/{gwas}/England-Wales/overlappingSNPs_chr{chr}.txt",
-        p5="data/HGDP1KG/variants/{gwas}/NorthernIreland-RepublicOfIrelend/overlappingSNPs_chr{chr}.txt",
-        p6="data/HGDP1KG/variants/{gwas}/NorthernIreland-Scotland/overlappingSNPs_chr{chr}.txt",
-        p7="data/HGDP1KG/variants/{gwas}/NorthernIreland-Wales/overlappingSNPs_chr{chr}.txt",
-        p8="data/HGDP1KG/variants/{gwas}/RepublicOfIrelend-Scotland/overlappingSNPs_chr{chr}.txt",
-        p9="data/HGDP1KG/variants/{gwas}/RepublicOfIrelend-Wales/overlappingSNPs_chr{chr}.txt",
-        p10="data/HGDP1KG/variants/{gwas}/Scotland-Wales/overlappingSNPs_chr{chr}.txt",
+        p1="data/InUKBB/variants/{gwas}/England-NorthernIreland/overlappingSNPs_chr{chr}.txt",
+        p2="data/InUKBB/variants/{gwas}/England-RepublicOfIrelend/overlappingSNPs_chr{chr}.txt",
+        p3="data/InUKBB/variants/{gwas}/England-Scotland/overlappingSNPs_chr{chr}.txt",
+        p4="data/InUKBB/variants/{gwas}/England-Wales/overlappingSNPs_chr{chr}.txt",
+        p5="data/InUKBB/variants/{gwas}/NorthernIreland-RepublicOfIrelend/overlappingSNPs_chr{chr}.txt",
+        p6="data/InUKBB/variants/{gwas}/NorthernIreland-Scotland/overlappingSNPs_chr{chr}.txt",
+        p7="data/InUKBB/variants/{gwas}/NorthernIreland-Wales/overlappingSNPs_chr{chr}.txt",
+        p8="data/InUKBB/variants/{gwas}/RepublicOfIrelend-Scotland/overlappingSNPs_chr{chr}.txt",
+        p9="data/InUKBB/variants/{gwas}/RepublicOfIrelend-Wales/overlappingSNPs_chr{chr}.txt",
+        p10="data/InUKBB/variants/{gwas}/Scotland-Wales/overlappingSNPs_chr{chr}.txt",
     shell:
         """
         cp {input} {output.p1}
