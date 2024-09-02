@@ -23,6 +23,40 @@ df <- inner_join(dfPCA, dfEB)
 df <- df %>% mutate(continental = case_when(EthnicBackground_21000 %in% c(4, 4001, 4002, 4003) ~ "Africa", EthnicBackground_21000 %in% c(1, 1001, 1002, 1003) ~ "Europe", EthnicBackground_21000 %in% c(2, 2001, 2002, 2003, 2004) ~ "Mixed", EthnicBackground_21000 %in% c(3, 3001, 3002, 3003, 3004) ~ "Asia"))
 ```
 
+## Read in GWAS IDs
+
+```{r}
+dfQ1 <- fread("../data/ids/gwas_ids/q1.txt")
+dfQ2 <- fread("../data/ids/gwas_ids/q2.txt")
+dfQ3 <- fread("../data/ids/gwas_ids/q3.txt")
+dfQ4 <- fread("../data/ids/gwas_ids/q4.txt")
+
+dfGWAS <- rbind(dfQ1, dfQ2, dfQ3, dfQ4)
+```
+
+## Country of Birth UK
+
+```{r}
+dfCoBUK <- fread("../data/InUKBB/data/CountryOfBirthUK_1647.txt")
+dfCoBUK <- dfCoBUK %>% filter(CountryOfBirthUK_1647 > 0) %>% 
+  mutate(CoB = case_when(CountryOfBirthUK_1647 == 1 ~ "England",
+                         CountryOfBirthUK_1647 == 2 ~ "Wales",
+                         CountryOfBirthUK_1647 == 3 ~ "Scotland",
+                         CountryOfBirthUK_1647 == 4 ~ "NorthernIreland", 
+                         CountryOfBirthUK_1647 == 5 ~ "RepublicOfIrelend", 
+                         CountryOfBirthUK_1647 == 6 ~ "Elsewhere"))
+
+dfCoBUK <- inner_join(dfCoBUK, df)%>% filter(continental == "Europe")
+```
+
+## Make test panel 
+```{r}
+dfTest <- dfCoBUK %>% filter(! IID %in% dfGWAS$IID)  %>% mutate("POP" = CoB) %>% select("#FID", "IID", "POP") %>% filter(POP != "Elsewhere")
+
+fwrite(dfGWAS,"../data/InUKBB/ids/test_ids/CountryOfBirthUK.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+```
+
+
 
 ## Explore Demographic Data
 
@@ -46,11 +80,7 @@ dfCoBUK <- dfCoBUK %>% filter(CountryOfBirthUK_1647 > 0) %>%
                          CountryOfBirthUK_1647 == 5 ~ "RepublicOfIrelend", 
                          CountryOfBirthUK_1647 == 6 ~ "Elsewhere"))
 
-dfCoBUK <- inner_join(dfCoBUK, df)
-
-dfCoBUK %>% filter(continental == "Europe") %>% ggplot(aes(x = PC9, y = PC10, color = CoB)) + geom_point()
-
-table(dfCoBUK$CoB)
+dfCoBUK <- inner_join(dfCoBUK, df)%>% filter(continental == "Europe")
 ```
 
 Country of Birth Non-UK
