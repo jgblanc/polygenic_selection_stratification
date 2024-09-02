@@ -10,7 +10,7 @@ GWAS=["q1", "q2", "q3", "q4"]
 
 rule all:
     input:
-        expand("data/InUKBB/variantFreq/CountryOfBirthUK_{chr}.afreq", chr=CHR, gwas=GWAS, contrasts=CONTRASTS)
+        expand("data/InUKBB/popAF/{gwas}/popAF_{chr}.England.afreq, chr=CHR, gwas=GWAS, contrasts=CONTRASTS)
 
 
 ## Get overlapping SNPs for each subdataset
@@ -39,3 +39,46 @@ rule get_AF_Test:
         --out {params.prefix_out_test}
         """
 
+# Get overlapping SNPs
+
+rule get_overlapping_snps:
+    input:
+        freq_test="data/InUKBB/variantFreq/CountryOfBirthUK_{chr}.afreq",
+	      freq_gwas="data/ukbb/variantFreq/{gwas}_{chr}.afreq"
+    output:
+        "data/InUKBB/variants/{gwas}/overlappingSNPs_chr{chr}.txt"
+    shell:
+        """
+        Rscript code/InUKBB/overlapping_snps.R {input.freq_gwas} {input.freq_test} {output}
+        """
+
+# Get pop AF
+
+rule get_popAF_all:
+    input:
+        test="data/InUKBB/ids/test_ids/CountryOfBirthUK.txt",
+        snps="data/InUKBB/variants/{gwas}/overlappingSNPs_chr{chr}.txt"
+    output:
+        "data/InUKBB/popAF/{gwas}/popAF_{chr}.England.afreq",
+        "data/InUKBB/popAF/{gwas}/popAF_{chr}.NorthernIreland.afreq",
+        "data/InUKBB/popAF/{gwas}/popAF_{chr}.RepublicOfIrelend.afreq",
+        "data/InUKBB/popAF/{gwas}/popAF_{chr}.Scotland.afreq",
+        "data/InUKBB/popAF/{gwas}/popAF_{chr}.Wales.afreq"
+    params:
+        prefix_in="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
+        prefix_out="data/InUKBB/popAF/{gwas}/popAF_{chr}"
+    resources:
+        mem_mb=38000,
+        time="00:30:00"
+    shell:
+        """
+        plink2 --pfile {params.prefix_in} \
+	      --extract {input.snps} \
+        --keep {input.test} \
+	      --freq \
+        --within {input.test} POP \
+	      --loop-cats POP \
+	      --threads 8 \
+        --memory 38000 \
+        --out {params.prefix_out}
+        """

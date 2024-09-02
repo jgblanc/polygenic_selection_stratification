@@ -53,7 +53,7 @@ dfCoBUK <- inner_join(dfCoBUK, df)%>% filter(continental == "Europe")
 ```{r}
 dfTest <- dfCoBUK %>% filter(! IID %in% dfGWAS$IID)  %>% mutate("POP" = CoB) %>% select("#FID", "IID", "POP") %>% filter(POP != "Elsewhere")
 
-fwrite(dfGWAS,"../data/InUKBB/ids/test_ids/CountryOfBirthUK.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+fwrite(dfTest,"../data/InUKBB/ids/test_ids/CountryOfBirthUK.txt", row.names = F, col.names = T, quote = F, sep = "\t")
 ```
 
 
