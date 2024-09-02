@@ -85,11 +85,11 @@ rule get_popAF_all:
 
 rule compute_r_all:
     input:
-        E="data/HGDP1KG/popAF/{gwas}/all/popAF_{chr}.England.afreq",
-        NI="data/HGDP1KG/popAF/{gwas}/all/popAF_{chr}.NorthernIreland.afreq",
-        RoI="data/HGDP1KG/popAF/{gwas}/all/popAF_{chr}.RepublicOfIrelend.afreq",
-        S="data/HGDP1KG/popAF/{gwas}/all/popAF_{chr}.Scotland.afreq",
-        W="data/HGDP1KG/popAF/{gwas}/all/popAF_{chr}.Wales.afreq"
+        E="data/HGDP1KG/popAF/{gwas}/popAF_{chr}.England.afreq",
+        NI="data/HGDP1KG/popAF/{gwas}/popAF_{chr}.NorthernIreland.afreq",
+        RoI="data/HGDP1KG/popAF/{gwas}/popAF_{chr}.RepublicOfIrelend.afreq",
+        S="data/HGDP1KG/popAF/{gwas}/popAF_{chr}.Scotland.afreq",
+        W="data/HGDP1KG/popAF/{gwas}/popAF_{chr}.Wales.afreq"
     output:
         p1 = "data/HGDP1KG/r/{gwas}/England-NorthernIreland_chr{chr}.rvec",
         p2 = "data/HGDP1KG/r/{gwas}/England-RepublicOfIrelend_chr{chr}.rvec",
