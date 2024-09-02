@@ -46,7 +46,7 @@ for (i in 2:length(args)) {
   #Extract PC num
   tmp <- strsplit(filename, "/")[[1]][9]
   tmp2 <- strsplit(tmp, "PC")[[1]][2]
-  PC <- strsplit(tmp, ".results")[[1]][1]
+  PC <- strsplit(tmp2, ".results")[[1]][1]
 
   # Read in results
   df <- fread(filename)
@@ -57,9 +57,9 @@ for (i in 2:length(args)) {
   df$L <- L
   df$phenotype <- phenotype
   df$covar <- covar
-  df$PC <- PC
+  df$pc <- PC
 
-  colnames(dfOut) <- c(names_from_file, "dataset", "gwas", "contrasts", "L")
+  colnames(dfOut) <- c(names_from_file, "dataset", "gwas", "contrasts", "L", "phenotype", "covar", "pc")
   dfOut <- rbind(dfOut, df)
 
 }
