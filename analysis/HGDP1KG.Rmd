@@ -313,6 +313,13 @@ ggsave("~/Desktop/tmp.png",pl,  height = 4)
 ```
 
 
+```{r}
+dfQ <- fread("../endpoints/HGDP1KG/QStats.txt")
+
+dfPlot <- dfQ %>% filter(contrasts == "nfe-afr")
+
+ggplot(dfPlot, aes(x = pc, y = q)) + geom_point() + facet_grid(vars(covar), vars(gwas))
+```
 
 
 
