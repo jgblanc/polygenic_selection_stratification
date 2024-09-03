@@ -17,6 +17,6 @@ source ../myVilma/bin/activate
 
 echo "SLURM_JOBID="$SLURM_JOBID
 #rm -r .snakemake/
-cat snakefile_InUKBB
-snakemake --unlock -s snakefile_InUKBB
-snakemake --profile cluster-setup-SDS/ -s snakefile_InUKBB --rerun-incomplete
+cat snakefile_main2
+snakemake --unlock -s snakefile_main2
+snakemake --profile cluster-setup-SDS/ -s snakefile_main2 --rerun-incomplete
