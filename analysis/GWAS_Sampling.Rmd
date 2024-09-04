@@ -1,0 +1,151 @@
+---
+title: "GWAS Sampling"
+author: "Jennifer Blanc"
+date: "2024-09-03"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(data.table)
+library(tidyverse)
+library(maps)
+library(latex2exp)
+library(ggpubr)
+```
+
+## UK Biobank PCA
+
+Plot PC1 vs PC2 colored by self-identified ethnic background
+```{r, warning=FALSE}
+# Load data and combine
+dfPCA <- fread("../endpoints/ukbb/whole_biobank.eigenvec.gz")
+dfEB <- fread("../endpoints/ukbb/EthnicBackground_21000.txt")
+df <- inner_join(dfPCA, dfEB)
+
+# Use continental labels 
+df <- df %>% mutate(continental = case_when(EthnicBackground_21000 %in% c(4, 4001, 4002, 4003) ~ "Africa", EthnicBackground_21000 %in% c(1, 1001, 1002, 1003) ~ "Europe", EthnicBackground_21000 %in% c(2, 2001, 2002, 2003, 2004) ~ "Mixed", EthnicBackground_21000 %in% c(3, 3001, 3002, 3003, 3004) ~ "Asia"))
+```
+
+```{r, cache=TRUE}
+# Make PCA plot color based on self identified Ethnic background
+ggplot(data = df, aes(x = PC1, y = PC2, color = continental)) + geom_point() + theme_classic(base_size = 14) + scale_color_manual(values = c("darkred", "navy", "goldenrod4", "gray50"), na.value = "gray70")
+```
+
+## Construct distance metric
+
+Identify WBS
+```{r, warning=FALSE}
+df <- df %>% mutate(POP = continental)
+
+# Use only WBS 
+WBS <- fread("../data/ukbb/WBS.ids")
+dfWBS <- inner_join(df, WBS) %>% select("#FID", "IID", "POP")
+```
+
+Calculate distance from centroid using 2 PCs
+```{r, warning=FALSE}
+# Get median of whole biobank
+medianPC2 <- apply(df[,3:4], 2, median)
+
+# Calculate from WBS centroid 
+df$distance2 <- sqrt(rowSums((df[,3:4] - medianPC2)^2))
+```
+
+Calculate distance from centroid using 40 PCs
+```{r, warning=FALSE}
+# Get median of whole biobank
+medianPC40 <- apply(df[,3:42], 2, median)
+
+# Calculate from WBS centroid 
+df$distance40 <- sqrt(rowSums((df[,3:42] - medianPC40)^2))
+```
+
+
+## Create difference subsets
+
+Using 2 PCs
+```{r}
+epsilon <- 1e-4
+
+dfDS <- df %>% mutate(e5 = case_when(distance2 <= (5 * epsilon) ~ TRUE, TRUE ~ FALSE),
+                      e10 =case_when(distance2 <= (10 * epsilon) ~ TRUE, TRUE ~ FALSE),
+                      e50 = case_when(distance2 <= (50 * epsilon) ~ TRUE, TRUE ~ FALSE),
+                      e200 = case_when(distance2 <= (200 * epsilon) ~ TRUE, TRUE ~ FALSE))
+```
+
+```{r}
+dfDS <- dfDS[order(dfDS$e5, decreasing = FALSE), ]
+p1 <-  ggplot(data = dfDS, aes(x = PC1, y = PC2, color = e5)) + geom_point() + theme_classic(base_size = 14) + scale_color_manual(values = c("grey70", "darkred")) + ggtitle("e5") + theme(legend.position = "none")
+
+dfDS <- dfDS[order(dfDS$e10, decreasing = FALSE), ]
+p2 <-  ggplot(data = dfDS, aes(x = PC1, y = PC2, color = e10)) + geom_point() + theme_classic(base_size = 14) + scale_color_manual(values = c("grey70", "darkred")) + ggtitle("e10") + theme(legend.position = "none")
+
+
+dfDS <- dfDS[order(dfDS$e50, decreasing = FALSE), ]
+p3 <-  ggplot(data = dfDS, aes(x = PC1, y = PC2, color = e50)) + geom_point() + theme_classic(base_size = 14) + scale_color_manual(values = c("grey70", "darkred")) + ggtitle("e50") + theme(legend.position = "none")
+
+dfDS <- dfDS[order(dfDS$e200, decreasing = FALSE), ]
+p4 <-  ggplot(data = dfDS, aes(x = PC1, y = PC2, color = e200)) + geom_point(color = "darkred") + theme_classic(base_size = 14)  + ggtitle("e200") + theme(legend.position = "none")
+
+
+p <- ggarrange(p1,p2,p3,p4, nrow = 1)
+ggsave( "~/Desktop/pca.png", p, height = 4, width = 12)
+```
+
+Using 40 PCs
+```{r}
+epsilon <- 1e-3
+
+dfDS <- df %>% mutate(e8 = case_when(distance40 <= (8 * epsilon) ~ TRUE, TRUE ~ FALSE),
+                      e9 =case_when(distance40 <= (9 * epsilon) ~ TRUE, TRUE ~ FALSE),
+                      e10 = case_when(distance40 <= (10 * epsilon) ~ TRUE, TRUE ~ FALSE),
+                      e20 = case_when(distance40 <= (20  * epsilon) ~ TRUE, TRUE ~ FALSE),
+                      eAll = TRUE)
+
+
+plot(ecdf(dfDS$distance40))
+```
+
+```{r}
+dfDS <- dfDS[order(dfDS$e8, decreasing = FALSE), ]
+p1 <-  ggplot(data = dfDS, aes(x = PC1, y = PC2, color = e8)) + geom_point() + theme_classic(base_size = 14) + scale_color_manual(values = c("grey70", "darkred")) + ggtitle("e8") + theme(legend.position = "none")
+p1
+
+dfDS <- dfDS[order(dfDS$e9, decreasing = FALSE), ]
+p2 <-  ggplot(data = dfDS, aes(x = PC1, y = PC2, color = e9)) + geom_point() + theme_classic(base_size = 14) + scale_color_manual(values = c("grey70", "darkred")) + ggtitle("e9") + theme(legend.position = "none")
+p2
+
+dfDS <- dfDS[order(dfDS$e10, decreasing = FALSE), ]
+p3 <-  ggplot(data = dfDS, aes(x = PC1, y = PC2, color = e10)) + geom_point() + theme_classic(base_size = 14) + scale_color_manual(values = c("grey70", "darkred")) + ggtitle("e10") + theme(legend.position = "none")
+p3
+
+dfDS <- dfDS[order(dfDS$e20, decreasing = FALSE), ]
+p4 <-  ggplot(data = dfDS, aes(x = PC1, y = PC2, color = e20)) + geom_point() + theme_classic(base_size = 14) + scale_color_manual(values = c("grey70", "darkred")) + ggtitle("e20") + theme(legend.position = "none")
+p4
+
+p5 <-  ggplot(data = dfDS, aes(x = PC1, y = PC2,)) + geom_point(color = "darkred") + theme_classic(base_size = 14) + ggtitle("All") + theme(legend.position = "none")
+p5
+
+p <- ggarrange(p1,p2,p3,p4,p5, nrow = 1)
+ggsave( "~/Desktop/pca40.png", p, height = 4, width = 12)
+```
+
+## Create GWAS panels based on PC2 
+
+```{r}
+set.seed(12121212)
+
+dfe5 <- dfDS %>% filter(e5 == TRUE) %>% sample_n(100000) %>% select("#FID", "IID")
+fwrite(dfe5,"../data/ids/gwas_ids/e5.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+
+dfe10 <- dfDS %>% filter(e10 == TRUE) %>% sample_n(100000) %>% select("#FID", "IID")
+fwrite(dfe10,"../data/ids/gwas_ids/e10.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+
+dfe50 <- dfDS %>% filter(e50 == TRUE) %>% sample_n(100000) %>% select("#FID", "IID")
+fwrite(dfe50,"../data/ids/gwas_ids/e50.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+
+dfe200 <- dfDS %>% filter(e200 == TRUE) %>% sample_n(100000) %>% select("#FID", "IID")
+fwrite(dfe200,"../data/ids/gwas_ids/e200.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+```
+

@@ -5,9 +5,7 @@ for i in range(1, 23):
   CHR.append(str(i))
 CONTRASTS = ["eurasia-lat", "eurasia-long", "eur-lat", "eur-long","sdi-eur", "eas-nfe", "eas-sas", "eas-afr", "eas-amr", "nfe-sas", "nfe-afr", "nfe-amr", "sas-afr", "sas-amr", "afr-amr"]
 #CONTRASTS = ["eurasia-long", "eurasia-lat",  "eur-lat", "eur-long"]
-#GWAS=["complete", "half", "quarter", "threequarter", "none"]
-GWAS= ["ALL", "WBS"]
-#GWAS= ["q1"]
+GWAS= ["e5", "e10", "e50", "e100"]
 CHRTYPE_GWAS = ["chr-even", "chr-all"]
 CHRTYPE_TEST = ["test-odd", "test-all"]
 NSNP = ["L-pruneall"]
@@ -17,7 +15,7 @@ wildcard_constraints:
 
 rule all:
     input:
-        expand("output/pca/{dataset}/{gwas}/{contrasts}/{nsnp}/{chrtype_gwas}.eigenvec", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST, nsnp=NSNP)
+        expand("data/gwas_variance/{gwas}/variance_{chr}.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST, nsnp=NSNP)
 
 # Get sample variance of GWAS panel genotypes for all GWAS panels
 
