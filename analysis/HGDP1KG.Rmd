@@ -229,37 +229,23 @@ dfGWAS <- df %>% filter(distance <=  q1)%>% sample_n(10000) %>% select("#FID", "
 Load data and format 
 ```{r}
 dfOverlap <- fread("../endpoints/HGDP1KG/OverlapStats.txt")
-#dfOverlap <- fread("../endpoints/InUKBB/OverlapStats.txt")
-dfOverlap <- dfOverlap %>% mutate(gwas_type2 = case_when(gwas %in% c("q1", "q2", "q3", "q4") ~ "distance",
-         gwas %in% c("ALL", "WBS") ~ "full"))
-dfOverlap$gwas <- factor(dfOverlap$gwas, levels = c("ALL", "WBS", "q1", "q2", "q3", "q4"))
-#dfOverlap <- dfOverlap %>% filter(contrasts == "eurasia-lat" | contrasts == "eurasia-long")
-
-
+dfOverlap$gwas <- factor(dfOverlap$gwas, levels = c( "e5", "e10", "e50", "e200"))
 ```
 
 ```{r}
 dfPC <- fread("../endpoints/HGDP1KG/PCStats.txt")
-#dfPC <- fread("../endpoints/InUKBB/PCStats.txt")
-dfPC <- dfPC %>% mutate(gwas_type2 = case_when(gwas %in% c("q1", "q2", "q3", "q4") ~ "distance",
-         gwas %in% c("ALL", "WBS") ~ "full"))
-dfPC$gwas <- factor(dfPC$gwas, levels = c("ALL", "WBS", "q1", "q2", "q3", "q4"))
-dfPC <- dfPC %>% filter(contrasts == "eur-lat" | contrasts == "eur-long")
-#dfPC <- dfPC %>% filter(contrasts == "sdi-eur" )
+dfPC$gwas <- factor(dfPC$gwas, levels = c("e5", "e10", "e50", "e200"))
 ```
 
 **GWAS type vs proportion of variance explained** 
 ```{r}
-pl <- dfOverlap %>% filter(L == "pruneall")%>% ggplot(aes(x = gwas, y = Z, fill = gwas_type2)) + geom_bar(stat = "identity") + xlab("GWAS Type") + ylab("Proportion of variance explained (Z)") + theme_bw(base_size = 14) + scale_fill_manual(values = c("purple4", "lightseagreen"))  + guides(fill="none") + theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(size = 10, angle = 45))+facet_wrap(~contrasts, nrow = 2) 
+pl <- dfOverlap %>% filter(L == "pruneall")%>% ggplot(aes(x = gwas, y = Z)) + geom_bar(stat = "identity") + xlab("GWAS Type") + ylab("Proportion of variance explained (Z)") + theme_bw(base_size = 14)  + guides(fill="none") + theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(size = 10, angle = 45))+facet_wrap(~contrasts, nrow = 2) 
 pl
-
-ggsave("~/Desktop/tmp.png",pl,  height = 5)
 ```
 
 ```{r}
-pl <- dfOverlap %>% filter(L == "pruneall")%>% ggplot(aes(x = contrasts, y = Z, fill = gwas_type2)) + geom_bar(stat = "identity") + xlab("Contrast") + ylab("Proportion of variance explained (Z)") + theme_bw(base_size = 14)  + guides(fill="none") + theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(size = 10, angle = 90 )) + facet_wrap(~gwas, nrow = 2, scales = "free") + scale_fill_manual(values = c("purple4", "lightseagreen"))
+pl <- dfOverlap %>% filter(L == "pruneall")%>% ggplot(aes(x = contrasts, y = Z)) + geom_bar(stat = "identity") + xlab("Contrast") + ylab("Proportion of variance explained (Z)") + theme_bw(base_size = 14)  + guides(fill="none") + theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(size = 10, angle = 90 )) + facet_wrap(~gwas, nrow = 2, scales = "free") 
 pl
-ggsave("~/Desktop/tmp.png",pl, height = 10, width = 10)
 ```
 
 

@@ -136,16 +136,16 @@ ggsave( "~/Desktop/pca40.png", p, height = 4, width = 12)
 ```{r}
 set.seed(12121212)
 
-dfe5 <- dfDS %>% filter(e5 == TRUE) %>% sample_n(100000) %>% select("#FID", "IID")
+dfe5 <- dfDS %>% filter(e5 == TRUE) %>% sample_n(100000) %>% select("#FID", "IID", "POP")
 fwrite(dfe5,"../data/ids/gwas_ids/e5.txt", row.names = F, col.names = T, quote = F, sep = "\t")
 
-dfe10 <- dfDS %>% filter(e10 == TRUE) %>% sample_n(100000) %>% select("#FID", "IID")
+dfe10 <- dfDS %>% filter(e10 == TRUE) %>% sample_n(100000) %>% select("#FID", "IID", "POP")
 fwrite(dfe10,"../data/ids/gwas_ids/e10.txt", row.names = F, col.names = T, quote = F, sep = "\t")
 
-dfe50 <- dfDS %>% filter(e50 == TRUE) %>% sample_n(100000) %>% select("#FID", "IID")
+dfe50 <- dfDS %>% filter(e50 == TRUE) %>% sample_n(100000) %>% select("#FID", "IID", "POP")
 fwrite(dfe50,"../data/ids/gwas_ids/e50.txt", row.names = F, col.names = T, quote = F, sep = "\t")
 
-dfe200 <- dfDS %>% filter(e200 == TRUE) %>% sample_n(100000) %>% select("#FID", "IID")
+dfe200 <- dfDS %>% filter(e200 == TRUE) %>% sample_n(100000) %>% select("#FID", "IID", "POP")
 fwrite(dfe200,"../data/ids/gwas_ids/e200.txt", row.names = F, col.names = T, quote = F, sep = "\t")
 ```
 
