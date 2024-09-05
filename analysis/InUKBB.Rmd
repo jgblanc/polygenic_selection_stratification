@@ -11,27 +11,15 @@ library(dplyr)
 library(data.table)
 ```
 
-## Explore PCA of Whole Biobank
-
-```{r, warning=FALSE, message=FALSE}
-# Load data and combine
-dfPCA <- fread("../endpoints/ukbb/whole_biobank.eigenvec.gz")
-dfEB <- fread("../endpoints/ukbb/EthnicBackground_21000.txt")
-df <- inner_join(dfPCA, dfEB)
-
-# Use continental labels 
-df <- df %>% mutate(continental = case_when(EthnicBackground_21000 %in% c(4, 4001, 4002, 4003) ~ "Africa", EthnicBackground_21000 %in% c(1, 1001, 1002, 1003) ~ "Europe", EthnicBackground_21000 %in% c(2, 2001, 2002, 2003, 2004) ~ "Mixed", EthnicBackground_21000 %in% c(3, 3001, 3002, 3003, 3004) ~ "Asia"))
-```
-
 ## Read in GWAS IDs
 
 ```{r}
-dfQ1 <- fread("../data/ids/gwas_ids/q1.txt")
-dfQ2 <- fread("../data/ids/gwas_ids/q2.txt")
-dfQ3 <- fread("../data/ids/gwas_ids/q3.txt")
-dfQ4 <- fread("../data/ids/gwas_ids/q4.txt")
+dfe5 <- fread("../data/ids/gwas_ids/e5.txt")
+dfe10 <- fread("../data/ids/gwas_ids/e10.txt")
+dfe50 <- fread("../data/ids/gwas_ids/e50.txt")
+dfe200 <- fread("../data/ids/gwas_ids/e200.txt")
 
-dfGWAS <- rbind(dfQ1, dfQ2, dfQ3, dfQ4)
+dfGWAS <- rbind(dfe5, dfe10, dfe50, dfe200)
 ```
 
 ## Country of Birth UK
@@ -50,44 +38,15 @@ dfCoBUK <- inner_join(dfCoBUK, df)%>% filter(continental == "Europe")
 ```
 
 ## Make test panel 
+
 ```{r}
 dfTest <- dfCoBUK %>% filter(! IID %in% dfGWAS$IID)  %>% mutate("POP" = CoB) %>% select("#FID", "IID", "POP") %>% filter(POP != "Elsewhere")
 
 fwrite(dfTest,"../data/InUKBB/ids/test_ids/CountryOfBirthUK.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+
+table(dfTest$POP)
 ```
 
-
-
-## Explore Demographic Data
-
-Year of Immigration 
-```{r}
-dfYoI <- fread("../data/InUKBB/data/YearImmigratedToUK_3659.txt")
-dfYoI <- inner_join(df, dfYoI) %>% filter(YearImmigratedToUK_3659 > 0)
-
-ggplot(data = dfYoI, aes(x = YearImmigratedToUK_3659, y = PC1 ,color = continental)) + geom_point() 
-
-ggplot(data = dfYoI, aes(x = YearImmigratedToUK_3659, color = continental)) + geom_density()
-```
-Country of Birth UK 
-```{r}
-dfCoBUK <- fread("../data/InUKBB/data/CountryOfBirthUK_1647.txt")
-dfCoBUK <- dfCoBUK %>% filter(CountryOfBirthUK_1647 > 0) %>% 
-  mutate(CoB = case_when(CountryOfBirthUK_1647 == 1 ~ "England",
-                         CountryOfBirthUK_1647 == 2 ~ "Wales",
-                         CountryOfBirthUK_1647 == 3 ~ "Scotland",
-                         CountryOfBirthUK_1647 == 4 ~ "NorthernIreland", 
-                         CountryOfBirthUK_1647 == 5 ~ "RepublicOfIrelend", 
-                         CountryOfBirthUK_1647 == 6 ~ "Elsewhere"))
-
-dfCoBUK <- inner_join(dfCoBUK, df)%>% filter(continental == "Europe")
-```
-
-Country of Birth Non-UK
-```{r}
-dfCoB <- fread("../data/InUKBB/data/CountryOfBirthNonUK_20115.txt")
-dfSum <- dfCoB %>% group_by(CountryOfBirthNonUK_20115) %>% summarise(count = n())
-```
 
 
 
