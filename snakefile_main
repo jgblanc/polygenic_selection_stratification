@@ -4,14 +4,15 @@ CHR = []
 for i in range(1, 23):
   CHR.append(str(i))
 #CONTRASTS = ["eurasia-lat", "eurasia-long", "eur-lat", "eur-long","sdi-eur", "eas-nfe", "eas-sas", "eas-afr", "eas-amr", "nfe-sas", "nfe-afr", "nfe-amr", "sas-afr", "sas-amr", "afr-amr"]
-CONTRASTS = ["eurasia-long", "eurasia-lat",  "eur-lat", "eur-long"]
+CONTRASTS = ["eurasia-long", "eurasia-lat"]
 GWAS= ["e5", "e10", "e50", "e200"]
 CHRTYPE_GWAS = ["chr-even", "chr-all"]
 CHRTYPE_TEST = ["test-odd", "test-all"]
 NSNP = ["L-pruneall"]
 
 wildcard_constraints:
-    nsnp="L-(\d+|pruneall)"
+    nsnp="L-pruneall",
+    gwas="e(5|10|50|200)"
 
 rule all:
     input:
@@ -246,7 +247,7 @@ rule compute_PC_FGr:
         Fgr=expand("output/calculate_FGr/{{dataset}}/blocks/{{gwas}}/{{nsnp}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR),
         PCs="output/pca/{gwas}/{chrtype_gwas}.eigenvec",
         SNP_Counts=expand("output/calculate_FGr/{{dataset}}/blocks/{{gwas}}/{{nsnp}}/{{contrasts}}_{chr}_SNPcount.txt", chr=CHR),
-        Eval = "output/pca/{dataset}/{gwas}/{contrasts}/{nsnp}/{chrtype_gwas}.eigenval"
+        Eval = "output/pca/{gwas}/{chrtype_gwas}.eigenval"
     output:
         pcStats="output/calculate_FGr/{dataset}/PC_stats/{gwas}/{nsnp}/{chrtype_gwas}_{chrtype_test}_{contrasts}.txt",
         Fgr="output/calculate_FGr/{dataset}/final_FGr/{gwas}/{nsnp}/{chrtype_gwas}_{chrtype_test}_{contrasts}.txt"

@@ -4,7 +4,7 @@ for i in range(1, 23):
   CHR.append(str(i))
 CONTRASTS = ["euraisa-lat", "eurasia-long", "eur-lat", "eur-long", "sdi-eur", "eas-nfe", "eas-sas", "eas-afr", "eas-amr", "nfe-sas", "nfe-afr", "nfe-amr", "sas-afr", "sas-amr", "afr-amr"]
 SUBDATASET = ["eurasia", "all", "nfe", "nfe_no_ceu"]
-GWAS=["ALL", "WBS", "q1", "q2", "q3", "q4"]
+GWAS=["e5", "e10", "e50", "e200"]
 #GWAS=["q1"]
 
 ## Wildcard constraints
@@ -16,7 +16,7 @@ wildcard_constraints:
 
 rule all:
     input:
-        expand("data/HGDP1KG/variants/{gwas}/{subdataset}/overlappingSNPs_chr{chr}.txt", chr=CHR, gwas=GWAS, contrasts=CONTRASTS, subdataset=SUBDATASET)
+        expand("data/HGDP1KG/variants/{gwas}/eur-lat/overlappingSNPs_chr{chr}.txt", chr=CHR, gwas=GWAS, contrasts=CONTRASTS, subdataset=SUBDATASET)
 
 
 ## Recode SNPs to match UKBB
