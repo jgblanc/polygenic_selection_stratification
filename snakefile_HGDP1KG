@@ -16,7 +16,7 @@ wildcard_constraints:
 
 rule all:
     input:
-        expand("data/HGDP1KG/variants/{gwas}/eur-lat/overlappingSNPs_chr{chr}.txt", chr=CHR, gwas=GWAS, contrasts=CONTRASTS, subdataset=SUBDATASET)
+        expand("data/HGDP1KG/variants/{gwas}/{subdataset}/overlappingSNPs_chr{chr}.txt", chr=CHR, gwas=GWAS, contrasts=CONTRASTS, subdataset=SUBDATASET)
 
 
 ## Recode SNPs to match UKBB
