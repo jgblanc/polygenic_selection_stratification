@@ -16,7 +16,7 @@ wildcard_constraints:
 
 rule all:
     input:
-        expand("output/calculate_FGr/{dataset}/overlap_stats/{gwas}/{nsnp}/{contrasts}.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST, nsnp=NSNP),
+        expand("endpoints/{dataset}/OverlapStats.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST, nsnp=NSNP),
         expand("endpoints/{dataset}/PCStats.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST, nsnp=NSNP)
 
 # Get sample variance of GWAS panel genotypes for all GWAS panels
