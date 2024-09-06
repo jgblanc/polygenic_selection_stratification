@@ -46,7 +46,23 @@ fwrite(dfTest,"../data/InUKBB/ids/test_ids/CountryOfBirthUK.txt", row.names = F,
 
 table(dfTest$POP)
 ```
+## Result
 
+Load data and format 
+```{r}
+dfOverlap <- fread("../endpoints/InUKBB/OverlapStats.txt") %>% separate(gwas, into = c("tmp", "gwas"), sep = "e")
+dfOverlap$gwas <- factor(dfOverlap$gwas, levels = c( "5", "10", "50", "200")) 
+```
 
+```{r}
+dfPC <- fread("../endpoints/InUKBB/PCStats.txt") %>% separate(gwas, into = c("tmp", "gwas"), sep = "e")
+dfPC$gwas <- factor(dfPC$gwas, levels = c("e5", "e10", "e50", "e200"))
+```
+
+```{r}
+pl <- dfOverlap %>% filter(L == "pruneall")%>% ggplot(aes(x = gwas, y = Z)) + geom_point() + xlab("") + ylab("") + theme_bw(base_size = 14)  + guides(fill="none") + theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(size = 10), strip.text.x = element_text(size = 6,))+facet_wrap(~contrasts, nrow = 1)+ scale_y_log10(breaks = c(1e-5, 1e-4, 1e-3), limits = c(1e-5, 1e-3)) 
+pl
+ggsave("~/Desktop/tmp.png", pl, height = 2, width = 12)
+```
 
 
