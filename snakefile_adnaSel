@@ -3,7 +3,7 @@ CHR = []
 for i in range(1, 23):
   CHR.append(str(i))
 CONTRASTS = ["EuropeanNeolithic", "BronzeAge", "Historical"]
-GWAS=["ALL", "WBS", "q1", "q2", "q3", "q4"]
+GWAS=["e5", "e10", "e50", "e200"]
 #GWAS=["q1"]
 
 rule all:
