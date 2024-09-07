@@ -24,7 +24,7 @@ dfIDs <- fread(ids)
 df <- inner_join(dfPheno, dfIDs, by = c("#FID", "IID"))
 
 # Replace batch with array
-df <- df %>% mutate(Value = qnorm((rank(Raw,na.last=NA)-0.5)/sum(Raw))) %>% select("#FID", "IID", "Value")
+df <- df %>% mutate(Value = qnorm((rank(Raw,na.last=NA)-0.5)/length(Raw))) %>% select("#FID", "IID", "Value")
 
 # Save file
 fwrite(df, outfile,col.names=T,row.names=F,quote=F,sep="\t")
