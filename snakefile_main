@@ -262,6 +262,146 @@ rule compute_PC_FGr:
         Rscript code/calculate_FGr/compute_PC_FGR_model.R {params.prefix_in} {input.PCs} {output.pcStats} {wildcards.chrtype_test} {output.Fgr} {params.count_in} {input.Eval}
         """
 
+# Comput FGr LOCO
+
+rule concat_FGr_LOCO:
+    input:
+        FGr=expand("output/calculate_FGr/{{dataset}}/blocks/{{gwas}}/{{nsnp}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR),
+        SNP_Counts=expand("output/calculate_FGr/{{dataset}}/blocks/{{gwas}}/{{nsnp}}/{{contrasts}}_{chr}_SNPcount.txt", chr=CHR)
+    output:
+        "output/calculate_FGr/{dataset}/FGr_LOCO/{gwas}/{nsnp}/FGr-LOCO_{contrasts}_{chr}.txt"
+    params:
+        chrNum = lambda wildcards: get_chr_num(wildcards.chr),
+        prefix_in = "output/calculate_FGr/{dataset}/blocks/{gwas}/{nsnp}/FGr_{contrasts}",
+        SNP_prefix="output/calculate_FGr/{dataset}/blocks/{gwas}/{nsnp}/{contrasts}"
+    shell:
+        """
+        Rscript code/calculate_FGr/concat_FGr_LOCO.R {params.prefix_in} {params.SNP_prefix} {params.chrNum} {output}
+        """
+
+# Transform phenotypes
+
+rule transform_phenos:
+    input:
+        pheno="data/phenotypes/cleaned/{phenotype}.txt"
+        ids="data/ids/gwas_ids/{gwas}.txt"
+    output:
+        "data/phenotypes/normalized/{gwas}/{phenotype}.txt"
+    shell:
+        """
+        Rscript code/run_gwas/normalize_phenotype.R {input.pheno} {input.ids} {output}
+        """
+
+# Assemble covariates
+
+rule assemble_fixed_covars:
+    input:
+        sex="data/phenotypes/genetic_sex_22001.txt",
+        batch="data/phenotypes/genotype_measurement_batch_22000.txt"
+    output:
+        "output/run_gwas/fixed_covars.txt"
+    shell:
+        """
+        Rscript code/run_gwas/assemble_fixed_covar.R {input.sex} {input.batch} {output}
+        """
+
+rule assemble_quant_covars_PCA:
+    input:
+        age="data/phenotypes/age_at_recruitment_21022.txt",
+        pcs="output/pca/{dataset}/{gwas}/{contrasts}/{nsnp}/chr-all.eigenvec"
+    output:
+        "output/run_gwas/{dataset}/{gwas}/{contrasts}/{nsnp}/covariates/no-FGr_{chr}-PC{pc}.txt"
+    params:
+        pcNum = lambda wildcards: get_chr_num(wildcards.pc)
+    shell:
+        """
+        Rscript code/run_gwas/assemble_quant_covar_control.R {input.age} {input.pcs} {params.pcNum} {output}
+        """
+
+rule assemble_quant_covars_FGr_PCA:
+    input:
+        age="data/phenotypes/age_at_recruitment_21022.txt",
+        covar="output/calculate_FGr/{dataset}/FGr_LOCO/{gwas}/{nsnp}/FGr-LOCO_{contrasts}_{chr}.txt",
+        pcs="output/pca/{dataset}/{gwas}/{contrasts}/{nsnp}/chr-all.eigenvec"
+    output:
+        "output/run_gwas/{dataset}/{gwas}/{contrasts}/{nsnp}/covariates/FGr-LOCO_{chr}-PC{pc}.txt"
+    params:
+        pcNum = lambda wildcards: get_chr_num(wildcards.pc)
+    shell:
+        """
+        Rscript code/run_gwas/assemble_quant_covar.R {input.age} {input.covar} {input.pcs} {params.pcNum} {output}
+        """
+
+# Run GWAS
+
+rule run_fastGWA:
+    input:
+      pheno="data/phenotypes/{phenotype}.txt",
+      qcovar="output/run_gwas/{dataset}/{gwas}/{contrasts}/{nsnp}/covariates/{covar}_{chr}-PC{pc}.txt",
+      gp_genos="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen",
+      overlap_snps="data/{dataset}/pruned_snps/{gwas}/{contrasts}/{nsnp}.txt",
+      covar="output/run_gwas/fixed_covars.txt",
+      IDs="data/ids/gwas_ids/{gwas}.txt"
+    output:
+      temp("/scratch/jgblanc/polygenic_selection_stratification/output/run_gwas/{dataset}/{gwas}/{contrasts}/{nsnp}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA"),
+    params:
+        prefix_out = "/scratch/jgblanc/polygenic_selection_stratification/output/run_gwas/{dataset}/{gwas}/{contrasts}/{nsnp}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}",
+        prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3"
+    threads: 16
+    resources:
+        mem_mb=100000,
+        time="00:30:00"
+    shell:
+        """
+        gcta  --pheno {input.pheno} \
+        --keep {input.IDs} \
+        --qcovar {input.qcovar} \
+        --covar {input.covar} \
+        --extract {input.overlap_snps} \
+        --fastGWA-lr \
+        --threads {threads} \
+        --pfile {params.prefix_plink} \
+        --out {params.prefix_out}
+        """
+
+# Pick minimum p-value per block
+
+rule assign_snps_to_blocks:
+    input:
+        ldBlocks="data/LD_blocks/fourier_ls-all_parsed.bed",
+        ss="/scratch/jgblanc/polygenic_selection_stratification/output/run_gwas/{dataset}/{gwas}/{contrasts}/{nsnp}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",
+        r="data/{dataset}/r/{gwas}/{contrasts}_chr{chr}.rvec",
+    output:
+        betas=temp("/scratch/jgblanc/polygenic_selection_stratification/output/pga_test/{dataset}/{gwas}/{contrasts}/{nsnp}/{phenotype}/formated_ss_LR/{covar}_{contrasts}_{chr}-PC{pc}.betas")
+    params:
+        pt = PVALUE_THRESHOLD
+    shell:
+        """
+        Rscript code/pga_test/assign_snps_to_blocks_LR.R {input.ldBlocks} {input.ss} {input.r} {output.betas} {params.pt}
+        """
+
+# Run selection test
+
+rule concat_snps:
+    input:
+        expand("/scratch/jgblanc/polygenic_selection_stratification/output/pga_test/{{dataset}}/{{gwas}}/{{contrasts}}/{{nsnp}}/{{phenotype}}/formated_ss_LR/{{covar}}_{{contrasts}}_{chr}-PC{{pc}}.betas", chr=CHR)
+    output:
+        "output/pga_test/{dataset}/{gwas}/{contrasts}/{nsnp}/{phenotype}/formated_ss_LR/{covar}_{contrasts}.all-PC{pc}.betas"
+    shell:
+        """
+        cat {input} > {output}
+        """
+
+rule pga_test:
+    input:
+        "output/pga_test/{dataset}/{gwas}/{contrasts}/{nsnp}/{phenotype}/formated_ss_LR/{covar}_{contrasts}.all-PC{pc}.betas"
+    output:
+        results="output/pga_test/{dataset}/{gwas}/{contrasts}/{nsnp}/{phenotype}/results_LR/{covar}_{contrasts}.all-PC{pc}.results"
+    shell:
+        """
+        Rscript code/pga_test/run_test_jacknife_LR.R {input} {output.results}
+        """
+
 # Summarize Results
 
 rule concat_overlap_stats:
@@ -283,3 +423,14 @@ rule concat_pc_stats:
         """
         Rscript code/summarize/concat_PCStats.R {output} {input}
         """
+
+rule concat_q:
+    input:
+        expand("output/pga_test/{{dataset}}/{gwas}/{contrasts}/{nsnp}/{phenotype}/results_LR/{covar}_{contrasts}.all-PC{pc}.results", gwas=GWAS, contrasts = CONTRASTS, nsnp=NSNP, phenotype=PHENOTYPE, covar=COVAR, pc = PC)
+    output:
+        "endpoints/{dataset}/QStats.txt"
+    shell:
+        """
+        Rscript code/summarize/concat_QStats.R {output} {input}
+        """
+

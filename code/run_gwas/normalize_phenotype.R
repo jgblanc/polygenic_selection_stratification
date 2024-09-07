@@ -9,22 +9,22 @@ suppressWarnings(suppressMessages({
   library(tidyverse)
 }))
 
-sex = args[1]
-batch = args[2]
+pheno = args[1]
+ids = args[2]
 outfile = args[3]
 
 # Read in phenotypes
-dfSex <- fread(sex)
-head(dfSex)
-dfBatch <- fread(batch)
-head(dfBatch)
+dfPheno <- fread(pheno) %>% drop_na()
+colnames(dfPheno) <- c("#FID", "IID", "Raw")
+
+# Read in IDs
+dfIDs <- fread(ids)
 
 # Join files
-df <- inner_join(dfSex, dfBatch, by = c("#FID", "IID"))
+df <- inner_join(dfPheno, dfIDs, by = c("#FID", "IID"))
 
 # Replace batch with array
-df <- df %>% mutate(genotype_measurement_batch_22000 = replace(genotype_measurement_batch_22000, genotype_measurement_batch_22000 < 0, 0)) %>%
-  mutate(genotype_measurement_batch_22000 = replace(genotype_measurement_batch_22000, genotype_measurement_batch_22000 > 0, 1))
+df <- df %>% mutate(Value = qnorm((rank(Raw,na.last=NA)-0.5)/sum(Raw))) %>% select("#FID", "IID", "Value")
 
 # Save file
 fwrite(df, outfile,col.names=T,row.names=F,quote=F,sep="\t")

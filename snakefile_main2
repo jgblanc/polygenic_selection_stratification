@@ -1,17 +1,17 @@
 # Snakefile to run the main pipeline for any dataset
-DATASET = ["adnaSel"]
+DATASET = ["HGDP1KG"]
 CHR = []
 for i in range(1, 23):
   CHR.append(str(i))
-CONTRASTS = ["EuropeanNeolithic", "BronzeAge", "Historical"]
+CONTRASTS = ["euraisa-lat"]
 GWAS= ["e5", "e10", "e50", "e200"]
 CHRTYPE_GWAS = ["chr-even", "chr-all"]
 CHRTYPE_TEST = ["test-odd", "test-all"]
-PC = [0,40]
+PC = [0,10,40]
 NSNP = ["L-pruneall"]
 PHENOTYPE=["StandingHeight_50"]
-COVAR = ["no-FGr", "FGr-LOCO"]
-PVALUE_THRESHOLD = "1e-3"
+COVAR = ["no-FGr"]
+PVALUE_THRESHOLD = "1e-4"
 
 
 def get_chr_num(x):
@@ -24,8 +24,8 @@ wildcard_constraints:
 
 rule all:
     input:
-        expand("endpoints/{dataset}/PCStats.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST, nsnp=NSNP, pc=PC),
-	expand("endpoints/{dataset}/OverlapStats.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST, nsnp=NSNP, pc=PC, phenotype=PHENOTYPE, covar=COVAR)
+        expand("output/pga_test/{dataset}/{gwas}/{contrasts}/{nsnp}/{phenotype}/results_LR/{covar}_{contrasts}.all-PC{pc}.results", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST, nsnp=NSNP, pc=PC)
+
 
 # Get sample variance of GWAS panel genotypes for all GWAS panels
 
