@@ -2,11 +2,11 @@
 #SBATCH --job-name=main2
 #SBATCH --output=logs/main2.out
 #SBATCH --error=logs/main2.err
-#SBATCH --time=24:00:00
+#SBATCH --time=12:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --mem-per-cpu=2000
-#SBATCH --partition=tier1q
+#SBATCH --partition=tier3q
 
 module load gcc/12.1.0
 module load python/3.10.5

@@ -1,9 +1,9 @@
 # Snakefile to run the main pipeline for any dataset
-DATASET = ["InUKBB"]
+DATASET = ["SDS"]
 CHR = []
 for i in range(1, 23):
   CHR.append(str(i))
-CONTRASTS = ["England-NorthernIreland", "England-RepublicOfIrelend", "England-Scotland", "England-Wales", "NorthernIreland-RepublicOfIrelend", "NorthernIreland-Scotland", "NorthernIreland-Wales", "RepublicOfIrelend-Scotland", "RepublicOfIrelend-Wales", "Scotland-Wales"]
+CONTRASTS = ["Han", "UK10K"]
 #CONTRASTS = ["eurasia-long", "eurasia-lat"]
 GWAS= ["e5", "e10", "e50", "e200"]
 CHRTYPE_GWAS = ["chr-even", "chr-all"]
