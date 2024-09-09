@@ -1,31 +1,30 @@
 # Snakefile to run the main pipeline for any dataset
-DATASET = ["HGDP1KG"]
+DATASET = ["SDS"]
 CHR = []
 for i in range(1, 23):
   CHR.append(str(i))
-CONTRASTS = ["euraisa-lat"]
+CONTRASTS = ["Han", "UK10K"]
 GWAS= ["e5", "e10", "e50", "e200"]
 CHRTYPE_GWAS = ["chr-even", "chr-all"]
 CHRTYPE_TEST = ["test-odd", "test-all"]
 PC = [0,10,40]
 NSNP = ["L-pruneall"]
-PHENOTYPE=["StandingHeight_50"]
+#PHENOTYPE=["StandingHeight_50"]
+PHENOTYPE = [f.split(".")[0] for f in os.listdir("data/phenotypes/cleaned/") if f.endswith('.txt')]
 COVAR = ["no-FGr"]
 PVALUE_THRESHOLD = "1e-4"
-
 
 def get_chr_num(x):
   out = int(x)
   return out
 
-
 wildcard_constraints:
-    nsnp="L-(\d+|pruneall)"
+    nsnp="L-pruneall",
+    gwas="e(5|10|50|200)"
 
 rule all:
     input:
-        expand("output/pga_test/{dataset}/{gwas}/{contrasts}/{nsnp}/{phenotype}/results_LR/{covar}_{contrasts}.all-PC{pc}.results", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test = CHRTYPE_TEST, nsnp=NSNP, pc=PC)
-
+        expand("endpoints/{dataset}/QStats.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, nsnp=NSNP, pc=PC, phenotype=PHENOTYPE, covar=COVAR)
 
 # Get sample variance of GWAS panel genotypes for all GWAS panels
 
@@ -124,6 +123,7 @@ rule downsample_snps:
         Rscript code/calculate_FGr/sample_snps.R {output.sample} {wildcards.nsnp} {input.snps} {input.overlap}
         """
 
+
 # Standardize r to have length 1
 
 rule standardize_r:
@@ -214,6 +214,7 @@ rule make_tmp_plink2:
         --out {params.prefix_out}
         """
 
+
 rule merge_GWAS_PCA:
     input:
         gp_genos=expand("/scratch/jgblanc/ukbb/plink2-files/{{gwas}}/merged/tmp_{chr}.pgen", chr=CHR),
@@ -251,9 +252,9 @@ rule merge_GWAS_PCA:
 rule compute_PC_FGr:
     input:
         Fgr=expand("output/calculate_FGr/{{dataset}}/blocks/{{gwas}}/{{nsnp}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR),
-        PCs="output/pca/{dataset}/{gwas}/{contrasts}/{nsnp}/{chrtype_gwas}.eigenvec",
+        PCs="output/pca/{gwas}/{chrtype_gwas}.eigenvec",
         SNP_Counts=expand("output/calculate_FGr/{{dataset}}/blocks/{{gwas}}/{{nsnp}}/{{contrasts}}_{chr}_SNPcount.txt", chr=CHR),
-        Eval = "output/pca/{dataset}/{gwas}/{contrasts}/{nsnp}/{chrtype_gwas}.eigenval"
+        Eval = "output/pca/{gwas}/{chrtype_gwas}.eigenval"
     output:
         pcStats="output/calculate_FGr/{dataset}/PC_stats/{gwas}/{nsnp}/{chrtype_gwas}_{chrtype_test}_{contrasts}.txt",
         Fgr="output/calculate_FGr/{dataset}/final_FGr/{gwas}/{nsnp}/{chrtype_gwas}_{chrtype_test}_{contrasts}.txt"
@@ -285,6 +286,18 @@ rule concat_FGr_LOCO:
         Rscript code/calculate_FGr/concat_FGr_LOCO.R {params.prefix_in} {params.SNP_prefix} {params.chrNum} {output}
         """
 
+# Transform phenotypes
+
+rule transform_phenos:
+    input:
+        pheno="data/phenotypes/cleaned/{phenotype}.txt",
+        ids="data/ids/gwas_ids/{gwas}.txt"
+    output:
+        "data/phenotypes/normalized/{gwas}/{phenotype}.txt"
+    shell:
+        """
+        Rscript code/run_gwas/normalize_phenotype.R {input.pheno} {input.ids} {output}
+        """
 
 # Assemble covariates
 
@@ -302,7 +315,7 @@ rule assemble_fixed_covars:
 rule assemble_quant_covars_PCA:
     input:
         age="data/phenotypes/age_at_recruitment_21022.txt",
-        pcs="output/pca/{dataset}/{gwas}/{contrasts}/{nsnp}/chr-all.eigenvec"
+        pcs="output/pca/{gwas}/chr-all.eigenvec"
     output:
         "output/run_gwas/{dataset}/{gwas}/{contrasts}/{nsnp}/covariates/no-FGr_{chr}-PC{pc}.txt"
     params:
@@ -316,7 +329,7 @@ rule assemble_quant_covars_FGr_PCA:
     input:
         age="data/phenotypes/age_at_recruitment_21022.txt",
         covar="output/calculate_FGr/{dataset}/FGr_LOCO/{gwas}/{nsnp}/FGr-LOCO_{contrasts}_{chr}.txt",
-        pcs="output/pca/{dataset}/{gwas}/{contrasts}/{nsnp}/chr-all.eigenvec"
+        pcs="output/pca/{gwas}/chr-all.eigenvec"
     output:
         "output/run_gwas/{dataset}/{gwas}/{contrasts}/{nsnp}/covariates/FGr-LOCO_{chr}-PC{pc}.txt"
     params:
@@ -330,7 +343,7 @@ rule assemble_quant_covars_FGr_PCA:
 
 rule run_fastGWA:
     input:
-      pheno="data/phenotypes/{phenotype}.txt",
+      pheno="data/phenotypes/normalized/{gwas}/{phenotype}.txt",
       qcovar="output/run_gwas/{dataset}/{gwas}/{contrasts}/{nsnp}/covariates/{covar}_{chr}-PC{pc}.txt",
       gp_genos="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen",
       overlap_snps="data/{dataset}/pruned_snps/{gwas}/{contrasts}/{nsnp}.txt",
@@ -396,7 +409,6 @@ rule pga_test:
         Rscript code/pga_test/run_test_jacknife_LR.R {input} {output.results}
         """
 
-
 # Summarize Results
 
 rule concat_overlap_stats:
@@ -428,3 +440,4 @@ rule concat_q:
         """
         Rscript code/summarize/concat_QStats.R {output} {input}
         """
+
