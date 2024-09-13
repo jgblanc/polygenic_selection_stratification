@@ -24,7 +24,7 @@ wildcard_constraints:
 
 rule all:
     input:
-        expand("output/pga_test/{dataset}/{gwas}/{contrasts}/{nsnp}/{phenotype}/results_LR/{covar}_{contrasts}.all-PC{pc}.results", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, nsnp=NSNP, pc=PC, phenotype=PHENOTYPE, covar=COVAR)
+        expand("endpoints/{dataset}/QStats.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, nsnp=NSNP, pc=PC, phenotype=PHENOTYPE, covar=COVAR)
 
 # Get sample variance of GWAS panel genotypes for all GWAS panels
 
