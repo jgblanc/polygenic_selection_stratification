@@ -19,7 +19,7 @@ wildcard_constraints:
 
 rule all:
     input:
-        expand("output/prs/HGDP1KG/{gwas}/{contrasts}/{nsnp}/{phenotype}/PGS/{covar}_{contrasts}.all-PC{pc}.sscore", chr=CHR, gwas=GWAS, contrasts=CONTRASTS, nsnp=NSNP, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONSTRASTS, pc=PC)
+        expand("output/prs/HGDP1KG/{gwas}/{contrasts}/{nsnp}/{phenotype}/PGS/{covar}_{contrasts}.{chr}-PC{pc}.sscore", chr=CHR, gwas=GWAS, contrasts=CONTRASTS, nsnp=NSNP, phenotype=PHENOTYPE, covar=COVAR, pc=PC)
 
 
 ## Recode SNPs to match UKBB
@@ -347,19 +347,20 @@ rule rename_overlap_snps_eur:
 
 rule pgs_nfe:
     input:
-        SNPs = "output/pga_test/{dataset}/{gwas}/{contrasts}/{nsnp}/{phenotype}/formated_ss_LR/{covar}_{contrasts}.all-PC{pc}.betas",
+        SNPs = "output/pga_test/HGDP1KG/{gwas}/{contrasts}/{nsnp}/{phenotype}/formated_ss_LR/{covar}_{contrasts}.all-PC{pc}.betas",
         gp_genos="data/HGDP1KG/plink2-files/gnomad.genomes.v3.1.2.hgdp_tgp.chr{chr}.psam",
         IDs="data/HGDP1KG/ids/test_ids/nfe.txt"
     output:
-        "output/prs/HGDP1KG/{gwas}/{contrasts}/{nsnp}/{phenotype}/PGS/{covar}_{contrasts}.all-PC{pc}.sscore"
+        "output/prs/HGDP1KG/{gwas}/{contrasts}/{nsnp}/{phenotype}/PGS/{covar}_{contrasts}.{chr}-PC{pc}.sscore"
     params:
-        plink_prefix = "output/prs/HGDP1KG/{gwas}/{contrasts}/{nsnp}/{phenotype}/PGS/{covar}_{contrasts}.all-PC{pc}"
+        plink_prefix = "output/prs/HGDP1KG/{gwas}/{contrasts}/{nsnp}/{phenotype}/PGS/{covar}_{contrasts}.{chr}-PC{pc}",
+	plink_in = "data/HGDP1KG/plink2-files/gnomad.genomes.v3.1.2.hgdp_tgp.chr{chr}"
     shell:
         """
-        cut -f2,5,7 {input} > {param.plink_prefix}.tmp
-        plink2 --pfile {params.prefix_in} \
+        cut -f2,5,7 {input} > {params.plink_prefix}.tmp
+        plink2 --pfile {params.plink_in} \
         --keep {input.IDs} \
-        --score {param.plink_prefix}.tmp center cols=dosagesum,scoresums  \
-        --out {params.prefix_out}
+        --score {params.plink_prefix}.tmp center cols=dosagesum,scoresums  \
+        --out {params.plink_prefix}
         """
 
