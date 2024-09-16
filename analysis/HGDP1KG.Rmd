@@ -440,13 +440,25 @@ Confounding increases with overlap but not (as much) with control
 levels(df$gwas) <- c("5" = TeX("$5\\epsilon$"), "10" = TeX("$10\\epsilon$"), "50" = TeX("$50\\epsilon$"), "200" = TeX("$200\\epsilon$"))
 
 pl <- df %>% ggplot(aes(x = Z, y = q^2, color = pc)) + geom_point() + geom_smooth(method = "lm") + scale_x_log10()+ scale_y_log10() + facet_wrap(~gwas, scale = "free", labeller = labeller(gwas = label_parsed))  + theme_bw(base_size = 12) + ylab(TeX("$q^2$")) + xlab("Proportion of variance explained (H)") + scale_color_manual(values = c("goldenrod", "darkred"), name = "PCs")
+pl
 
-ggsave("~/Desktop/allData.png", pl, height = 6, width = 7)
+#ggsave("~/Desktop/allData.png", pl, height = 6, width = 7)
 
 #+ geom_hline(yintercept = 1, color = "blue", linetype = "dashed", size = 1.5)
 ```
 
 
+```{r}
+df40 <- df %>% filter(pc == 40)
+df0 <- df %>% filter(pc == 0)
+model0 <- lm(df0$q^2 ~ df0$Z)
+summary(model0)
+
+model40 <- lm(df40$q^2 ~ df40$Z)
+summary(model40)
+
+ggplot(data = df0, aes(x = Z, y = q^2)) + geom_point()
+```
 
 
 
@@ -470,11 +482,8 @@ df %>% filter(pc == 40 ) %>% ggplot(aes(x = HRatio, y = q^2, color = gwas)) + ge
 df %>% filter(pc == 40 ) %>% ggplot(aes(x = HRatio, y = -log10(pval), color = gwas)) + geom_point() + scale_x_log10()
 ```
 
-
-
-
 ```{r}
-df %>% filter(contrasts == "eur-lat" & phenotype == "EosinophillPercentage") %>% ggplot(aes(x = gwas, y = q, color = as.character(pc))) + geom_point() 
+df %>% filter(contrasts == "eurasia-long" & phenotype == "StandingHeight") %>% ggplot(aes(x = gwas, y = q, color = as.character(pc))) + geom_point() 
 ```
 
 
@@ -484,19 +493,80 @@ dfCont <- df %>% filter(contrasts %in%c("eas-nfe","eas-sas","eas-afr", "eas-amr"
 
 
 Sig <- dfCont %>% filter(pc == 40 & pAdjust < .05)
-
-df %>% filter(contrasts == "nfe-amr" & phenotype == "Glucose") %>% ggplot(aes(x = gwas, y = q, color = as.character(pc))) + geom_point() 
 ```
 
 
 ```{r}
-pl <- dfCont %>% filter(pc == 40) %>% ggplot(aes(x =Ratio, y = -log10(pval), color = gwas)) + geom_point(size = 3) + geom_hline(yintercept = -log10(0.05/17), color = "gray60", linetype = "dashed", size = 1) + scale_color_manual(values = c("purple1", "darkorange", "skyblue2", "seagreen"), name= TeX("Sampling distance ($\\epsilon$)")) + theme_classic(base_size =20) + xlab(TeX("$R^2_K / \\hat{\\gamma}_{F_{Gr}}$")) + theme(legend.position = "bottom")
+pl <- dfCont %>% filter(pc == 40) %>% ggplot(aes(x =Ratio, y = -log10(pval), color = gwas)) + geom_point(size = 3) + geom_hline(yintercept = -log10(0.05/17), color = "gray60", linetype = "dashed", size = 1) + scale_color_manual(values = c("purple1", "darkorange", "skyblue2", "seagreen"), name= TeX("Sampling distance ($\\epsilon$)")) + theme_classic(base_size =20) + xlab(TeX("$R^2_{40} / \\hat{\\gamma}_{F_{Gr}}$")) + theme(legend.position = "bottom")
 
 ggsave("~/Desktop/QHGDP1kGP.png", pl, width = 10, height = 5)
 ```
 
+```{r}
+dfCont %>% filter(contrasts == "sdi-eur" & phenotype == "StandingHeight") %>% ggplot(aes(x = gwas, y = q, color = as.character(pc))) + geom_point() 
+```
+```{r}
+levels(dfCont$gwas) <- c("5" = TeX("$5\\epsilon$"), "10" = TeX("$10\\epsilon$"), "50" = TeX("$50\\epsilon$"), "200" = TeX("$200\\epsilon$"))
+
+pl <- dfCont %>% filter(contrasts == "sdi-eur" & phenotype == "StandingHeight") %>% mutate(upper = q + 1.96, lower = q - 1.96) %>%  ggplot(aes(x = pc, y = q, color = pc)) + geom_point(size = 3) + facet_wrap(~gwas, nrow = 1,  labeller = labeller(gwas = label_parsed)) + geom_errorbar(aes(ymin = lower, ymax = upper)) + theme_bw(base_size = 16) + scale_color_manual(values = c("goldenrod", "darkred")) + theme(legend.position = "none") + geom_hline(yintercept = 0, color = "red", linetype = "dashed") + ylab(TeX("$\\hat{q}$ (sdi - eur)")) + xlab("PCs")
+
+ggsave("~/Desktop/sdiQ.png", pl, width = 7, height = 3)
+```
 
 
+```{r}
+tmp1 <- fread("../endpoints/HGDP1KG/e5/sdi-eur/L-pruneall/StandingHeight_50/PGS/no-FGr_sdi-eur.all-PC0.sscore")
+tmp1$pc <- 0
+tmp2 <- fread("../endpoints/HGDP1KG/e5/sdi-eur/L-pruneall/StandingHeight_50/PGS/no-FGr_sdi-eur.all-PC40.sscore")
+tmp2$pc <- 40
+dfSDI <- rbind(tmp1, tmp2)
+colnames(dfSDI)[1] <- "IID"
+dfSDI_e5  <- left_join(dfSDI, dfEur) %>% select("IID", "pc", "SCORE1_SUM", "SDI") %>% mutate(gwas = "5")
+
+tmp1 <- fread("../endpoints/HGDP1KG/e10/sdi-eur/L-pruneall/StandingHeight_50/PGS/no-FGr_sdi-eur.all-PC0.sscore")
+tmp1$pc <- 0
+tmp2 <- fread("../endpoints/HGDP1KG/e10/sdi-eur/L-pruneall/StandingHeight_50/PGS/no-FGr_sdi-eur.all-PC40.sscore")
+tmp2$pc <- 40
+dfSDI <- rbind(tmp1, tmp2)
+colnames(dfSDI)[1] <- "IID"
+dfSDI_e10  <- left_join(dfSDI, dfEur) %>% select("IID", "pc", "SCORE1_SUM", "SDI") %>% mutate(gwas = "10")
+
+tmp1 <- fread("../endpoints/HGDP1KG/e50/sdi-eur/L-pruneall/StandingHeight_50/PGS/no-FGr_sdi-eur.all-PC0.sscore")
+tmp1$pc <- 0
+tmp2 <- fread("../endpoints/HGDP1KG/e50/sdi-eur/L-pruneall/StandingHeight_50/PGS/no-FGr_sdi-eur.all-PC40.sscore")
+tmp2$pc <- 40
+dfSDI <- rbind(tmp1, tmp2)
+colnames(dfSDI)[1] <- "IID"
+dfSDI_e50  <- left_join(dfSDI, dfEur) %>% select("IID", "pc", "SCORE1_SUM", "SDI") %>% mutate(gwas = "50")
+
+tmp1 <- fread("../endpoints/HGDP1KG/e200/sdi-eur/L-pruneall/StandingHeight_50/PGS/no-FGr_sdi-eur.all-PC0.sscore")
+tmp1$pc <- 0
+tmp2 <- fread("../endpoints/HGDP1KG/e200/sdi-eur/L-pruneall/StandingHeight_50/PGS/no-FGr_sdi-eur.all-PC40.sscore")
+tmp2$pc <- 40
+dfSDI <- rbind(tmp1, tmp2)
+colnames(dfSDI)[1] <- "IID"
+dfSDI_e200  <- left_join(dfSDI, dfEur) %>% select("IID", "pc", "SCORE1_SUM", "SDI") %>% mutate(gwas = "200")
+
+dfSDI <- rbind(dfSDI_e5, dfSDI_e10, dfSDI_e50, dfSDI_e200)
+dfSDI$gwas<- factor(dfSDI$gwas, levels = c( "5", "10", "50", "200")) 
+#levels(dfSDI$gwas) <- c("5" = TeX("$5\\epsilon$"), "10" = TeX("$10\\epsilon$"), "50" = TeX("$50\\epsilon$"), "200" = TeX("$200\\epsilon$"))
+```
+
+```{r}
+levels(dfSDI$gwas) <- c("5" = TeX("$5\\epsilon$"), "10" = TeX("$10\\epsilon$"), "50" = TeX("$50\\epsilon$"), "200" = TeX("$200\\epsilon$"))
+
+pl <- dfSDI %>%
+  ggplot(aes(x = SDI, y = SCORE1_SUM, group = SDI, fill = SDI)) + 
+  geom_violin(aes(fill = SDI), alpha = 0.2) +  # Makes the violin plot transparent
+  facet_grid(vars(pc), vars(gwas), scales = "free",  labeller = labeller(gwas = label_parsed, pc = c("0" = "0 PCs", "40" = "40 PCs"))) + stat_summary(fun = "mean",
+               geom = "crossbar", 
+               width = 0.5,
+               colour = "black") +
+  theme_bw(base_size = 16) + ylab("Height polygenic score") + xlab("") + theme(legend.position = "none") +
+  scale_fill_manual(values = c("royalblue1", "pink3"))
+
+ggsave("~/Desktop/sdiPGS.png", pl, width = 7, height = 5)
+```
 
 
 Within UK
