@@ -22,107 +22,23 @@ library(latex2exp)
 df <- fread("../data/adnaSel/raw/all_populations_mles.txt")
 head(df)
 ```
-I can calculate the contrasts by comparing the observed frequency to the expected (as showin in their paper). 
-
-### Explore PCA of Whole Biobank
-
-Plot PC1 vs PC2 colored by self-identified ethnic background
-```{r, warning=FALSE}
-# Load data and combine
-dfPCA <- fread("../endpoints/ukbb/whole_biobank.eigenvec.gz")
-dfEB <- fread("../endpoints/ukbb/EthnicBackground_21000.txt")
-df <- inner_join(dfPCA, dfEB)
-
-# Use continental labels 
-df <- df %>% mutate(continental = case_when(EthnicBackground_21000 %in% c(4, 4001, 4002, 4003) ~ "Africa", EthnicBackground_21000 %in% c(1, 1001, 1002, 1003) ~ "Europe", EthnicBackground_21000 %in% c(2, 2001, 2002, 2003, 2004) ~ "Mixed", EthnicBackground_21000 %in% c(3, 3001, 3002, 3003, 3004) ~ "Asia"))
-```
-
-```{r, cache=TRUE}
-# Make PCA plot color based on self identified Ethnic background
-ggplot(data = df, aes(x = PC1, y = PC2, color = continental)) + geom_point() + theme_classic(base_size = 14) + scale_color_manual(values = c("darkred", "navy", "goldenrod4", "gray50"), na.value = "gray70")
-```
-### Sample Panels 
-
-#### Pre-defined sets  
-
-First use two predefined sets:  
-- ALL: all genotyped individuals in the UKBB ($M = 486,670$)  
-- WBS ("White British Subset"): all individuals the UKBB assigned to be part of the WBS ($M=408,812$)  
-
-```{r, warning=FALSE}
-df <- df %>% mutate(POP = continental)
-
-# Use all genotyped individuals 
-dfALL <- df %>% select("#FID", "IID", "POP")
-#fwrite(dfALL,"../data/adnaSel/ids/gwas_ids/ALL.txt", row.names = F, col.names = T, quote = F, sep = "\t")
-
-# Use only WBS 
-WBS <- fread("../data/ukbb/WBS.ids")
-dfWBS <- inner_join(df, WBS) %>% select("#FID", "IID", "POP")
-#fwrite(dfWBS,"../data/adnaSel/ids/gwas_ids/WBS.txt", row.names = F, col.names = T, quote = F, sep = "\t")
-```
-#### Use PC distance
-
-First I calculate the euclidean distance of each individual from the mean position on PC1 and PC2 for the WBS. Using this distance metric I select $M=10,000$ individuals for 4 different GWAS panels based on their distance from the WBS:  
-
-- q1: individuals in the first fourth of the total distance  
-- q2: individuals in the first half of distance  
-- q3: individuals in the three-fourths of total distance  
-- q4: individuals in any distance (equivalent to sampling 10,000 individuals from ALL)   
-
-
-```{r, warning=FALSE}
-# Get average of WBS
-dfWBS <- inner_join(df, WBS)
-avgPC1 <- mean(dfWBS$PC1)
-avgPC2 <- mean(dfWBS$PC2)
-
-# Calculate from WBS centroid 
-avgPC <- c(avgPC1, avgPC2)
-df$distance <- sqrt(rowSums((df[, 3:4] - avgPC)^2))
-
-# Plot distance
-ggplot(data = df, aes(x = distance, y = PC1, color = POP)) + geom_point() + theme_classic(base_size = 14) + scale_color_manual(values = c("darkred", "navy", "goldenrod4", "gray50"), na.value = "gray70")
-```
-
-```{r, eval=FALSE}
-set.seed(12)
-# Sample GWAS panels
-maxDist <- max(df$distance)
-interval <- maxDist / 4
-q1 <- interval
-q2 <- interval * 2
-q3 <- interval * 3
-q4 <- interval * 4
-
-## Sample everyone 
-dfGWAS <- df %>% filter(distance <=  q4) %>% sample_n(10000) %>% select("#FID", "IID", "POP")
-#fwrite(dfGWAS,"../data/adnaSel/ids/gwas_ids/q4.txt", row.names = F, col.names = T, quote = F, sep = "\t")
-
-## Sample q3
-dfGWAS <- df %>% filter(distance <=  q3)%>% sample_n(10000) %>% select("#FID", "IID", "POP")
-#fwrite(dfGWAS,"../data/adnaSel/ids/gwas_ids/q3.txt", row.names = F, col.names = T, quote = F, sep = "\t")
-
-## Sample q4
-dfGWAS <- df %>% filter(distance <=  q2)%>% sample_n(10000) %>% select("#FID", "IID", "POP")
-#fwrite(dfGWAS,"../data/adnaSel/ids/gwas_ids/q2.txt", row.names = F, col.names = T, quote = F, sep = "\t")
-
-## 1sr quartile
-dfGWAS <- df %>% filter(distance <=  q1)%>% sample_n(10000) %>% select("#FID", "IID", "POP")
-#fwrite(dfGWAS,"../data/adnaSel/ids/gwas_ids/q1.txt", row.names = F, col.names = T, quote = F, sep = "\t")
-```
-
-# Results 
 
 ### Overlap statistics
 
 Load data and format 
 ```{r}
-dfOverlap <- fread("../endpoints/adnaSel/OverlapStats.txt")
-dfOverlap <- dfOverlap %>% mutate(gwas_type2 = case_when(gwas %in% c("q1", "q2", "q3", "q4") ~ "distance",
-         gwas %in% c("ALL", "WBS") ~ "full"))
-dfOverlap$gwas <- factor(dfOverlap$gwas, levels = c("ALL", "WBS", "q1", "q2", "q3", "q4"))
+dfOverlap <- fread("../endpoints/adnaSel/OverlapStats.txt") %>% separate(gwas, into = c("tmp", "gwas"), sep = "e")
+dfOverlap$gwas <- factor(dfOverlap$gwas, levels = c( "5", "10", "50", "200"))
 ```
+
+Plot Z by GWAS
+```{r}
+pl <- dfOverlap %>% filter(L == "pruneall")%>% ggplot(aes(x = gwas, y = Z)) + geom_point() + xlab("") + ylab("") + theme_bw(base_size = 14)  + guides(fill="none") + theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(size = 10), strip.text.x = element_text(size = 8,))+facet_wrap(~contrasts, nrow = 1)+ scale_y_log10(limits = c(1e-6, 1e-4)) 
+pl
+ggsave("~/Desktop/tmp.png", pl, height = 2, width = 12)
+```
+
+
 
 **GWAS type vs proportion of variance explained** 
 ```{r}

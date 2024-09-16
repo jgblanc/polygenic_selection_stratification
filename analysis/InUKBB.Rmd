@@ -13,6 +13,16 @@ library(data.table)
 
 ## Read in GWAS IDs
 
+```{r, warning=FALSE}
+# Load data and combine
+dfPCA <- fread("../endpoints/ukbb/whole_biobank.eigenvec.gz")
+dfEB <- fread("../endpoints/ukbb/EthnicBackground_21000.txt")
+df <- inner_join(dfPCA, dfEB)
+
+# Use continental labels 
+df <- df %>% mutate(continental = case_when(EthnicBackground_21000 %in% c(4, 4001, 4002, 4003) ~ "Africa", EthnicBackground_21000 %in% c(1, 1001, 1002, 1003) ~ "Europe", EthnicBackground_21000 %in% c(2, 2001, 2002, 2003, 2004) ~ "Mixed", EthnicBackground_21000 %in% c(3, 3001, 3002, 3003, 3004) ~ "Asia"))
+```
+
 ```{r}
 dfe5 <- fread("../data/ids/gwas_ids/e5.txt")
 dfe10 <- fread("../data/ids/gwas_ids/e10.txt")
@@ -42,7 +52,7 @@ dfCoBUK <- inner_join(dfCoBUK, df)%>% filter(continental == "Europe")
 ```{r}
 dfTest <- dfCoBUK %>% filter(! IID %in% dfGWAS$IID)  %>% mutate("POP" = CoB) %>% select("#FID", "IID", "POP") %>% filter(POP != "Elsewhere")
 
-fwrite(dfTest,"../data/InUKBB/ids/test_ids/CountryOfBirthUK.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+#fwrite(dfTest,"../data/InUKBB/ids/test_ids/CountryOfBirthUK.txt", row.names = F, col.names = T, quote = F, sep = "\t")
 
 table(dfTest$POP)
 ```
@@ -52,17 +62,27 @@ Load data and format
 ```{r}
 dfOverlap <- fread("../endpoints/InUKBB/OverlapStats.txt") %>% separate(gwas, into = c("tmp", "gwas"), sep = "e")
 dfOverlap$gwas <- factor(dfOverlap$gwas, levels = c( "5", "10", "50", "200")) 
+rep_str = c("England" = "ENG","Wales" = "WAL", "Scotland" = "SCT","NorthernIreland" = "NI","RepublicOfIrelend" = "RoI"  )
+dfOverlap$contrasts <- str_replace_all(dfOverlap$contrasts, rep_str)
 ```
 
 ```{r}
 dfPC <- fread("../endpoints/InUKBB/PCStats.txt") %>% separate(gwas, into = c("tmp", "gwas"), sep = "e")
-dfPC$gwas <- factor(dfPC$gwas, levels = c("e5", "e10", "e50", "e200"))
+dfPC$gwas <- factor(dfPC$gwas, levels = c( "5", "10", "50", "200"))
 ```
 
 ```{r}
-pl <- dfOverlap %>% filter(L == "pruneall")%>% ggplot(aes(x = gwas, y = Z)) + geom_point() + xlab("") + ylab("") + theme_bw(base_size = 14)  + guides(fill="none") + theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(size = 10), strip.text.x = element_text(size = 6,))+facet_wrap(~contrasts, nrow = 1)+ scale_y_log10(breaks = c(1e-5, 1e-4, 1e-3), limits = c(1e-5, 1e-3)) 
+pl <- dfOverlap %>% filter(L == "pruneall")%>% ggplot(aes(x = gwas, y = Z)) + geom_point() + xlab("") + ylab("") + theme_bw(base_size = 14)  + guides(fill="none") + theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(size = 10), strip.text.x = element_text(size = 8,))+facet_wrap(~contrasts, nrow = 1)+ scale_y_log10(breaks = c(1e-5, 1e-4, 1e-3), limits = c(1e-5, 1e-3)) 
 pl
 ggsave("~/Desktop/tmp.png", pl, height = 2, width = 12)
 ```
+
+
+```{r}
+pl <- dfPC %>% filter(gwas_type == "even" & test_type == "odd" & L == "pruneall") %>% ggplot(aes(x = PC, y = r2)) + geom_bar(stat = "identity", fill = "darkgreen", color = "darkgreen") + facet_grid(vars(gwas), vars(contrasts)) + theme_bw(base_size = 8) + ylab(TeX("$R_{K}^2$")) + geom_hline( aes(yintercept = 1-Error), color = "red", linetype = 2, linewidth = 1) + scale_x_continuous(breaks = seq(0, 40, by = 10)) + theme(axis.text.x = element_text(size = 6), plot.title = element_text(hjust = 0.5)) + ylim(-0.1,1)
+pl
+```
+
+
 
 

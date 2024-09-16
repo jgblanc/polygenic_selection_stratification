@@ -53,14 +53,19 @@ dfEurAsia <- dfEurAsia %>% mutate(FID = 0) %>% select(FID, everything())
 
 # Save IDs 
 fwrite(dfEurAsia,"../data/HGDP1KG/ids/test_ids/eurasia.txt", row.names = F, col.names = T, quote = F, sep = "\t")
-
-# Plot Map
-pl <- ggplot() + geom_polygon(data = world_map, aes(x = long, y = lat, group = group), fill = "white", color = "black") +
-  geom_point(data = dfEurAsia, aes(x = long, y = lat, color = pop), size = 2) + 
-  theme_minimal(base_size = 14) + xlab("Longitude") + ylab("Latitude") +labs(colour="POP") + theme(legend.position = "bottom")
-
-ggsave("~/Desktop/tmp.png", pl, height = 5)
 ```
+
+```{r}
+dfPlot <- dfEurAsia %>% group_by(subpop) %>% mutate(size = n()) %>% ungroup()
+
+pl <- ggplot() + geom_polygon(data = world_map, aes(x = long, y = lat, group = group), fill = "white", color = "black") +
+  geom_point(data = dfPlot, aes(x = long, y = lat, color = pop, size = size)) + 
+  theme_minimal(base_size = 20) + xlab("Longitude") + ylab("Latitude") +labs(colour="Region", size = "Sample Size") + theme(legend.position = "right") + scale_color_manual(values = c( "springgreen4","slateblue4","royalblue1", "darkorange")) +  scale_size_continuous(range = c(1, 6)) 
+
+ggsave("~/Desktop/tmp.png", height = 5, width = 12)
+```
+
+
 
 **Latitude (and Longitude) in Europe**
 
@@ -76,15 +81,22 @@ colnames(dfEur) <- c("IID","pop", "subpop", "lat", "long")
 dfEur <- dfEur %>% mutate(FID = 0) %>% select(FID, everything())
 
 # Save IDs 
-fwrite(dfEur,"../data/HGDP1KG/ids/test_ids/nfe_no_ceu.txt", row.names = F, col.names = T, quote = F, sep = "\t")
-
-# Plot Map 
-pl <- ggplot() + geom_polygon(data = world_map, aes(x = long, y = lat, group = group), fill = "white", color = "black") +
-  geom_point(data = dfEur, aes(x = long, y = lat, color = subpop), size = 2) + 
-  theme_minimal(base_size = 14) + xlab("Longitude") + ylab("Latitude") +labs(colour="POP") + theme(legend.position = "bottom")
-
-ggsave("~/Desktop/tmp.png", pl, height = 5)
+#fwrite(dfEur,"../data/HGDP1KG/ids/test_ids/nfe_no_ceu.txt", row.names = F, col.names = T, quote = F, sep = "\t")
 ```
+
+```{r}
+dfPlot <- dfEur %>% group_by(subpop) %>% mutate(size = n()) %>% ungroup()
+
+pl <- ggplot() + geom_polygon(data = world_map, aes(x = long, y = lat, group = group), fill = "white", color = "black") +
+  geom_point(data = dfPlot, aes(x = long, y = lat, color = pop, size = size)) + 
+  theme_minimal(base_size = 20) + xlab("Longitude") + ylab("Latitude") +labs(colour="Region", size = "Sample Size") + theme(legend.position = "right") + scale_color_manual(values = c( "springgreen4","slateblue4","royalblue1", "darkorange")) +  scale_size_continuous(range = c(1, 6)) 
+pl
+
+ggsave("~/Desktop/tmp.png", height = 5, width = 12)
+```
+
+
+
 **Sardinia vs Europe**
 
 Similar to the analysis in [Chen et al](https://www.sciencedirect.com/science/article/pii/S0002929720301610) we want to test for polygenic selection acting on height in Sardinia compared to the rest of Europe.   
@@ -99,14 +111,24 @@ dfEur <- dfEur %>% mutate(SDI = case_when(subpop == "Sardinian" ~ "sdi", TRUE ~ 
 dfEur <- dfEur %>% mutate(FID = 0) %>% select(FID, everything())
 
 # Save IDs 
-fwrite(dfEur,"../data/HGDP1KG/ids/test_ids/nfe.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+#fwrite(dfEur,"../data/HGDP1KG/ids/test_ids/nfe.txt", row.names = F, col.names = T, quote = F, sep = "\t")
 
-# Plot Map 
-pl <- ggplot() + geom_polygon(data = world_map, aes(x = long, y = lat, group = group), fill = "white", color = "black") +
-  geom_point(data = dfEur, aes(x = long, y = lat, color = SDI), size = 2) + 
-  theme_minimal(base_size = 14) + xlab("Longitude") + ylab("Latitude") +labs(colour="POP") + theme(legend.position = "bottom")
-ggsave("~/Desktop/tmp.png", height = 5)
 ```
+
+```{r}
+dfPlot <- dfEur %>% group_by(subpop) %>% mutate(size = n()) %>% ungroup()
+dfPlot <- dfPlot[order(dfPlot$SDI, decreasing = FALSE), ]
+
+pl <- ggplot() + geom_polygon(data = world_map, aes(x = long, y = lat, group = group), fill = "white", color = "black") +
+  geom_point(data = dfPlot, aes(x = long, y = lat, color = SDI, size = size)) + 
+  theme_minimal(base_size = 20) + xlab("Longitude") + ylab("Latitude") +labs(colour="Contrast", size = "Sample Size") + theme(legend.position = "right") + scale_color_manual(values = c( "royalblue1", "pink3")) +  scale_size_continuous(range = c(1, 6)) 
+pl
+
+ggsave("~/Desktop/tmp.png", height = 5, width = 12)
+```
+
+
+
 **All continental differences**  
 
 Here we include the 5 major populations and will test for overlap in "continental" level contrasts (N = 3,859).  
@@ -125,6 +147,16 @@ dfAll <- dfAll %>% mutate(FID = 0) %>% select(FID, everything())
 #fwrite(dfAll,"../data/HGDP1KG/ids/test_ids/all.txt", row.names = F, col.names = T, quote = F, sep = "\t")
 ```
 
+```{r}
+dfPlot <- dfAll %>% group_by(subpop) %>% mutate(size = n()) %>% ungroup()
+
+pl <- ggplot() + geom_polygon(data = world_map, aes(x = long, y = lat, group = group), fill = "white", color = "black") +
+  geom_point(data = dfPlot, aes(x = long, y = lat, color = pop, size = size)) + 
+  theme_minimal(base_size = 20) + xlab("Longitude") + ylab("Latitude") +labs(colour="Region", size = "Sample Size") + theme(legend.position = "right") + scale_color_manual(values = c( "purple","firebrick3","springgreen4", "royalblue1", "darkorange")) +  scale_size_continuous(range = c(1, 6)) 
+pl
+
+ggsave("~/Desktop/tmp.png", height = 5, width = 12)
+```
 
 # Results 
 
@@ -180,14 +212,16 @@ Load data and format
 ```{r}
 dfOverlap <- fread("../endpoints/HGDP1KG/OverlapStats.txt") %>% separate(gwas, into = c("tmp", "gwas"), sep = "e")
 dfOverlap$gwas <- factor(dfOverlap$gwas, levels = c( "5", "10", "50", "200")) 
-dfOverlap <- dfOverlap %>% filter(contrasts %in% c("eurasia-lat", "eurasia-long", "eur-lat", "eur-long"))
+dfOverlap <- dfOverlap %>% filter(contrasts %in% c("eurasia-lat", "eurasia-long", "eur-lat", "eur-long", "sdi-eur"))
 #dfOverlap$contrasts <- factor(dfOverlap$contrasts, levels = c("eas-nfe","eas-sas","eas-afr", "eas-amr", "nfe-sas","nfe-afr", "nfe-amr","sas-afr", "sas-amr", "afr-amr"))
 ```
 
 ```{r}
 dfPC <- fread("../endpoints/HGDP1KG/PCStats.txt") %>% separate(gwas, into = c("tmp", "gwas"), sep = "e")
-dfPC$gwas <- factor(dfPC$gwas, levels = c("e5", "e10", "e50", "e200"))
-dfPC <- dfPC %>% filter(contrasts %in% c("eurasia-lat", "eurasia-long", "eur-lat", "eur-long"))
+dfPC$gwas <- factor(dfPC$gwas, levels = c("5", "10", "50", "200"))
+#dfPC <- dfPC %>% filter(contrasts %in% c("eurasia-lat", "eurasia-long", "eur-lat", "eur-long", "sdi-eur"))
+
+dfPC <- dfPC %>% filter(contrasts %in% c("eur-lat"))
 ```
 
 ```{r}
@@ -195,7 +229,21 @@ pl <- dfOverlap %>% filter(L == "pruneall")%>% ggplot(aes(x = gwas, y = Z)) + ge
 pl
 ggsave("~/Desktop/tmp.png", pl, height = 2, width = 12)
 ```
+```{r}
+gwas_labeller <- as_labeller(
+  c("5" = expression(5 * epsilon), 
+    "10" = expression(10 * epsilon), 
+    "50" = expression(50 * epsilon), 
+    "200" = expression(200 * epsilon))
+)
 
+dfPC$gwas <- as.factor(dfPC$gwas)
+levels(dfPC$gwas) <- c("5" = TeX("$5\\epsilon$"), "10" = TeX("$10\\epsilon$"), "50" = TeX("$50\\epsilon$"), "200" = TeX("$200\\epsilon$"))
+pl <- dfPC %>% filter(gwas_type == "even" & test_type == "odd" & L == "pruneall") %>% ggplot(aes(x = PC, y = r2)) + geom_bar(stat = "identity", fill = "darkgreen", color = "darkgreen") + facet_grid(vars(gwas), vars(contrasts),labeller = labeller(gwas = label_parsed, contrasts = c("eur-lat" = "Europe-Latitude"))) + theme_bw(base_size = 16) + ylab(TeX("$R_{J}^2$")) + geom_hline( aes(yintercept = 1-Error), color = "red", linetype = 2, linewidth = 1) + scale_x_continuous(breaks = seq(0, 40, by = 10)) + theme(axis.text.x = element_text(size = 16), plot.title = element_text(hjust = 0.5)) + ylim(-0.1,1)
+pl
+
+ggsave("~/Desktop/tmp.png",pl, width = 7, height = 7)
+```
 
 
 
@@ -219,4 +267,288 @@ ggsave("~/Desktop/tmp.png",pl,  height = 4)
 ```
 
 
+## All data together
 
+```{r}
+tmp1 <- fread("../endpoints/HGDP1KG/OverlapStats.txt")
+tmp2 <- fread("../endpoints/InUKBB/OverlapStats.txt")
+tmp3 <- fread("../endpoints/adnaSel/OverlapStats.txt")
+tmp4 <- fread("../endpoints/SDS/OverlapStats.txt")
+
+dfAllOverlap <- rbind(tmp1, tmp2, tmp3, tmp4) %>% separate(gwas, into = c("tmp", "gwas"), sep = "e")
+dfAllOverlap$gwas <- factor(dfAllOverlap$gwas, levels = c( "5", "10", "50", "200")) 
+
+pl <- dfAllOverlap %>% ggplot(aes(x = Z, y = error, color = gwas)) + geom_point(size = 2.5) + scale_x_log10() + scale_y_log10() + xlab("Proportion of variance explained (H)") + ylab(TeX("Error ($\\hat{e}_{F_{Gr}}$)"))  + theme_bw(base_size = 14) + scale_color_manual(values = c("purple1", "darkorange", "skyblue2", "seagreen"), name= TeX("Sampling distance ($\\epsilon$)"))  + theme(panel.grid.minor = element_line(linetype = "dashed"))
+
+#ggsave("~/Downloads/FGrError.png", pl, height = 5, width = 9)
+```
+
+
+```{r}
+tmp1 <- fread("../endpoints/HGDP1KG/PCStats.txt")
+tmp2 <- fread("../endpoints/InUKBB/PCStats.txt")
+tmp3 <- fread("../endpoints/adnaSel/PCStats.txt")
+tmp4 <- fread("../endpoints/SDS/PCStats.txt")
+
+dfAllPC <- rbind(tmp1, tmp2,tmp3, tmp4) %>% separate(gwas, into = c("tmp", "gwas"), sep = "e") %>% filter(gwas_type == "even" & test_type == "odd" & L == "pruneall")
+dfAllPC$gwas <- factor(dfAllPC$gwas, levels = c( "5", "10", "50", "200")) 
+dfAllPC$Signal <- 1 - dfAllPC$Error
+dfAllPC$Ratio <- dfAllPC$r2 / dfAllPC$Signal
+
+# Replace ratio > 1 with 1
+#dfAllPC <- dfAllPC %>% mutate(Ratio = case_when(Ratio > 1 ~ 1, Ratio <= 1 ~ Ratio))
+
+pl <- dfAllPC %>% filter(PC == 40) %>% ggplot(aes(x = gwas, y = Ratio)) + geom_point() + facet_wrap(~contrasts)
+#ggsave("~/Desktop/tmp1.png", pl)
+```
+
+```{r}
+dfAllC <- left_join(dfAllPC, dfAllOverlap)
+
+pl <- dfAllC %>% filter(PC == 40) %>% ggplot(aes(x = Z, y = Ratio, color = gwas)) + geom_point() + scale_x_log10() 
+pl
+
+```
+
+
+Europe Lat
+```{r}
+pl <- dfAllC %>% filter(contrasts == "eur-lat") %>% ggplot(aes(x = PC, y = Ratio, color = gwas)) + geom_smooth() + facet_wrap(~contrasts, scales = "free", labeller = labeller(contrasts = c("eur-lat" = "Europe-Latitude")))  + geom_hline(yintercept = 1, color = "red", linetype = "dashed")+ scale_y_continuous(breaks = c(0,.25, 0.5, .75, 1)) + theme_bw(base_size = 18) + scale_color_manual(values = c("purple1", "darkorange", "skyblue2", "seagreen"), name= TeX("Sampling distance ($\\epsilon$)")) + theme(panel.grid.minor = element_line(linetype = "dashed"), legend.position = "bottom") + ylab(TeX("$R^2_J / \\hat{\\gamma}_{F_{Gr}}$"))
+pl 
+ggsave("~/Desktop/tmp3.png", pl, height = 6, width = 7)
+```
+
+Everyone 
+```{r}
+# Continental 
+dfPlot <- dfAllC %>% filter(contrasts %in%c("eas-nfe","eas-sas","eas-afr", "eas-amr", "nfe-sas","nfe-afr", "nfe-amr","sas-afr", "sas-amr", "afr-amr"))
+
+dfPlot$contrasts <- factor(dfPlot$contrasts, levels = c("eas-nfe","eas-sas","eas-afr", "eas-amr", "nfe-sas","nfe-afr", "nfe-amr","sas-afr", "sas-amr", "afr-amr"))  
+
+pl <- dfPlot %>% ggplot(aes(x = PC, y = Ratio, color = gwas)) + geom_smooth() + facet_wrap(~contrasts, labeller = labeller(contrasts = c("eur-lat" = "Europe-Latitude")), nrow =1)  + geom_hline(yintercept = 1, color = "red", linetype = "dashed")+ scale_y_continuous(breaks = c(0,.25, 0.5, .75, 1)) + theme_bw(base_size = 12) + scale_color_manual(values = c("purple1", "darkorange", "skyblue2", "seagreen"), name= TeX("Sampling distance ($\\epsilon$)")) + theme(panel.grid.minor = element_line(linetype = "dashed"), legend.position = "none") + ylab(TeX("$R^2_J / \\hat{\\gamma}_{F_{Gr}}$"))
+ggsave("~/Desktop/tmp.png", pl, height = 2, width = 14)
+```
+
+```{r}
+# Continental 
+dfPlot <- dfAllC %>% filter(contrasts %in% c("eurasia-lat", "eurasia-long", "eur-lat", "eur-long", "sdi-eur"))
+
+
+pl <- dfPlot %>% ggplot(aes(x = PC, y = Ratio, color = gwas)) + geom_smooth() + facet_wrap(~contrasts, nrow =1)  + geom_hline(yintercept = 1, color = "red", linetype = "dashed")+ scale_y_continuous(breaks = c(0,.25, 0.5, .75, 1)) + theme_bw(base_size = 12) + scale_color_manual(values = c("purple1", "darkorange", "skyblue2", "seagreen"), name= TeX("Sampling distance ($\\epsilon$)")) + theme(panel.grid.minor = element_line(linetype = "dashed"), legend.position = "none") + ylab(TeX("$R^2_J / \\hat{\\gamma}_{F_{Gr}}$"))
+pl
+ggsave("~/Desktop/tmp.png", pl, height = 2, width = 14)
+```
+
+
+```{r}
+# In UK
+rep_str = c("England" = "ENG","Wales" = "WAL", "Scotland" = "SCT","NorthernIreland" = "NI","RepublicOfIrelend" = "RoI"  )
+dfAllC$contrasts <- str_replace_all(dfAllC$contrasts, rep_str)
+
+dfPlot <- dfAllC %>% filter(contrasts %in% c("ENG-NI", "ENG-RoI", "ENG-SCT", "ENG-WAL", "NI-RoI", "NI-SCT", "NI-WAL", "RoI-SCT", "RoI-WAL", "SCT-WAL"))
+
+pl <- dfPlot %>% ggplot(aes(x = PC, y = Ratio, color = gwas)) + geom_smooth() + facet_wrap(~contrasts, nrow =1)  + geom_hline(yintercept = 1, color = "red", linetype = "dashed")+ scale_y_continuous(breaks = c(0,.25, 0.5, .75, 1)) + theme_bw(base_size = 12) + scale_color_manual(values = c("purple1", "darkorange", "skyblue2", "seagreen"), name= TeX("Sampling distance ($\\epsilon$)")) + theme(panel.grid.minor = element_line(linetype = "dashed"), legend.position = "none") + ylab(TeX("$R^2_J / \\hat{\\gamma}_{F_{Gr}}$"))
+pl
+ggsave("~/Desktop/tmp.png", pl, height = 2, width = 14)
+```
+
+
+```{r}
+# aDNAsel
+library(ggh4x)
+
+dfPlot <- dfAllC %>% filter(contrasts %in% c("BronzeAge", "EuropeanNeolithic", "Historical"))
+
+custom_y <- list(
+  scale_y_continuous(limits = c(0, 1)),
+  scale_y_continuous(limits = c(0, 1)),
+  scale_y_continuous(limits = c(0, 2.5))
+)
+
+
+pl <- dfPlot %>% ggplot(aes(x = PC, y = Ratio, color = gwas)) + geom_smooth() + facet_wrap(~contrasts, nrow =1, scales = "free_y")  + geom_hline(yintercept = 1, color = "red", linetype = "dashed") + theme_bw(base_size = 12) + scale_color_manual(values = c("purple1", "darkorange", "skyblue2", "seagreen"), name= TeX("Sampling distance ($\\epsilon$)")) + theme(panel.grid.minor = element_line(linetype = "dashed"), legend.position = "none") + ylab(TeX("$R^2_J / \\hat{\\gamma}_{F_{Gr}}$")) + facetted_pos_scales(y = custom_y)
+pl
+ggsave("~/Desktop/tmp.png", pl, height = 2, width = 14)
+```
+
+
+
+
+
+```{r}
+# SDS
+
+dfPlot <- dfAllC %>% filter(contrasts %in% c("Han", "UK10K"))
+
+custom_y <- list(
+  scale_y_continuous(limits = c(0, 2.5)),
+  scale_y_continuous(limits = c(0, 1))
+)
+
+
+pl <- dfPlot %>% ggplot(aes(x = PC, y = Ratio, color = gwas)) + geom_smooth() + facet_wrap(~contrasts, nrow =1, scales = "free_y")  + geom_hline(yintercept = 1, color = "red", linetype = "dashed") + theme_bw(base_size = 12) + scale_color_manual(values = c("purple1", "darkorange", "skyblue2", "seagreen"), name= TeX("Sampling distance ($\\epsilon$)")) + theme(panel.grid.minor = element_line(linetype = "dashed"), legend.position = "none") + ylab(TeX("$R^2_K / \\hat{\\gamma}_{F_{Gr}}$")) + facetted_pos_scales(y = custom_y)
+pl
+ggsave("~/Desktop/tmp.png", pl, height = 2, width = 14)
+```
+
+
+## Q results 
+
+```{r}
+tmp1 <- fread("../endpoints/HGDP1KG/QStats.txt")
+tmp2 <- fread("../endpoints/InUKBB/QStats.txt")
+tmp3 <- fread("../endpoints/adnaSel/QStats.txt")
+tmp4 <- fread("../endpoints/SDS/QStats.txt")
+
+dfQ <- rbind(tmp1, tmp2, tmp3, tmp4) %>% separate(gwas, into = c("tmp", "gwas"), sep = "e") %>% filter(pc == 0 | pc == 40)
+```
+
+```{r}
+tmp1 <- fread("../endpoints/HGDP1KG/PCStats.txt")
+tmp2 <- fread("../endpoints/InUKBB/PCStats.txt")
+tmp3 <- fread("../endpoints/adnaSel/PCStats.txt")
+tmp4 <- fread("../endpoints/SDS/PCStats.txt")
+
+dfAllPC <- rbind(tmp1, tmp2,tmp3, tmp4) %>% separate(gwas, into = c("tmp", "gwas"), sep = "e") %>% filter(gwas_type == "even" & test_type == "odd" & L == "pruneall") %>% filter(PC ==40) %>% select(!PC)
+dfAllPC$gwas <- factor(dfAllPC$gwas, levels = c( "5", "10", "50", "200")) 
+dfAllPC$Signal <- 1 - dfAllPC$Error
+dfAllPC$Ratio <- dfAllPC$r2 / dfAllPC$Signal
+```
+
+```{r}
+tmp1 <- fread("../endpoints/HGDP1KG/OverlapStats.txt")
+tmp2 <- fread("../endpoints/InUKBB/OverlapStats.txt")
+tmp3 <- fread("../endpoints/adnaSel/OverlapStats.txt")
+tmp4 <- fread("../endpoints/SDS/OverlapStats.txt")
+
+dfAllOverlap <- rbind(tmp1, tmp2, tmp3, tmp4) %>% separate(gwas, into = c("tmp", "gwas"), sep = "e")
+dfAllOverlap$gwas <- factor(dfAllOverlap$gwas, levels = c( "5", "10", "50", "200")) 
+```
+
+```{r}
+tmp <- left_join(dfQ, dfAllPC)
+df <- left_join(tmp, dfAllOverlap)
+df$HRatio <- df$Ratio * df$Z
+
+df <- df %>% filter(Ratio < 1.5)
+df$gwas<- factor(df$gwas, levels = c( "5", "10", "50", "200")) 
+df$pc <-as.factor(df$pc)
+```
+
+Confounding increases with overlap but not (as much) with control 
+```{r}
+levels(df$gwas) <- c("5" = TeX("$5\\epsilon$"), "10" = TeX("$10\\epsilon$"), "50" = TeX("$50\\epsilon$"), "200" = TeX("$200\\epsilon$"))
+
+pl <- df %>% ggplot(aes(x = Z, y = q^2, color = pc)) + geom_point() + geom_smooth(method = "lm") + scale_x_log10()+ scale_y_log10() + facet_wrap(~gwas, scale = "free", labeller = labeller(gwas = label_parsed))  + theme_bw(base_size = 12) + ylab(TeX("$q^2$")) + xlab("Proportion of variance explained (H)") + scale_color_manual(values = c("goldenrod", "darkred"), name = "PCs")
+
+ggsave("~/Desktop/allData.png", pl, height = 6, width = 7)
+
+#+ geom_hline(yintercept = 1, color = "blue", linetype = "dashed", size = 1.5)
+```
+
+
+
+
+
+```{r}
+df40 <- df %>% filter(pc == 40 )
+df0 <- df %>% filter(pc == 0 )
+
+df40$predQ <- df40$Ratio * df0$q
+
+df40 %>% ggplot(aes(x = predQ, y = q)) + geom_point() + geom_smooth(method = "lm")
+```
+
+
+```{r}
+df %>% filter(pc == 40 ) %>% ggplot(aes(x = HRatio, y = q^2, color = gwas)) + geom_point() + scale_x_log10() 
+```
+
+
+
+```{r}
+df %>% filter(pc == 40 ) %>% ggplot(aes(x = HRatio, y = -log10(pval), color = gwas)) + geom_point() + scale_x_log10()
+```
+
+
+
+
+```{r}
+df %>% filter(contrasts == "eur-lat" & phenotype == "EosinophillPercentage") %>% ggplot(aes(x = gwas, y = q, color = as.character(pc))) + geom_point() 
+```
+
+
+HGDP1kGP
+```{r}
+dfCont <- df %>% filter(contrasts %in%c("eas-nfe","eas-sas","eas-afr", "eas-amr", "nfe-sas","nfe-afr", "nfe-amr","sas-afr", "sas-amr", "afr-amr", "eurasia-lat", "eurasia-long", "eur-lat", "eur-long", "sdi-eur")) %>% group_by(gwas, contrasts, pc) %>% mutate(pAdjust = p.adjust(pval, method = "bonferroni"))
+
+
+Sig <- dfCont %>% filter(pc == 40 & pAdjust < .05)
+
+df %>% filter(contrasts == "nfe-amr" & phenotype == "Glucose") %>% ggplot(aes(x = gwas, y = q, color = as.character(pc))) + geom_point() 
+```
+
+
+```{r}
+pl <- dfCont %>% filter(pc == 40) %>% ggplot(aes(x =Ratio, y = -log10(pval), color = gwas)) + geom_point(size = 3) + geom_hline(yintercept = -log10(0.05/17), color = "gray60", linetype = "dashed", size = 1) + scale_color_manual(values = c("purple1", "darkorange", "skyblue2", "seagreen"), name= TeX("Sampling distance ($\\epsilon$)")) + theme_classic(base_size =20) + xlab(TeX("$R^2_K / \\hat{\\gamma}_{F_{Gr}}$")) + theme(legend.position = "bottom")
+
+ggsave("~/Desktop/QHGDP1kGP.png", pl, width = 10, height = 5)
+```
+
+
+
+
+
+Within UK
+```{r}
+rep_str = c("England" = "ENG","Wales" = "WAL", "Scotland" = "SCT","NorthernIreland" = "NI","RepublicOfIrelend" = "RoI"  )
+df$contrasts <- str_replace_all(df$contrasts, rep_str)
+
+dfUK <- df %>% filter(contrasts %in% c("ENG-NI", "ENG-RoI", "ENG-SCT", "ENG-WAL", "NI-RoI", "NI-SCT", "NI-WAL", "RoI-SCT", "RoI-WAL", "SCT-WAL")) %>% group_by(gwas, contrasts, pc) %>% mutate(pAdjust = p.adjust(pval, method = "bonferroni"))
+
+Sig <- dfUK %>% filter(pc == 40 & pAdjust < .05)
+```
+
+```{r}
+pl <- dfUK %>% filter(pc == 40) %>% ggplot(aes(x =Ratio, y = -log10(pval), color = gwas)) + geom_point(size = 3) + geom_hline(yintercept = -log10(0.05/17), color = "gray60", linetype = "dashed", size = 1) + scale_color_manual(values = c("purple1", "darkorange", "skyblue2", "seagreen"), name= TeX("Sampling distance ($\\epsilon$)")) + theme_classic(base_size =20) + xlab(TeX("$R^2_K / \\hat{\\gamma}_{F_{Gr}}$")) + theme(legend.position = "bottom")
+pl
+
+#ggsave("~/Desktop/QHGDP1kGP.png", pl, width = 10, height = 5)
+```
+
+```{r}
+df %>% filter(contrasts == "ENG-SCT" & phenotype == "MeanCorpuscularVolume") %>% ggplot(aes(x = gwas, y = q, color = as.character(pc))) + geom_point() 
+```
+
+aDNA
+```{r}
+
+dfaDNA <- df %>% filter(contrasts %in% c("Historical", "BronzeAge", "EuropeanNeolithic")) %>% group_by(gwas, contrasts, pc) %>% mutate(pAdjust = p.adjust(pval, method = "bonferroni"))
+
+Sig <- dfaDNA %>% filter(pc == 40 & pAdjust < .05)
+```
+
+```{r}
+pl <- dfaDNA %>% filter(pc == 40) %>% ggplot(aes(x =Ratio, y = -log10(pval), color = gwas)) + geom_point(size = 3) + geom_hline(yintercept = -log10(0.05/17), color = "gray60", linetype = "dashed", size = 1) + scale_color_manual(values = c("purple1", "darkorange", "skyblue2", "seagreen"), name= TeX("Sampling distance ($\\epsilon$)")) + theme_classic(base_size =20) + xlab(TeX("$R^2_K / \\hat{\\gamma}_{F_{Gr}}$")) + theme(legend.position = "bottom")
+pl
+
+#ggsave("~/Desktop/QHGDP1kGP.png", pl, width = 10, height = 5)
+```
+
+
+
+
+SDS
+```{r}
+
+dfSDS <- df %>% filter(contrasts %in% c("UK10K", "Han")) %>% group_by(gwas, contrasts, pc) %>% mutate(pAdjust = p.adjust(pval, method = "bonferroni"))
+
+Sig <- dfSDS %>% filter(pc == 40 & pAdjust < .05)
+```
+
+```{r}
+pl <- dfSDS %>% filter(pc == 40) %>% ggplot(aes(x =Ratio, y = -log10(pval), color = gwas)) + geom_point(size = 3) + geom_hline(yintercept = -log10(0.05/17), color = "gray60", linetype = "dashed", size = 1) + scale_color_manual(values = c("purple1", "darkorange", "skyblue2", "seagreen"), name= TeX("Sampling distance ($\\epsilon$)")) + theme_classic(base_size =20) + xlab(TeX("$R^2_K / \\hat{\\gamma}_{F_{Gr}}$")) + theme(legend.position = "bottom")
+pl
+
+#ggsave("~/Desktop/QHGDP1kGP.png", pl, width = 10, height = 5)
+```

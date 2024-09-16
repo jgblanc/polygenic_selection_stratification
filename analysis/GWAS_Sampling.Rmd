@@ -149,3 +149,52 @@ dfe200 <- dfDS %>% filter(e200 == TRUE) %>% sample_n(100000) %>% select("#FID", 
 fwrite(dfe200,"../data/ids/gwas_ids/e200.txt", row.names = F, col.names = T, quote = F, sep = "\t")
 ```
 
+## Create PCA plots 
+
+```{r}
+dfe5 <- fread("../data/ids/gwas_ids/e5.txt")
+dfe5$Sample <- TRUE
+
+dfPlot <- left_join(df, dfe5)
+dfPlot$Sample[is.na(dfPlot$Sample)] <- FALSE
+dfPlot <- dfPlot[order(dfPlot$Sample, decreasing = FALSE), ]
+
+p1 <- ggplot(data = dfPlot, aes(x = PC1, y = PC2, color = Sample)) + geom_point() + theme_classic(base_size = 14) + scale_color_manual(values = c("grey70", "orchid4")) + ggtitle(TeX("$5 \\epsilon$")) + theme(legend.position = "none",plot.title = element_text(hjust = 0.5))
+```
+
+```{r}
+dfe10 <- fread("../data/ids/gwas_ids/e10.txt")
+dfe10$Sample <- TRUE
+
+dfPlot <- left_join(df, dfe10)
+dfPlot$Sample[is.na(dfPlot$Sample)] <- FALSE
+dfPlot <- dfPlot[order(dfPlot$Sample, decreasing = FALSE), ]
+
+p2 <- ggplot(data = dfPlot, aes(x = PC1, y = PC2, color = Sample)) + geom_point() + theme_classic(base_size = 14) + scale_color_manual(values = c("grey70", "orchid4")) + ggtitle(TeX("$10 \\epsilon$")) + theme(legend.position = "none",plot.title = element_text(hjust = 0.5))
+```
+```{r}
+dfe50 <- fread("../data/ids/gwas_ids/e50.txt")
+dfe50$Sample <- TRUE
+
+dfPlot <- left_join(df, dfe50)
+dfPlot$Sample[is.na(dfPlot$Sample)] <- FALSE
+dfPlot <- dfPlot[order(dfPlot$Sample, decreasing = FALSE), ]
+
+p3 <- ggplot(data = dfPlot, aes(x = PC1, y = PC2, color = Sample)) + geom_point() + theme_classic(base_size = 14) + scale_color_manual(values = c("grey70", "orchid4")) + ggtitle(TeX("$50 \\epsilon$")) + theme(legend.position = "none",plot.title = element_text(hjust = 0.5))
+```
+
+```{r}
+dfe200 <- fread("../data/ids/gwas_ids/e200.txt")
+dfe200$Sample <- TRUE
+
+dfPlot <- left_join(df, dfe200)
+dfPlot$Sample[is.na(dfPlot$Sample)] <- FALSE
+dfPlot <- dfPlot[order(dfPlot$Sample, decreasing = FALSE), ]
+
+p4 <- ggplot(data = dfPlot, aes(x = PC1, y = PC2, color = Sample)) + geom_point() + theme_classic(base_size = 14) + scale_color_manual(values = c("grey70", "orchid4")) + ggtitle(TeX("$200 \\epsilon$")) + theme(legend.position = "none",plot.title = element_text(hjust = 0.5))
+```
+```{r}
+p <- ggarrange(p1,p2,p3,p4, nrow = 1)
+ggsave( "~/Desktop/pca40.png", p, height = 4, width = 12)
+```
+
