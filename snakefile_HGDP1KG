@@ -19,7 +19,7 @@ wildcard_constraints:
 
 rule all:
     input:
-        expand("output/prs/HGDP1KG/{gwas}/{contrasts}/{nsnp}/{phenotype}/PGS/{covar}_{contrasts}.{chr}-PC{pc}.sscore", chr=CHR, gwas=GWAS, contrasts=CONTRASTS, nsnp=NSNP, phenotype=PHENOTYPE, covar=COVAR, pc=PC)
+        expand("endpoints/HGDP1KG/{gwas}/{contrasts}/{nsnp}/{phenotype}/PGS/{covar}_{contrasts}.all-PC{pc}.sscore", chr=CHR, gwas=GWAS, contrasts=CONTRASTS, nsnp=NSNP, phenotype=PHENOTYPE, covar=COVAR, pc=PC)
 
 
 ## Recode SNPs to match UKBB
@@ -362,5 +362,21 @@ rule pgs_nfe:
         --keep {input.IDs} \
         --score {params.plink_prefix}.tmp center cols=dosagesum,scoresums  \
         --out {params.plink_prefix}
+        """
+
+rule combine_pgs:
+    input:
+        expand("output/prs/HGDP1KG/{{gwas}}/{{contrasts}}/{{nsnp}}/{{phenotype}}/PGS/{{covar}}_{{contrasts}}.{chr}-PC{{pc}}.sscore", chr=CHR)
+    output:
+        "endpoints/HGDP1KG/{gwas}/{contrasts}/{nsnp}/{phenotype}/PGS/{covar}_{contrasts}.all-PC{pc}.sscore"
+    params:
+        all_chrs = CHR,
+        num_chr = len(CHR),
+        prefix_one = "output/prs/HGDP1KG/{gwas}/{contrasts}/{nsnp}/{phenotype}/PGS/{covar}_{contrasts}",
+        prefix_two = "-PC{pc}.sscore"
+    shell:
+        """
+        Rscript code/prs/combine_chr.R {params.num_chr} {params.prefix_one} {params.prefix_two} {output} {params.all_chrs}
+	      rm {input}
         """
 
