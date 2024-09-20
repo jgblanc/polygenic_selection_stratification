@@ -53,10 +53,10 @@ print(paste0("M is ", M))
 
 # Compute D
 FGr_hat <- apply(data, 1, sum) * (1/L)
-D <- t(FGr_hat) %*% FGr_hat * (L^2)
+D <- (t(FGr_hat) %*% FGr_hat * (L^2)) * (1 /((M-1)^2))
 
 # Expected D
-expD <- (M-1)
+expD <- 1/(M-1)
 
 # Compute SE for D
 nblocks <- ncol(data)
@@ -65,7 +65,7 @@ for (i in 1:nblocks) {
 
   mi <- as.numeric(snp_nums[i, 2])
   FGri <- data[,i] * (1/mi)
-  Di <- t(FGri) %*% FGri * (mi^2)
+  Di <- (t(FGri) %*% FGri * (mi^2)) * (1 /((M-1)^2))
   allDs[i] <- (mi / (L - mi)) * (D - Di)^2
 
 }
@@ -73,7 +73,7 @@ varD <- mean(allDs)
 se <- sqrt(varD)
 
 # Test D for significance
-pval <- pnorm(abs(D -expD) ,mean =0, sd = se, lower.tail = FALSE)
+pval <- pnorm( D ,mean =expD, sd = se, lower.tail = FALSE)
 
 
 # Compute SE for entries of FGr - Mair Notes
@@ -96,10 +96,10 @@ error <- jkVar / varFGr
 signal <- 1 - error
 
 # Find Z
-Z <- D / ((M-1) * L)
+Z <- D
 
 # Get traceK
-trK <- (M-1) * L
+trK <- (M-1)
 
 # Make output table
 dfOut <- as.data.frame(matrix(NA, nrow = 1, ncol = 10))

@@ -33,9 +33,9 @@ dfOverlap$gwas <- factor(dfOverlap$gwas, levels = c( "5", "10", "50", "200"))
 
 Plot Z by GWAS
 ```{r}
-pl <- dfOverlap %>% filter(L == "pruneall")%>% ggplot(aes(x = gwas, y = Z)) + geom_point() + xlab("") + ylab("") + theme_bw(base_size = 14)  + guides(fill="none") + theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(size = 10), strip.text.x = element_text(size = 8,))+facet_wrap(~contrasts, nrow = 1)+ scale_y_log10(limits = c(1e-6, 1e-4)) 
+pl <- dfOverlap %>% filter(L == "pruneall")%>% ggplot(aes(x = gwas, y = Z, color = gwas)) + geom_point(size = 2) + xlab("") + ylab("") + theme_bw(base_size = 14)  + guides(fill="none") + theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(size = 10), strip.text.x = element_text(size = 8,), strip.background=element_rect(colour="black",fill="white"), legend.position = "none")+facet_wrap(~contrasts, nrow = 1)+ scale_y_log10(limits = c(1e-6, 1e-4)) + geom_hline(yintercept = 1 / (99999), color = "red", linetype = "dashed") + scale_color_manual(values = c("purple1", "darkorange", "skyblue2", "seagreen"))
 pl
-ggsave("~/Desktop/tmp.png", pl, height = 2, width = 12)
+ggsave("~/Desktop/tmp.png", pl, height = 2.2, width = 12)
 ```
 
 
