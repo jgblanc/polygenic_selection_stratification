@@ -56,7 +56,7 @@ FGr_hat <- apply(data, 1, sum) * (1/L)
 D <- (t(FGr_hat) %*% FGr_hat * (L^2)) * (1 /((M-1)^2))
 
 # Expected D
-expD <- 1/(M-1)
+expD <- 1/((M-1))
 
 # Compute SE for D
 nblocks <- ncol(data)
