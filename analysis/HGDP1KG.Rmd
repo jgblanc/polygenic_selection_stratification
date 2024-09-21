@@ -162,8 +162,9 @@ ggsave("~/Desktop/tmp.png", height = 5, width = 12)
 
 Load data and format 
 ```{r}
-dfOverlap <- fread("../endpoints/HGDP1KG/OverlapStats.txt") %>% separate(gwas, into = c("tmp", "gwas"), sep = "e")
+dfOverlap <- fread("../endpoints/HGDP1KG/OverlapStats_NewScale.txt") %>% separate(gwas, into = c("tmp", "gwas"), sep = "e")
 dfOverlap$gwas <- factor(dfOverlap$gwas, levels = c( "5", "10", "50", "200")) 
+dfOverlap <- dfOverlap %>% mutate(uc = Z + (1.96*(sqrt(varD))), lc = Z - (1.96*(sqrt(varD))))
 ```
 
 
@@ -174,7 +175,7 @@ Continental
 dfCont <- dfOverlap %>% filter(contrasts %in% c("eas-nfe","eas-sas","eas-afr", "eas-amr", "nfe-sas","nfe-afr", "nfe-amr","sas-afr", "sas-amr", "afr-amr"))
 dfCont$contrasts <- factor(dfCont$contrasts, levels = c("eas-nfe","eas-sas","eas-afr", "eas-amr", "nfe-sas","nfe-afr", "nfe-amr","sas-afr", "sas-amr", "afr-amr"))
 
-pl <- dfCont %>% filter(L == "pruneall")%>% ggplot(aes(x = gwas, y = Z, color = gwas)) + geom_point(size = 2) + xlab("") + ylab("") + theme_bw(base_size = 14)  + guides(fill="none") + theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(size = 10), strip.background=element_rect(colour="black",fill="white"), legend.position = "none")+facet_wrap(~contrasts, nrow = 1)+ scale_y_log10() + geom_hline(yintercept = 1 / (99999), color = "red", linetype = "dashed") + scale_color_manual(values = c("purple1", "darkorange", "skyblue2", "seagreen"))
+pl <- dfCont %>% filter(L == "pruneall")%>% ggplot(aes(x = gwas, y = Z, color = gwas)) + geom_point(size = 2) + xlab("") + ylab("") + theme_bw(base_size = 14)  + guides(fill="none") + theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(size = 10), strip.background=element_rect(colour="black",fill="white"), legend.position = "none")+facet_wrap(~contrasts, nrow = 1)+ scale_y_log10() + geom_hline(yintercept = 1 / (99999), color = "red", linetype = "dashed") + scale_color_manual(values = c("purple1", "darkorange", "skyblue2", "seagreen")) + geom_errorbar(aes(ymin = lc, ymax = uc))
 pl
 ggsave("~/Desktop/tmp.png", pl, height = 2.2, width = 12)
 ```
@@ -558,37 +559,58 @@ pl
 L <- 500
 M <- 100
 
+
 # Make Genotype Matrix
 G <- matrix(NA, nrow = M, ncol = L)
 for (i in 1:L) {
-  G[,i] <- rnorm(M)
+  G[,i] <- c(rnorm(50, mean = 0, sd = 1), rnorm(50, mean = 0, sd = 1))
 }
 G <- scale(G)
+ 
 
 # Make r 
-r <- rnorm(L)
+r <- c(rnorm(250, mean = 0, sd = 1), rnorm(250, mean = 0, sd = 1))
 r <- r - mean(r)
 r <- r / sqrt(sum(r^2))
 
+#plot(G[,1])
 
 # Calculate R
-R <- (1/(M-1)) * (t(G) %*% G)
-sum(diag(R))
-myR <- eigen(R)
-sum(myR$values)
+#R <- (1/(M-1)) * (t(G) %*% G)
+#sum(diag(R))
+#myR <- eigen(R)
+#sum(myR$values)
 
 # Calculate K
-K <- (1/L) * (G %*% t(G))
-sum(diag(K))
-myK <- eigen(K)
-sum(myK$values)
+#K <- (1/L) * (G %*% t(G))
+#sum(diag(K))
+#myK <- eigen(K)
+#sum(myK$values)
 
 # Calculate D 
-D <- t(r) %*% t(G) %*% G %*% r
-D <- t(r) %*% R %*% r * (M -1)
+D <- t(r) %*% t(G) %*% G %*% r 
 
+D
 ```
 
 
 
+```{r}
+tmp <- rep(0, M)
+for (i in 1:M){
+  tmp[i] <- cov(G[i,],r)^2
+}
+mean(tmp)
+(1/M) * (1/(L-1))^2 * (D)
+
+
+tmp <- rep(0, M)
+for (i in 1:M){
+  tmp[i] <- var(G[i,])
+}
+mean(tmp)
+sum(diag((1/(L-1)) *G %*% t(G))) * (1/M)
+
+((1/(L-1))^2 * (D)) / (sum(diag((1/(L-1)) *G %*% t(G))))
+```
 
