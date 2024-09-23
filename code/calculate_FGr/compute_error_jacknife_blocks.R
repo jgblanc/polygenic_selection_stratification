@@ -52,8 +52,10 @@ print(paste0("L is ", L))
 print(paste0("M is ", M))
 
 # Compute D
-FGr_hat <- apply(data, 1, sum) * (1/L)
-D <- (t(FGr_hat) %*% FGr_hat * (L^2)) / ((M-1) * L)
+#FGr_hat <- apply(data, 1, sum) * (1/L)
+#D <- (t(FGr_hat) %*% FGr_hat * (L^2)) / ((M-1) * L)
+FGr_hat <- apply(data, 1, sum)
+D <- t(FGr_hat) %*% FGr_hat
 
 # Expected D
 expD <- 1/(M-1)
@@ -64,8 +66,10 @@ allDs <- allDs <- rep(NA, nblocks)
 for (i in 1:nblocks) {
 
   mi <- as.numeric(snp_nums[i, 2])
-  FGri <- data[,i] * (1/mi)
-  Di <- (t(FGri) %*% FGri * (mi^2)) / ((M-1) * L)
+  #FGri <- data[,i] * (1/mi)
+  #Di <- (t(FGri) %*% FGri * (mi^2)) / ((M-1) * L)
+  FGri <- data[,i]
+  Di <- (t(FGri) %*% FGri)
   allDs[i] <- (mi / (L - mi)) * (D - Di)^2
 
 }

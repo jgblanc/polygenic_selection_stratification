@@ -1,10 +1,10 @@
 # Snakefile to run the main pipeline for any dataset
-DATASET = ["SDS"]
+DATASET = ["HGDP1KGP"]
 CHR = []
 for i in range(1, 23):
   CHR.append(str(i))
-CONTRASTS = ["Han", "UK10K"]
-GWAS= ["e5", "e10", "e50", "e200"]
+CONTRASTS = ["eas-nfe"]
+GWAS= ["e5"]
 CHRTYPE_GWAS = ["chr-even", "chr-all"]
 CHRTYPE_TEST = ["test-odd", "test-all"]
 PC = [0,10,40]
@@ -24,7 +24,7 @@ wildcard_constraints:
 
 rule all:
     input:
-        expand("endpoints/{dataset}/OverlapStats_NewScale.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, nsnp=NSNP, pc=PC, phenotype=PHENOTYPE, covar=COVAR)
+        expand("output/calculate_FGr/{dataset}/overlap_stats/{gwas}/{nsnp}/{contrasts}.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, nsnp=NSNP, pc=PC, phenotype=PHENOTYPE, covar=COVAR)
 
 # Get sample variance of GWAS panel genotypes for all GWAS panels
 

@@ -175,7 +175,7 @@ Continental
 dfCont <- dfOverlap %>% filter(contrasts %in% c("eas-nfe","eas-sas","eas-afr", "eas-amr", "nfe-sas","nfe-afr", "nfe-amr","sas-afr", "sas-amr", "afr-amr"))
 dfCont$contrasts <- factor(dfCont$contrasts, levels = c("eas-nfe","eas-sas","eas-afr", "eas-amr", "nfe-sas","nfe-afr", "nfe-amr","sas-afr", "sas-amr", "afr-amr"))
 
-pl <- dfCont %>% filter(L == "pruneall")%>% ggplot(aes(x = gwas, y = Z, color = gwas)) + geom_point(size = 2) + xlab("") + ylab("") + theme_bw(base_size = 14)  + guides(fill="none") + theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(size = 10), strip.background=element_rect(colour="black",fill="white"), legend.position = "none")+facet_wrap(~contrasts, nrow = 1)+ scale_y_log10() + geom_hline(yintercept = 1 / (99999), color = "red", linetype = "dashed") + scale_color_manual(values = c("purple1", "darkorange", "skyblue2", "seagreen")) + geom_errorbar(aes(ymin = lc, ymax = uc))
+pl <- dfCont %>% filter(L == "pruneall")%>% ggplot(aes(x = gwas, y = Z, color = gwas)) + geom_point(size = 2) + xlab("") + ylab("") + theme_bw(base_size = 14)  + guides(fill="none") + theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(size = 10), strip.background=element_rect(colour="black",fill="white"), legend.position = "none")+facet_wrap(~contrasts, nrow = 1)+ scale_y_log10() + geom_hline(yintercept = 1 / (99999), color = "red", linetype = "dashed") + scale_color_manual(values = c("purple1", "darkorange", "skyblue2", "seagreen")) + geom_errorbar(aes(ymin = lc, ymax = uc), width = 0.8)
 pl
 ggsave("~/Desktop/tmp.png", pl, height = 2.2, width = 12)
 ```
@@ -576,16 +576,16 @@ r <- r / sqrt(sum(r^2))
 #plot(G[,1])
 
 # Calculate R
-#R <- (1/(M-1)) * (t(G) %*% G)
-#sum(diag(R))
-#myR <- eigen(R)
-#sum(myR$values)
+R <- (1/(M-1)) * (t(G) %*% G)
+sum(diag(R))
+myR <- eigen(R)
+sum(myR$values)
 
 # Calculate K
-#K <- (1/L) * (G %*% t(G))
-#sum(diag(K))
-#myK <- eigen(K)
-#sum(myK$values)
+K <- (t(G) %*% G)
+sum(diag(K))
+myK <- eigen(K)
+sum(myK$values)
 
 # Calculate D 
 D <- t(r) %*% t(G) %*% G %*% r 
