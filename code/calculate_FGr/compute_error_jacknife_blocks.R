@@ -54,8 +54,9 @@ print(paste0("M is ", M))
 # Compute D
 #FGr_hat <- apply(data, 1, sum) * (1/L)
 #D <- (t(FGr_hat) %*% FGr_hat * (L^2)) / ((M-1) * L)
-FGr_hat <- apply(data, 1, sum)
-D <- t(FGr_hat) %*% FGr_hat
+FGr_hat <- apply(data, 1, sum)  
+print(var(FGr_hat))
+D <- t(FGr_hat) %*% FGr_hat *(1 /((M-1) * L))
 
 # Expected D
 expD <- 1/(M-1)
@@ -68,8 +69,8 @@ for (i in 1:nblocks) {
   mi <- as.numeric(snp_nums[i, 2])
   #FGri <- data[,i] * (1/mi)
   #Di <- (t(FGri) %*% FGri * (mi^2)) / ((M-1) * L)
-  FGri <- data[,i]
-  Di <- (t(FGri) %*% FGri)
+  FGri <- scale(data[,i])
+  Di <- (t(FGri) %*% FGri) *(1 /((M-1)* (mi-1)))
   allDs[i] <- (mi / (L - mi)) * (D - Di)^2
 
 }
@@ -83,10 +84,12 @@ pval <- pnorm( D ,mean =expD, sd = se, lower.tail = FALSE)
 
 # Compute SE for entries of FGr - Mair Notes
 allFGrs <- matrix(NA, nrow = nrow(data), ncol = nblocks)
+FGr_hat <- apply(data, 1, sum) * (1/L)
 for (i in 1:nblocks) {
 
   mi <- as.numeric(snp_nums[i, 2])
   FGri <- data[,i] * (1/mi)
+  #FGri <- scale(data[,i]) 
   allFGrs[,i] <- (mi / (L - mi)) * (FGri - FGr_hat)^2
 
 }
