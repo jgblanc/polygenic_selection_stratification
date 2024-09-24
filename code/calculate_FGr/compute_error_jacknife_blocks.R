@@ -54,7 +54,7 @@ print(paste0("M is ", M))
 # Compute D
 #FGr_hat <- apply(data, 1, sum) * (1/L)
 #D <- (t(FGr_hat) %*% FGr_hat * (L^2)) / ((M-1) * L)
-FGr_hat <- apply(data, 1, sum)  
+FGr_hat <- (1/sqrt(L)) * apply(data, 1, sum)
 print(var(FGr_hat))
 D <- t(FGr_hat) %*% FGr_hat *(1 /((M-1) * L))
 
@@ -89,7 +89,7 @@ for (i in 1:nblocks) {
 
   mi <- as.numeric(snp_nums[i, 2])
   FGri <- data[,i] * (1/mi)
-  #FGri <- scale(data[,i]) 
+  #FGri <- scale(data[,i])
   allFGrs[,i] <- (mi / (L - mi)) * (FGri - FGr_hat)^2
 
 }

@@ -49,13 +49,12 @@ df$r[is.na(df$r)] <- 0
 #df$r <- df$r * (1/sqrt(df$Var))
 #df$r <- df$r - mean(df$r)
 #print(df)
-#df$r <- scale(df$r)
 #df$r <- df$r / sqrt(sum(df$r^2))
 #print(df)
 #print(paste0("The length of the vector is ", sqrt(sum(df$r^2))))
 #df$r <- df$r * (1/sqrt(df$Var))
+#df$r <- df$r * (1/sqrt(df$Var))
 
-df$r <- df$r * (1/sqrt(df$Var))
 df$r <- scale(df$r)
 df$r <- df$r * (1/sqrt(df$Var))
 
