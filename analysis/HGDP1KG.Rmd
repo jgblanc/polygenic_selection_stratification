@@ -359,10 +359,10 @@ dfAllPC$Ratio <- dfAllPC$r2 / dfAllPC$Signal
 ```
 
 ```{r}
-tmp1 <- fread("../endpoints/HGDP1KG/OverlapStats.txt")
+tmp1 <- fread("../endpoints/HGDP1KG/OverlapStats_NewScale.txt")
 tmp2 <- fread("../endpoints/InUKBB/OverlapStats.txt")
 tmp3 <- fread("../endpoints/adnaSel/OverlapStats.txt")
-tmp4 <- fread("../endpoints/SDS/OverlapStats.txt")
+tmp4 <- fread("../endpoints/SDS/OverlapStats_NewScale.txt")
 
 dfAllOverlap <- rbind(tmp1, tmp2, tmp3, tmp4) %>% separate(gwas, into = c("tmp", "gwas"), sep = "e")
 dfAllOverlap$gwas <- factor(dfAllOverlap$gwas, levels = c( "5", "10", "50", "200")) 
@@ -613,4 +613,110 @@ sum(diag((1/(L-1)) *G %*% t(G))) * (1/M)
 
 ((1/(L-1))^2 * (D)) / (sum(diag((1/(L-1)) *G %*% t(G))))
 ```
+
+```{r}
+simulate_block <- function(size) {
+  # Create a random matrix
+  A <- matrix(rnorm(size^2), nrow = size)
+  # Symmetrize the matrix to ensure it's a valid covariance matrix
+  cov_block <- A %*% t(A)
+  # Optionally, scale the covariance matrix to control the variances
+  cov_block <- cov_block / max(diag(cov_block))
+  return(cov_block)
+}
+
+b1 <- matrix(rep(1, 50^2),50,50)
+b2 <- matrix(rep(0.5, 50^2),50,50)
+Sigma1 <- rbind(b1, b2)
+Sigma2 <- rbind(b2, b1)
+Sigma <- cbind(Sigma1, Sigma2)
+Sigma <- matrix(rep(1, 100^2),100,100)
+
+G <- matrix(NA, nrow = M, ncol = L)
+for (i in 1:L) {
+  G[,i ] <- t(mvrnorm(n = 1, rep(0, M), Sigma = Sigma))
+}
+G <- t(mvrnorm(n = 1, rep(0, M), Sigma = Sigma))
+X <-  t(rmvnorm(n = L, rep(0, M), Sigma = Sigma))
+
+r <- c(rep(-1, M/2), rep(1, M/2)) %*% X
+r <- r[1,]
+r <- r - mean(r)
+r <- r / sqrt(sum(r^2))
+
+G <- scale(G)
+FGr <- G %*% r
+
+H <- t(FGr) %*% FGr * (1/(M-1)) * (1/L)
+expH <- 1/(M-1)
+
+# Create a heatmap without row/column reordering
+heatmap(G %*% t(G), Rowv = NA, Colv = NA, scale = "none")
+
+Sigma <- matrix(c(10,3,3,2),2,2)
+Sigma
+mvrnorm(n = 1000, rep(0, 2), Sigma)
+
+```
+
+
+
+```{r}
+Tm_prefix <- "~/Downloads/FGr_eas-nfe"
+snp_prefix <- "~/Downloads/eas-nfe"
+
+# Get list of all chromosomes
+chrs <- seq(1,22)
+
+# Add Tm for each chromosome to each other
+data <- fread(paste0(Tm_prefix, "_1.txt"))
+data <- data[,4:ncol(data)]
+
+for (i in 2:22) {
+
+  print(paste0("chr num ",i))
+  # Read in new chromosome
+  filename <- paste0(Tm_prefix,"_", i, ".txt")
+  tmp <- fread(filename)
+  tmp <- tmp[,4:ncol(tmp)]
+  data <- cbind(data, tmp)
+
+}
+data <- as.data.frame(data)
+print(dim(data))
+
+# Find total number of SNPs
+snp_nums <- fread(paste0(snp_prefix, "_1_SNPcount.txt"))
+for (i in 2:22) {
+
+  print(paste0("chr num ",i))
+  # Read in new chromosome
+  snp_nums <- rbind(snp_nums, fread(paste0(snp_prefix,"_", i, "_SNPcount.txt")))
+
+}
+print(dim(snp_nums))
+print(snp_nums)
+
+# Set parameters
+L <- sum(snp_nums$nSNP)
+M <- nrow(data)
+print(paste0("L is ", L))
+print(paste0("M is ", M))
+
+```
+
+
+```{r}
+FGr_hat <- apply(data, 1, sum) * (1/sqrt(L))
+var(FGr_hat)
+D <- t(FGr_hat) %*% FGr_hat *(1 / M)
+
+* (1/L) 
+
+* (1/L)
+
+D
+```
+
+
 

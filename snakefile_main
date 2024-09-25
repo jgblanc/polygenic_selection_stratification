@@ -24,7 +24,35 @@ wildcard_constraints:
 
 rule all:
     input:
-        expand("output/calculate_FGr/{dataset}/overlap_stats/{gwas}/{nsnp}/{contrasts}.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, nsnp=NSNP, pc=PC, phenotype=PHENOTYPE, covar=COVAR)
+        expand("output/calculate_FGr/{dataset}/FGr_GWAS/{gwas}/{nsnp}/{contrasts}_{chr}.linear", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, nsnp=NSNP, pc=PC, phenotype=PHENOTYPE, covar=COVAR)
+
+
+rule FGr_GWAS:
+    input:
+        Fgr="output/calculate_FGr/{dataset}/final_FGr/{gwas}/{nsnp}/{chrtype_gwas}_{chrtype_test}_{contrasts}.txt"
+        gwas="data/ids/gwas_ids/{gwas}.txt",
+        gp_genos="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen",
+        snps="data/{dataset}/variants/{gwas}/{contrasts}/overlappingSNPs_chr{chr}.txt"
+    output:
+        output="output/calculate_FGr/{dataset}/FGr_GWAS/{gwas}/{nsnp}/{contrasts}_{chr}.linear",
+    params:
+        prefix_in="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
+        prefix_out="output/calculate_FGr/{dataset}/FGr_GWAS/{gwas}/{nsnp}/{contrasts}_{chr}"
+    resources:
+        mem_mb=38000,
+        time="01:00:00"
+    shell:
+        """
+        plink2 \
+        --pfile {params.prefix_in} \
+        --keep {input.gwas} \
+        --extract {input.snps} \
+        --glm omit-ref allow-no-covars \
+        --pheno {input.Fgr} \
+        --pheno-name FGr \
+        --out {params.prefix_out}
+        """
+
 
 # Get sample variance of GWAS panel genotypes for all GWAS panels
 
