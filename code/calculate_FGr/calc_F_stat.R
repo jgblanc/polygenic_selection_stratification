@@ -67,7 +67,6 @@ for (i in 1:nblocks) {
   tmp <- df %>% filter(block == i)
   mi <- nrow(tmp)
   Hi <- mean(tmp$BETA^2)
-  print(Hi)
   allHs[i] <- (mi / (L- mi)) * (H - Hi)^2
 
 }

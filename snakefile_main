@@ -1,9 +1,9 @@
 # Snakefile to run the main pipeline for any dataset
-DATASET = ["SDS"]
+DATASET = ["adnaSel"]
 CHR = []
 for i in range(1, 23):
   CHR.append(str(i))
-CONTRASTS = ["Han"]
+CONTRASTS = ["Historical"]
 GWAS= ["e5"]
 CHRTYPE_GWAS = ["chr-even", "chr-all"]
 CHRTYPE_TEST = ["test-odd", "test-all"]
@@ -35,7 +35,7 @@ rule Fstat:
         output="output/calculate_FGr/{dataset}/FGr_GWAS/{gwas}/{nsnp}/Fstat_{contrasts}.txt"
     params:
         beta_prefix = "output/calculate_FGr/{dataset}/FGr_GWAS/{gwas}/{nsnp}/{contrasts}",
-        var_prefix = "data/gwas_variance/{gwas}/variance"
+        var_prefix = "data/gwas_variance/{gwas}/variance_block"
     shell:
         """
         Rscript code/calculate_FGr/calc_F_stat.R {params.beta_prefix} {params.var_prefix} {output}
