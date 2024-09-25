@@ -56,7 +56,7 @@ df$r[is.na(df$r)] <- 0
 #df$r <- df$r * (1/sqrt(df$Var))
 
 df$r <- scale(df$r)
-df$r <- df$r * (1/sqrt(df$Var))
+#df$r <- df$r * (1/sqrt(df$Var))
 
 
 print(head(df))

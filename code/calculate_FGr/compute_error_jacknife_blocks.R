@@ -56,7 +56,9 @@ print(paste0("M is ", M))
 #D <- (t(FGr_hat) %*% FGr_hat * (L^2)) / ((M-1) * L)
 FGr_hat <- (1/sqrt(L)) * apply(data, 1, sum)
 print(var(FGr_hat))
-D <- t(FGr_hat) %*% FGr_hat *(1 /((M-1) * L))
+#D <- sum(FGr_hat^2)  * (1/(M-1))
+D <- (t(FGr_hat) %*% FGr_hat) * (1/(M-1))
+print(D)
 
 # Expected D
 expD <- 1/(M-1)
@@ -74,7 +76,7 @@ for (i in 1:nblocks) {
   allDs[i] <- (mi / (L - mi)) * (D - Di)^2
 
 }
-print(allDs)
+#print(allDs)
 varD <- mean(allDs)
 se <- sqrt(varD)
 
