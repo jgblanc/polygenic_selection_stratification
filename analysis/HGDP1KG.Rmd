@@ -556,22 +556,21 @@ pl
 
 
 ```{r}
-L <- 500
+L <- 50000
 M <- 100
 
 
 # Make Genotype Matrix
 G <- matrix(NA, nrow = M, ncol = L)
 for (i in 1:L) {
-  G[,i] <- c(rnorm(50, mean = 0, sd = 1), rnorm(50, mean = 0, sd = 1))
+  G[,i] <- c(rnorm(M, mean = 0, sd = 1))
 }
 G <- scale(G)
  
 
 # Make r 
-r <- c(rnorm(250, mean = 0, sd = 1), rnorm(250, mean = 0, sd = 1))
-r <- r - mean(r)
-r <- r / sqrt(sum(r^2))
+r <- c(rnorm(L, mean = 0, sd = 1))
+r <- scale(r)
 
 #plot(G[,1])
 
@@ -588,9 +587,10 @@ myK <- eigen(K)
 sum(myK$values)
 
 # Calculate D 
-D <- t(r) %*% t(G) %*% G %*% r 
+D <- t(r) %*% t(G) %*% G %*% r * (1/M) * (1/L) * (1/L)
 
 D
+1/L
 ```
 
 
@@ -707,11 +707,9 @@ print(paste0("M is ", M))
 
 
 ```{r}
-FGr_hat <- apply(data, 1, sum) * (1/sqrt(L))
+FGr_hat <- apply(data, 1, sum) * (1/sqrt(L-1)) * (sqrt(M/L))
 var(FGr_hat)
 D <- t(FGr_hat) %*% FGr_hat *(1 / M)* (1/L) 
-
-#* (1/L)
 
 D
 ```
