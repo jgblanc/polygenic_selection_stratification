@@ -24,18 +24,21 @@ wildcard_constraints:
 
 rule all:
     input:
-        expand("output/calculate_FGr/{dataset}/FGr_GWAS/{gwas}/{nsnp}/stat_{contrasts}_{chr}.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, nsnp=NSNP, pc=PC, phenotype=PHENOTYPE, covar=COVAR)
+        expand("output/calculate_FGr/{dataset}/FGr_GWAS/{gwas}/{nsnp}/stat_{contrasts}.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, nsnp=NSNP, pc=PC, phenotype=PHENOTYPE, covar=COVAR)
 
 
-rule blah_FGr:
+rule Fstat:
     input:
-        betas="output/calculate_FGr/{dataset}/FGr_GWAS/{gwas}/{nsnp}/{contrasts}_{chr}.FGr.glm.linear",
-        var ="data/gwas_variance/{gwas}/variance_{chr}.txt"
+        betas=expand("output/calculate_FGr/{{dataset}}/FGr_GWAS/{{gwas}}/{{nsnp}}/{{contrasts}}_{chr}.FGr.glm.linear", chr = CHR)
+        var=expand("data/gwas_variance/{{gwas}}/variance_{chr}.txt", chr = CHR)
     output:
-        output="output/calculate_FGr/{dataset}/FGr_GWAS/{gwas}/{nsnp}/stat_{contrasts}_{chr}.txt"
+        output="output/calculate_FGr/{dataset}/FGr_GWAS/{gwas}/{nsnp}/Fstat_{contrasts}.txt"
+    params:
+        beta_prefix = "output/calculate_FGr/{dataset}/FGr_GWAS/{gwas}/{nsnp}/{contrasts}_{chr}",
+        var_prefix = "data/gwas_variance/{gwas}/variance"
     shell:
         """
-        Rscript code/calculate_FGr/ol_stat.R {input.betas} {input.var} {output}
+        Rscript code/calculate_FGr/calc_F_stat.R {params.beta_prefix} {params.var_prefix} {output}
         """
 
 rule scale_FGr:
