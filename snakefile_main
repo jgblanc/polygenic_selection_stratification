@@ -27,6 +27,18 @@ rule all:
         expand("output/calculate_FGr/{dataset}/FGr_GWAS/{gwas}/{nsnp}/{contrasts}_{chr}.FGr.glm.linear", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, nsnp=NSNP, pc=PC, phenotype=PHENOTYPE, covar=COVAR)
 
 
+rule scale_FGr_stat:
+    input:
+        betas=expand("output/calculate_FGr/{dataset}/FGr_GWAS/{gwas}/{nsnp}/{contrasts}_{chr}.linear", chr = CHR),
+        var = "data/gwas_variance/{gwas}/variance_{chr}.txt"
+    output:
+        output="output/calculate_FGr/{dataset}/FGr_GWAS/{gwas}/{nsnp}/stat_{contrasts}.txt",
+    shell:
+        """
+        Rscript code/calculate_FGr/ol_stat.R {input.betas} {input.var} {output}
+        """
+
+
 rule scale_FGr:
     input:
         Fgr="output/calculate_FGr/{dataset}/final_FGr/{gwas}/{nsnp}/chr-all_test-all_{contrasts}.txt",

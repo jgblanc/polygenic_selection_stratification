@@ -718,5 +718,12 @@ D <- t(FGr_hat) %*% FGr_hat *(1 / M)
 D
 ```
 
+```{r}
+df <- fread("~/Downloads/eas-nfe_1.FGr.glm.linear")
+
+var(df$BETA)
+
+mean((df$BETA^2) / ((M - 1)^2))
+```
 
 
