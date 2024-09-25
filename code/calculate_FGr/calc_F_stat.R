@@ -7,6 +7,7 @@ if(length(args)<2){stop("Rscript compute_error_jacknife.R <prefix to Tm chromoso
 suppressWarnings(suppressMessages({
   library(data.table)
   library(dplyr)
+  library(tidyverse)
 }))
 
 betas_prefix = args[1]
@@ -79,7 +80,7 @@ df <- df %>%
   mutate(block = apply(., MARGIN = 1, FUN = function(params)assign_SNP_to_block(as.numeric(params[1]), as.numeric(params[2])))) %>%
   drop_na()
 print(paste0("Now df blocks has", nrow(df), " rows"))
-
+print(head(df))
 
 # Calculate block jackknife for H
 nblocks <- unique(df$block)
