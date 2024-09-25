@@ -24,72 +24,7 @@ wildcard_constraints:
 
 rule all:
     input:
-        expand("output/calculate_FGr/{dataset}/FGr_GWAS/{gwas}/{nsnp}/Fstat_{contrasts}.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, nsnp=NSNP, pc=PC, phenotype=PHENOTYPE, covar=COVAR)
-
-
-rule Fstat:
-    input:
-        betas=expand("output/calculate_FGr/{{dataset}}/FGr_GWAS/{{gwas}}/{{nsnp}}/{{contrasts}}_{chr}.FGr.glm.linear", chr = CHR),
-        var=expand("data/gwas_variance/{{gwas}}/variance_block_{chr}.txt", chr = CHR)
-    output:
-        output="output/calculate_FGr/{dataset}/FGr_GWAS/{gwas}/{nsnp}/Fstat_{contrasts}.txt"
-    params:
-        beta_prefix = "output/calculate_FGr/{dataset}/FGr_GWAS/{gwas}/{nsnp}/{contrasts}",
-        var_prefix = "data/gwas_variance/{gwas}/variance_block"
-    shell:
-        """
-        Rscript code/calculate_FGr/calc_F_stat.R {params.beta_prefix} {params.var_prefix} {output}
-        """
-
-rule add_Block_info:
-    input:
-        var = "data/gwas_variance/{gwas}/variance_{chr}.txt",
-        ldBlocks="data/LD_blocks/big_blocks.bed"
-    output:
-        output="data/gwas_variance/{gwas}/variance_block_{chr}.txt"
-    resources:
-        mem_mb=38000,
-        time="03:00:00"
-    shell:
-        """
-        Rscript code/calculate_FGr/add_block_info.R {input.var} {input.ldBlocks} {output}
-        """
-
-rule scale_FGr:
-    input:
-        Fgr="output/calculate_FGr/{dataset}/final_FGr/{gwas}/{nsnp}/chr-all_test-all_{contrasts}.txt",
-    output:
-        output="output/calculate_FGr/{dataset}/FGr_GWAS/{gwas}/{nsnp}/FGr_{contrasts}.txt",
-    shell:
-        """
-        Rscript code/calculate_FGr/scale_FGr.R {input} {output}
-        """
-
-
-rule FGr_GWAS:
-    input:
-        Fgr="output/calculate_FGr/{dataset}/FGr_GWAS/{gwas}/{nsnp}/FGr_{contrasts}.txt",
-        gwas="data/ids/gwas_ids/{gwas}.txt",
-        gp_genos="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen",
-    output:
-        output="output/calculate_FGr/{dataset}/FGr_GWAS/{gwas}/{nsnp}/{contrasts}_{chr}.FGr.glm.linear",
-    params:
-        prefix_in="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
-        prefix_out="output/calculate_FGr/{dataset}/FGr_GWAS/{gwas}/{nsnp}/{contrasts}_{chr}"
-    resources:
-        mem_mb=38000,
-        time="01:00:00"
-    shell:
-        """
-        plink2 \
-        --pfile {params.prefix_in} \
-        --keep {input.gwas} \
-        --maf 0.01 \
-        --glm omit-ref allow-no-covars \
-        --pheno {input.Fgr} \
-        --pheno-name FGr \
-        --out {params.prefix_out}
-        """
+        expand("data/{dataset}/r/{gwas}/{nsnp}/{contrasts}_all_standardized.rvec", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, nsnp=NSNP, pc=PC, phenotype=PHENOTYPE, covar=COVAR)
 
 
 # Get sample variance of GWAS panel genotypes for all GWAS panels
@@ -190,7 +125,7 @@ rule downsample_snps:
         """
 
 
-# Standardize r to have length 1
+# Standardize r to have variance 1
 
 rule standardize_r:
     input:

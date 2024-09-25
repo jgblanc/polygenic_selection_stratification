@@ -712,6 +712,8 @@ var(FGr_hat)
 D <- t(FGr_hat) %*% FGr_hat *(1 / M)* (1/L) 
 
 D
+
+var(data[,1] * 1/sqrt(2315) * (sqrt(M/L)))
 ```
 
 ```{r}
