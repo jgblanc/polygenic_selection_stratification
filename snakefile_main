@@ -30,7 +30,8 @@ rule all:
 rule Fstat:
     input:
         betas=expand("output/calculate_FGr/{{dataset}}/FGr_GWAS/{{gwas}}/{{nsnp}}/{{contrasts}}_{chr}.FGr.glm.linear", chr = CHR),
-        var=expand("data/gwas_variance/{{gwas}}/variance_{chr}.txt", chr = CHR)
+        var=expand("data/gwas_variance/{{gwas}}/variance_{chr}.txt", chr = CHR),
+        ldBlocks="data/LD_blocks/big_blocks.bed"
     output:
         output="output/calculate_FGr/{dataset}/FGr_GWAS/{gwas}/{nsnp}/Fstat_{contrasts}.txt"
     params:
@@ -38,7 +39,7 @@ rule Fstat:
         var_prefix = "data/gwas_variance/{gwas}/variance"
     shell:
         """
-        Rscript code/calculate_FGr/calc_F_stat.R {params.beta_prefix} {params.var_prefix} {output}
+        Rscript code/calculate_FGr/calc_F_stat.R {params.beta_prefix} {params.var_prefix} {output} {input.ldBlocks}
         """
 
 rule scale_FGr:
