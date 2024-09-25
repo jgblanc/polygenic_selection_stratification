@@ -48,6 +48,7 @@ df <- inner_join(r, dfVar)
 df <- inner_join(df, psnps)
 df$r[is.na(df$r)] <- 0
 df$r <- scale(df$r)
+print(paste0("The var of r is ", var(df$r)))
 df$r <- df$r * (1/sqrt(df$Var))
 
 
