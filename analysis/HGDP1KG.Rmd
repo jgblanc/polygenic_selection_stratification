@@ -709,11 +709,9 @@ print(paste0("M is ", M))
 ```{r}
 FGr_hat <- apply(data, 1, sum) * (1/sqrt(L))
 var(FGr_hat)
-D <- t(FGr_hat) %*% FGr_hat *(1 / M)
+D <- t(FGr_hat) %*% FGr_hat *(1 / M)* (1/L) 
 
-* (1/L) 
-
-* (1/L)
+#* (1/L)
 
 D
 ```
@@ -721,9 +719,8 @@ D
 ```{r}
 df <- fread("~/Downloads/eas-nfe_1.FGr.glm.linear")
 
-var(df$BETA)
 
-mean((df$BETA^2) / ((M - 1)^2))
+mean(df$BETA^2)
 ```
 
 
