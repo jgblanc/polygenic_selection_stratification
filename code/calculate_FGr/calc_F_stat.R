@@ -31,7 +31,7 @@ for (i in 2:22) {
   data <- rbind(data, tmp)
 }
 print(dim(data))
-
+colnames(data) <- c("CHR", "POS", "ID", "BETA")
 
 # Get variance for all chromosomes
 dfVar <- fread(paste0(var_prefix, "_1.txt"))
@@ -42,7 +42,7 @@ for (i in 2:22) {
   # Read in new chromosome
   filename <- paste0(var_prefix,"_", i, ".txt")
   tmp <- fread(filename)
-  data <- rbind(dfVar, tmp)
+  dfVar <- rbind(dfVar, tmp)
 }
 print(dim(dfVar))
 
@@ -59,13 +59,14 @@ print(H)
 # Calculate block jackknife for H
 nblocks <- 22
 L <- nrow(df)
-allHs <- allHs <- rep(NA, nblocks)
+allHs <- rep(NA, nblocks)
 for (i in 1:nblocks) {
 
-  tmp <- df %>% filter("#CHROM" == chrs[i])
+  tmp <- df %>% filter(CHR == i)
   mi <- nrow(tmp)
-  Hi <- mean(df$BETA^2)
-  allHs <- (mi / (L- mi)) * (H - Hi)^2
+  Hi <- mean(tmp$BETA^2)
+  print(Hi)
+  allHs[i] <- (mi / (L- mi)) * (H - Hi)^2
 
 }
 print(allHs)
@@ -76,9 +77,10 @@ expH <- 1/(100000)
 # Test D for significance
 pval <- pnorm( H ,mean =expH, sd = se, lower.tail = FALSE)
 
-
-dfOut <- as.data.frame(c(H, varH, seH, pval))
+dfOut <- as.data.frame(matrix(NA, nrow = 1, ncol = 4))
+dfOut[1,] <- c(H, varH, se, pval)
 colnames(dfOut) <- c("H", "varH", "seH", "pval")
+print(dfOut)
 fwrite(dfOut, outfile, row.names = F, col.names = T, quote = F, sep = "\t")
 
 
