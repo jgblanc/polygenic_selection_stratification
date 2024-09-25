@@ -44,10 +44,13 @@ rule Fstat:
 
 rule add_Block_info:
     input:
-        var = "data/gwas_variance/{gwas}/variance_{chr}.txt"
+        var = "data/gwas_variance/{gwas}/variance_{chr}.txt",
         ldBlocks="data/LD_blocks/big_blocks.bed"
     output:
         output="data/gwas_variance/{gwas}/variance_block_{chr}.txt"
+    resources:
+        mem_mb=38000,
+        time="03:00:00"	
     shell:
         """
         Rscript code/calculate_FGr/add_block_info.R {input.var} {input.ldBlocks} {output}
