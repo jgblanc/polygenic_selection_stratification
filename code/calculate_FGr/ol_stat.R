@@ -17,19 +17,18 @@ outfile = args[3]
 # Add Tm for each chromosome to each other
 data <- fread(betas_in)
 data <- data[,c(1,2,3,12)]
-dfVar <- fread(infile)
+dfVar <- fread(infile_var)
 
 df <- inner_join(dfVar, data)
 print(head(df))
 
-df$BETA <- df$BETA * (1/sqrt(df$Var))
-print(head(df))
+df$BETA <- df$BETA * (sqrt(df$Var)) 
 
-D <- mean(df$BETA^2 * (1/M) * (1/M))
+D <- mean(df$BETA^2)
 print(D)
 
 dfOut <- as.data.frame(D)
-fwrite(Out, outfile, row.names = F, col.names = T, quote = F, sep = "\t")
+fwrite(dfOut, outfile, row.names = F, col.names = T, quote = F, sep = "\t")
 
 
 
