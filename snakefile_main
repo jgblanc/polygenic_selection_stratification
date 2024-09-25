@@ -24,7 +24,7 @@ wildcard_constraints:
 
 rule all:
     input:
-        expand("output/calculate_FGr/{dataset}/FGr_GWAS/{gwas}/{nsnp}/Fstat_{contrasts}.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, nsnp=NSNP, pc=PC, phenotype=PHENOTYPE, covar=COVAR)
+        expand("data/gwas_variance/{gwas}/variance_block_{chr}.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, nsnp=NSNP, pc=PC, phenotype=PHENOTYPE, covar=COVAR)
 
 
 rule Fstat:
@@ -40,6 +40,17 @@ rule Fstat:
     shell:
         """
         Rscript code/calculate_FGr/calc_F_stat.R {params.beta_prefix} {params.var_prefix} {output} {input.ldBlocks}
+        """
+
+rule add_Block_info:
+    input:
+        var = "data/gwas_variance/{gwas}/variance_{chr}.txt"
+        ldBlocks="data/LD_blocks/big_blocks.bed"
+    output:
+        output="data/gwas_variance/{gwas}/variance_block_{chr}.txt"
+    shell:
+        """
+        Rscript code/calculate_FGr/add_block_info.R {input.var} {input.ldBlocks} {output}
         """
 
 rule scale_FGr:
