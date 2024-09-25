@@ -29,7 +29,7 @@ rule all:
 
 rule FGr_GWAS:
     input:
-        Fgr="output/calculate_FGr/{dataset}/final_FGr/{gwas}/{nsnp}/{chrtype_gwas}_{chrtype_test}_{contrasts}.txt"
+        Fgr="output/calculate_FGr/{dataset}/final_FGr/{gwas}/{nsnp}/chr-all_test-all_{contrasts}.txt",
         gwas="data/ids/gwas_ids/{gwas}.txt",
         gp_genos="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen",
         snps="data/{dataset}/variants/{gwas}/{contrasts}/overlappingSNPs_chr{chr}.txt"
