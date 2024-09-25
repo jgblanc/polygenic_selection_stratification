@@ -14,61 +14,28 @@ suppressWarnings(suppressMessages({
 gwas_prefix = args[1]
 out_prefix = args[2]
 r_file = args[3]
-snps_file = args[4]
-ldFile = args[5]
-outfile = args[6]
-outfile_snps = args[7]
-gwas_IDs = args[8]
-chr_num = as.numeric(args[9])
+outfile = args[4]
+outfile_snps = args[5]
+gwas_IDs = args[6]
+chr_num = as.numeric(args[7])
 print(paste0("This Chr num is ", chr_num))
 
 
 # Read in GWAS individuals
 dfGWAS_IDs <- fread(gwas_IDs)
 dfGWAS_IDs <- dfGWAS_IDs %>% select("#FID", "IID", "POP")
-m <- nrow(dfGWAS_IDs)
 
 # Read in and format r
 r <- fread(r_file)
-print(head(r))
-dfSnps <- fread(snps_file)
-colnames(dfSnps) <- "ID"
-print(head(dfSnps))
-r <- inner_join(r, dfSnps)
-r <- r %>% dplyr::select("ID", "ALT", "r")
+r <- r %>% filter("#CHROM" == chr_num) %>% dplyr::select("ID", "ALT", "r")
 colnames(r) <- c("ID", "A1", "BETA")
-print(head(r))
+print(paste0("r had rows: ", nrow(r)))
 
-
-# Separate ID into CHR and BP
-r_blocks <- r %>% separate("ID", into = c("CHR", "BP"), sep = ":", remove = FALSE) %>% filter(CHR == chr_num)
-print(paste0("r blocks has", nrow(r_blocks), " rows"))
-
-# Read in LD block file
-ld <- fread(ldFile)
-
-# Assign SNPs to blocks
-assign_SNP_to_block <- function(CHR, BP, block = ld) {
-
-  # Filter blocks based on snp
-  block_chr <- block %>% filter(chr == CHR)
-  first_start <- as.numeric(block_chr[1, "start"])
-  block_bp <- block_chr %>% filter( (start < BP & stop >= BP) | BP == first_start)
-
-  # Assign
-  block_num <- as.numeric(block_bp[,"block_number"])
-  return(block_num)
-}
-
-# Add block info - takes a while
-r_blocks <- r_blocks %>%
-  mutate(block = apply(., MARGIN = 1, FUN = function(params)assign_SNP_to_block(as.numeric(params[2]), as.numeric(params[3])))) %>%
-  drop_na()
-print(paste0("Now r blocks has", nrow(r_blocks), " rows"))
-
-# Select only SNPs that have a block
-r <- r %>% filter(ID %in% r_blocks$ID)
-print(paste0("Now r has", nrow(r), " rows"))
+# Get r with block info
+r_blocks <- fread(r_file)
+r_blocks <- r_blocks %>% filter("#CHROM" == chr_num) %>% dplyr::select("ID", "ALT", "r", "block")
+colnames(r_blocks) <- c("ID", "A1", "BETA", "block")
+print(paste0("r blocks had rows: ", nrow(r)))
 
 # Save as scoring weights
 fwrite(r, paste0(out_prefix, "_scoringWeights.txt"), row.names = F, col.names = T, quote = F, sep = "\t")
@@ -107,6 +74,10 @@ for (i in 1:numBlocks) {
     dfIDs <- dfFGr[,1:1]
   }
   FGr = as.matrix(dfFGr$BETA_SUM)
+  print(paste0("The number of SNPs in block is ", nsnp_in_block))
+  print(paste0("The variance of FGr block is ", var(FGr)))
+  print(paste0("This should have variance 1 ", var(FGr * sqrt(nsnp_in_block))))
+  print(head(FGr))
 
   # Format output
   col_name <- paste0("block_", block_num)
@@ -114,8 +85,8 @@ for (i in 1:numBlocks) {
   print(head(dfIDs))
 
   # Remove tmp files
-  cmd <- paste("rm", paste0(out_prefix,"_SNPs_", block_num, ".txt"), paste0(out_prefix,".gxt_tmp*") , sep = " ")
-  system(cmd)
+  #cmd <- paste("rm", paste0(out_prefix,"_SNPs_", block_num, ".txt"), paste0(out_prefix,".gxt_tmp*") , sep = " ")
+  #system(cmd)
 
 }
 
