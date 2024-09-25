@@ -9,37 +9,27 @@ suppressWarnings(suppressMessages({
   library(dplyr)
 }))
 
-infile_betas = args[1]
+betas_in = args[1]
 infile_var = args[2]
 outfile = args[3]
 
 
-beta_prefix =
-# Get list of all chromosomes
-chrs <- seq(1,22)
-
 # Add Tm for each chromosome to each other
-data <- fread(paste0(Tm_prefix, "_1.txt"))
-data <- data[,4:ncol(data)]
-
-for (i in 2:22) {
-
-  print(paste0("chr num ",i))
-  # Read in new chromosome
-  filename <- paste0(Tm_prefix,"_", i, ".txt")
-  tmp <- fread(filename)
-  tmp <- tmp[,4:ncol(tmp)]
-  data <- cbind(data, tmp)
-
-}
-data <- as.data.frame(data)
-print(dim(data))
-
-dfBeta <- fread(infile_betas)
+data <- fread(betas_in)
+data <- data[,c(1,2,3,12)]
 dfVar <- fread(infile)
+
+df <- inner_join(dfVar, data)
 print(head(df))
 
-fwrite(df, outfile, row.names = F, col.names = T, quote = F, sep = "\t")
+df$BETA <- df$BETA * (1/sqrt(df$Var))
+print(head(df))
+
+D <- mean(df$BETA^2 * (1/M) * (1/M))
+print(D)
+
+dfOut <- as.data.frame(D)
+fwrite(Out, outfile, row.names = F, col.names = T, quote = F, sep = "\t")
 
 
 
