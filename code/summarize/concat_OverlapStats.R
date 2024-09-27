@@ -42,8 +42,9 @@ for (i in 2:length(args)) {
   df$dataset <- dataset
   df$gwas <- gwas
   df$contrasts <- constrasts
-  df$L <- nsnp
-  colnames(dfOut) <- c(names_from_file, "dataset", "gwas", "contrasts", "L")
+  df$nsnp <- nsnp
+  colnames(dfOut) <- c(names_from_file, "dataset", "gwas", "contrasts", "nsnp")
+  print(head(df))
   dfOut <- rbind(dfOut, df)
 
 }

@@ -30,7 +30,7 @@ for (i in 2:22) {
   data <- cbind(data, tmp)
 
 }
-
+data <- as.data.frame(data)
 
 # Find total number of SNPs
 snp_nums <- fread(paste0(snp_prefix, "_1_SNPcount.txt"))
@@ -74,7 +74,7 @@ se <- sqrt(varD)
 
 # Test D for significance
 pval <- pnorm( D ,mean =expD, sd = se, lower.tail = FALSE)
-
+print(pval)
 
 # Compute SE for entries of FGr - Mair Notes
 allFGrs <- matrix(NA, nrow = nrow(data), ncol = nblocks)
@@ -83,7 +83,6 @@ for (i in 1:nblocks) {
 
   mi <- as.numeric(snp_nums[i, 2])
   FGri <- data[,i] * (1/mi)
-  #FGri <- scale(data[,i])
   allFGrs[,i] <- (mi / (L - mi)) * (FGri - FGr_hat)^2
 
 }
