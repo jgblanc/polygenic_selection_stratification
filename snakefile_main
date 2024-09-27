@@ -24,7 +24,7 @@ wildcard_constraints:
 
 rule all:
     input:
-        expand("data/{dataset}/r/{gwas}/{nsnp}/{contrasts}_all_standardized.rvec", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, nsnp=NSNP, pc=PC, phenotype=PHENOTYPE, covar=COVAR)
+        expand("output/calculate_FGr/{dataset}/overlap_stats/{gwas}/{nsnp}/{contrasts}.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, nsnp=NSNP, pc=PC, phenotype=PHENOTYPE, covar=COVAR)
 
 
 # Get sample variance of GWAS panel genotypes for all GWAS panels

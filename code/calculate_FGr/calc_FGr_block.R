@@ -27,21 +27,25 @@ dfGWAS_IDs <- dfGWAS_IDs %>% select("#FID", "IID", "POP")
 
 # Read in and format r
 r <- fread(r_file)
-r <- r %>% filter("#CHROM" == chr_num) %>% dplyr::select("ID", "ALT", "r")
+L <- nrow(r)
+print(paste0("L is ", L))
+r <- r %>% filter(CHR == chr_num) %>% dplyr::select("ID", "ALT", "r")
 colnames(r) <- c("ID", "A1", "BETA")
 print(paste0("r had rows: ", nrow(r)))
 
 # Get r with block info
 r_blocks <- fread(r_file)
-r_blocks <- r_blocks %>% filter("#CHROM" == chr_num) %>% dplyr::select("ID", "ALT", "r", "block")
+r_blocks <- r_blocks %>% filter(CHR == chr_num) %>% dplyr::select("ID", "ALT", "r", "block")
 colnames(r_blocks) <- c("ID", "A1", "BETA", "block")
 print(paste0("r blocks had rows: ", nrow(r)))
+print(head(r_blocks))
 
 # Save as scoring weights
 fwrite(r, paste0(out_prefix, "_scoringWeights.txt"), row.names = F, col.names = T, quote = F, sep = "\t")
 
 # Loop through blocks and calculate FGr for each block
 numBlocks <- length(unique(r_blocks$block))
+print(unique(r_blocks$block))
 dfSNPs <- as.data.frame(matrix(NA, ncol = 2, nrow = numBlocks))
 colnames(dfSNPs) <- c("Block", "nSNP")
 for (i in 1:numBlocks) {
@@ -76,8 +80,9 @@ for (i in 1:numBlocks) {
   FGr = as.matrix(dfFGr$BETA_SUM)
   print(paste0("The number of SNPs in block is ", nsnp_in_block))
   print(paste0("The variance of FGr block is ", var(FGr)))
-  print(paste0("This should have variance 1 ", var(FGr * sqrt(nsnp_in_block))))
-  print(head(FGr))
+  print(paste0("This should have variance 1 ", var(FGr * (1/sqrt(nsnp_in_block)))))
+  print(paste0("Does this have var 1? ", var(FGr *  (1/sqrt(nsnp_in_block)) * (sqrt(100000/L)))))
+  print(head(dfFGr))
 
   # Format output
   col_name <- paste0("block_", block_num)

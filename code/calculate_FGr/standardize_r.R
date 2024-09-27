@@ -35,10 +35,10 @@ print(head(r))
 print(tail(r))
 
 # Read in all variances
-var_file <- paste0(variance_prefix, "1.txt")
+var_file <- paste0(variance_prefix, "_1.txt")
 dfVar <- fread(var_file)
 for (i in 2:num_chr) {
-  var_file <- paste0(variance_prefix, i, ".txt")
+  var_file <- paste0(variance_prefix, "_", i, ".txt")
   tmp <- fread(var_file)
   dfVar <- rbind(dfVar, tmp)
 }
