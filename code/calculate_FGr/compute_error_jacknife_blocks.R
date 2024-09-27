@@ -65,10 +65,11 @@ for (i in 1:nblocks) {
 
   mi <- as.numeric(snp_nums[i, 2])
   FGri <- data[,i] * (1/sqrt(mi-1))
-  Di <- (t(FGri) %*% FGri) * (1/M) * (1 / (mi -1))
+  Di <- (sum(FGri^2)) * (1/M) * (1 / (mi -1))
   allDs[i] <- (mi / (L - mi)) * (D - Di)^2
 
 }
+print(allDs)
 varD <- mean(allDs)
 se <- sqrt(varD)
 
