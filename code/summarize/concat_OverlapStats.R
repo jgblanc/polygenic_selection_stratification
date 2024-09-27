@@ -13,7 +13,7 @@ suppressWarnings(suppressMessages({
 
 outfile = args[1]
 
-dfOut <- matrix(NA, nrow = 1, ncol = 14)
+dfOut <- matrix(NA, nrow = 1, ncol = 13)
 
 for (i in 2:length(args)) {
 
@@ -50,7 +50,6 @@ for (i in 2:length(args)) {
 
 # Remove first row
 dfOut <- as.data.frame(dfOut[2:nrow(dfOut),])
-#colnames(dfOut) <- c(name_from_file, "dataset", "gwas", "contrasts")
 
 # Save file
 print(dfOut)

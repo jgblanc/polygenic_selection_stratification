@@ -30,8 +30,7 @@ for (i in 2:22) {
   data <- cbind(data, tmp)
 
 }
-data <- as.data.frame(data)
-print(dim(data))
+
 
 # Find total number of SNPs
 snp_nums <- fread(paste0(snp_prefix, "_1_SNPcount.txt"))
@@ -42,8 +41,7 @@ for (i in 2:22) {
   snp_nums <- rbind(snp_nums, fread(paste0(snp_prefix,"_", i, "_SNPcount.txt")))
 
 }
-print(dim(snp_nums))
-print(snp_nums)
+
 
 # Set parameters
 L <- sum(snp_nums$nSNP)
@@ -52,12 +50,9 @@ print(paste0("L is ", L))
 print(paste0("M is ", M))
 
 # Compute D
-#FGr_hat <- apply(data, 1, sum) * (1/L)
-#D <- (t(FGr_hat) %*% FGr_hat * (L^2)) / ((M-1) * L)
-FGr_hat <- (1/sqrt(L)) * apply(data, 1, sum)
+FGr_hat <- (1/sqrt(L-1)) * apply(data, 1, sum)
 print(var(FGr_hat))
-D <- sum(FGr_hat^2)  * (1/(M-1)) * (1/(L-1))
-#D <- (t(FGr_hat) %*% FGr_hat) * (1/(M-1))
+D <- sum(FGr_hat^2)  * (1/M) * (1/(L-1))
 print(D)
 
 # Expected D
@@ -69,14 +64,11 @@ allDs <- allDs <- rep(NA, nblocks)
 for (i in 1:nblocks) {
 
   mi <- as.numeric(snp_nums[i, 2])
-  FGri <- data[,i] * (1/sqrt(mi))
-  Di <- (t(FGri) %*% FGri) / ((M-1) * mi)
-  #FGri <- scale(data[,i])
-  #Di <- (t(FGri) %*% FGri) *(1 /((M-1)* (mi-1)))
+  FGri <- data[,i] * (1/sqrt(mi-1))
+  Di <- (t(FGri) %*% FGri) * (1/M) * (1 / (mi -1))
   allDs[i] <- (mi / (L - mi)) * (D - Di)^2
 
 }
-#print(allDs)
 varD <- mean(allDs)
 se <- sqrt(varD)
 
@@ -105,16 +97,11 @@ error <- jkVar / varFGr
 # Final signal
 signal <- 1 - error
 
-# Find Z
-Z <- D
-
-# Get traceK
-trK <- (M-1)
 
 # Make output table
-dfOut <- as.data.frame(matrix(NA, nrow = 1, ncol = 10))
-colnames(dfOut) <- c("D","ExpD", "varD", "pvalD","Z", "trK", "jkFGr", "varFGr", "error", "signal")
-dfOut[1,] <- c(D, expD, varD, pval, Z, trK, jkVar, varFGr, error, signal)
+dfOut <- as.data.frame(matrix(NA, nrow = 1, ncol = 9))
+colnames(dfOut) <- c("H", "varH", "pvalH","M", "L", "jkFGr", "varFGr", "error", "signal")
+dfOut[1,] <- c(D, varD, pval, M, L, jkVar, varFGr, error, signal)
 print(dfOut)
 fwrite(dfOut, outfile, row.names = F, col.names = T, quote = F, sep = "\t")
 
