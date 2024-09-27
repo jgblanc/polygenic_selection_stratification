@@ -49,8 +49,9 @@ M <- nrow(data)
 print(paste0("L is ", L))
 print(paste0("M is ", M))
 
+
 # Compute D
-FGr_hat <- (1/sqrt(L-1)) * apply(data, 1, sum)
+FGr_hat <- (1/sqrt(L-1)) * apply(data, 1, sum) * sqrt(M/L)
 print(var(FGr_hat))
 D <- sum(FGr_hat^2)  * (1/M) * (1/(L-1))
 print(D)
@@ -60,16 +61,16 @@ expD <- 1/(L-1)
 
 # Compute SE for D
 nblocks <- ncol(data)
+print(nblocks)
 allDs <- allDs <- rep(NA, nblocks)
 for (i in 1:nblocks) {
 
   mi <- as.numeric(snp_nums[i, 2])
-  FGri <- data[,i] * (1/sqrt(mi-1))
-  Di <- (sum(FGri^2)) * (1/M) * (1 / (mi -1))
+  FGri <- data[,i] * (1/sqrt(mi-1)) * sqrt(M/L)
+  Di <- (sum(FGri^2)) * (1/M) * (1 / (L -1))
   allDs[i] <- (mi / (L - mi)) * (D - Di)^2
 
 }
-print(allDs)
 varD <- mean(allDs)
 se <- sqrt(varD)
 
