@@ -215,11 +215,12 @@ tmp2 <- fread("../endpoints/InUKBB/OverlapStats.txt")
 tmp3 <- fread("../endpoints/adnaSel/OverlapStats.txt")
 tmp4 <- fread("../endpoints/SDS/OverlapStats.txt")
 
-dfAllOverlap <- rbind(tmp1, tmp2, tmp3, tmp4) %>% separate(gwas, into = c("tmp", "gwas"), sep = "e")
+dfAllOverlap <- rbind(tmp1, tmp2, tmp3, tmp4)
+dfAllOverlap <- dfAllOverlap%>% separate(gwas, into = c("tmp", "gwas"), sep = "e")
 dfAllOverlap$gwas <- factor(dfAllOverlap$gwas, levels = c( "5", "10", "50", "200")) 
 
-pl <- dfAllOverlap %>% ggplot(aes(x = Z, y = error, color = gwas)) + geom_point(size = 2.5) + scale_x_log10() + scale_y_log10() + xlab("Proportion of variance explained (H)") + ylab(TeX("Error ($\\hat{e}_{F_{Gr}}$)"))  + theme_bw(base_size = 14) + scale_color_manual(values = c("purple1", "darkorange", "skyblue2", "seagreen"), name= TeX("Sampling distance ($\\epsilon$)"))  + theme(panel.grid.minor = element_line(linetype = "dashed"))
-
+pl <- dfAllOverlap %>% ggplot(aes(x = H, y = error, color = gwas)) + geom_point(size = 2.5) + scale_x_log10() + scale_y_log10() + xlab("Proportion of variance explained (H)") + ylab(TeX("Error ($\\hat{e}_{F_{Gr}}$)"))  + theme_bw(base_size = 14) + scale_color_manual(values = c("purple1", "darkorange", "skyblue2", "seagreen"), name= TeX("Sampling distance ($\\epsilon$)"))  + theme(panel.grid.minor = element_line(linetype = "dashed"))
+pl
 #ggsave("~/Downloads/FGrError.png", pl, height = 5, width = 9)
 ```
 
@@ -300,7 +301,7 @@ ggsave("~/Desktop/tmp.png", pl, height = 2.5, width = 14)
 # aDNAsel
 library(ggh4x)
 
-dfPlot <- dfAllC %>% filter(contrasts %in% c("BronzeAge", "EuropeanNeolithic", "Historical"))
+dfPlot <- dfAllOverlap %>% filter(contrasts %in% c("BronzeAge", "EuropeanNeolithic", "Historical"))
 
 custom_y <- list(
   scale_y_continuous(limits = c(0, 1)),
@@ -309,7 +310,17 @@ custom_y <- list(
 )
 
 
-pl <- dfPlot %>% ggplot(aes(x = PC, y = Ratio, color = gwas)) + geom_point(size =1.5) + geom_line() + facet_wrap(~contrasts, nrow =1, scales = "free_y")  + geom_hline(yintercept = 1, color = "red", linetype = "dashed") + theme_bw(base_size = 12) + scale_color_manual(values = c("purple1", "darkorange", "skyblue2", "seagreen"), name= TeX("Sampling distance ($\\epsilon$)")) + theme(panel.grid.minor = element_line(linetype = "dashed"), legend.position = "none", strip.background=element_rect(colour="black",fill="white")) + ylab(TeX("$R^2_J / \\hat{\\gamma}_{F_{Gr}}$")) + facetted_pos_scales(y = custom_y)
+dfPlot %>% ggplot(aes(x = PC, y = Ratio, color = gwas)) + geom_point(size =1.5) + geom_line() + facet_wrap(~contrasts, nrow =1, scales = "free_y")  + geom_hline(yintercept = 1, color = "red", linetype = "dashed") + theme_bw(base_size = 12) + scale_color_manual(values = c("purple1", "darkorange", "skyblue2", "seagreen"), name= TeX("Sampling distance ($\\epsilon$)")) + theme(panel.grid.minor = element_line(linetype = "dashed"), legend.position = "none", strip.background=element_rect(colour="black",fill="white")) + ylab(TeX("$R^2_J / \\hat{\\gamma}_{F_{Gr}}$")) + facetted_pos_scales(y = custom_y)
+
+
+
+
+
+dfPlot %>% ggplot(aes(x = gwas, y = H, color = gwas)) + geom_point(size =1.5) + facet_wrap(~contrasts, nrow =1)  + geom_point(aes(x = gwas, y = 1/L), color = "red") + theme_bw(base_size = 12) + scale_color_manual(values = c("purple1", "darkorange", "skyblue2", "seagreen"), name= TeX("Sampling distance ($\\epsilon$)")) + theme(panel.grid.minor = element_line(linetype = "dashed"), legend.position = "none", strip.background=element_rect(colour="black",fill="white")) 
+
+
+
+
 pl
 ggsave("~/Desktop/tmp.png", pl, height = 2.5, width = 14)
 ```
