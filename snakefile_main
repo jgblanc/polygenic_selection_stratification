@@ -3,7 +3,7 @@ DATASET = ["adnaSel"]
 CHR = []
 for i in range(1, 23):
   CHR.append(str(i))
-CONTRASTS = ["Historical"]
+CONTRASTS = ["Historical", "BronzeAge", "EuropeanNeolithic"]
 GWAS= ["e5", "e10", "e50", "e200"]
 CHRTYPE_GWAS = ["chr-even", "chr-all"]
 CHRTYPE_TEST = ["test-odd", "test-all"]
@@ -24,7 +24,7 @@ wildcard_constraints:
 
 rule all:
     input:
-        expand("data/gwas_variance/{gwas}/variance_block_{chr}.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, nsnp=NSNP, pc=PC, phenotype=PHENOTYPE, covar=COVAR)
+        expand("data/{dataset}/r/{gwas}/{nsnp}/{contrasts}_all_standardized.rvec", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, nsnp=NSNP, pc=PC, phenotype=PHENOTYPE, covar=COVAR)
 
 
 # Get sample variance of GWAS panel genotypes for all GWAS panels
