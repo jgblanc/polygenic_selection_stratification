@@ -670,6 +670,7 @@ chrs <- seq(1,22)
 
 # Add Tm for each chromosome to each other
 data <- fread(paste0(Tm_prefix, "_1.txt"))
+
 data <- data[,4:ncol(data)]
 
 for (i in 2:22) {
