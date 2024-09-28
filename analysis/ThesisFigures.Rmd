@@ -1,0 +1,94 @@
+---
+title: "ThesisFigures"
+output: html_document
+date: "2024-09-28"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library("gridExtra")
+```
+
+## Overlap Stats
+
+```{r}
+# Combine all data
+tmp1 <- fread("../endpoints/HGDP1KG/OverlapStats.txt")
+tmp2 <- fread("../endpoints/InUKBB/OverlapStats.txt")
+tmp3 <- fread("../endpoints/adnaSel/OverlapStats.txt")
+tmp4 <- fread("../endpoints/SDS/OverlapStats.txt")
+
+# Format Data
+dfAllOverlap <- rbind(tmp1, tmp2, tmp3, tmp4)
+dfAllOverlap <- dfAllOverlap%>% separate(gwas, into = c("tmp", "gwas"), sep = "e")
+dfAllOverlap$gwas <- factor(dfAllOverlap$gwas, levels = c( "5", "10", "50", "200")) 
+rep_str = c("England" = "ENG","Wales" = "WAL", "Scotland" = "SCT","NorthernIreland" = "NI","RepublicOfIrelend" = "RoI" )
+dfAllOverlap$contrasts <- str_replace_all(dfAllOverlap$contrasts, rep_str)
+
+# Bonferonni correction 
+dfAllOverlap$pAjust <- p.adjust(dfAllOverlap$pvalH, method = "bonferroni")
+ci <- qnorm(1 -(0.025/nrow(dfAllOverlap)))
+dfAllOverlap$lc <- dfAllOverlap$H - (ci * sqrt(dfAllOverlap$varH)) 
+dfAllOverlap$uc <- dfAllOverlap$H + (ci * sqrt(dfAllOverlap$varH)) 
+```
+
+HGDP1KG - Continental
+```{r}
+dfPlot <- dfAllOverlap %>% filter(contrasts %in%c("eas-nfe","eas-sas","eas-afr", "eas-amr", "nfe-sas","nfe-afr", "nfe-amr","sas-afr", "sas-amr", "afr-amr"))
+dfPlot$contrasts <- factor(dfPlot$contrasts, levels = c("eas-nfe","eas-sas","eas-afr", "eas-amr", "nfe-sas","nfe-afr", "nfe-amr","sas-afr", "sas-amr", "afr-amr"))  
+
+plCont <- dfPlot %>% ggplot(aes(x =gwas, y =H, color = gwas))  + geom_point(size =1.5) + facet_wrap(~contrasts, nrow =1) + theme_bw(base_size = 12) + scale_color_manual(values = c("purple1", "darkorange", "skyblue2", "seagreen"), name= TeX("Sampling distance ($\\epsilon$)")) + theme( legend.position = "none", strip.background=element_rect(colour="black",fill="white"), axis.text.x = element_text(size = 8)) + ylab("") + scale_y_log10() + xlab("") +geom_segment(aes(x = as.numeric(gwas) - 0.4, xend = as.numeric(gwas) + 0.4, y = 1/L, yend = 1/L), color = "red") + geom_errorbar(aes(x = gwas, ymin = lc, ymax = uc), width = 0.6) + theme(plot.margin = margin(t = 0.5, b = 0.5))
+plCont
+```
+
+HGDP - Lat/Long/SDI 
+```{r}
+dfPlot <- dfAllOverlap %>% filter(contrasts %in%c("eurasia-lat", "eurasia-long", "eur-lat", "eur-long", "sdi-eur"))
+dfPlot$contrasts <- factor(dfPlot$contrasts, levels = c("eurasia-lat", "eurasia-long", "eur-lat", "eur-long", "sdi-eur"))  
+
+plLat <- dfPlot %>% ggplot(aes(x =gwas, y =H, color = gwas))  + geom_point(size =2) + facet_wrap(~contrasts, nrow =1) + theme_bw(base_size = 12) + scale_color_manual(values = c("purple1", "darkorange", "skyblue2", "seagreen"), name= TeX("Sampling distance ($\\epsilon$)")) + theme( legend.position = "none", strip.background=element_rect(colour="black",fill="white")) + ylab("") + scale_y_log10() + xlab("") +geom_segment(aes(x = as.numeric(gwas) - 0.4, xend = as.numeric(gwas) + 0.4, y = 1/L, yend = 1/L), color = "red") + geom_errorbar(aes(x = gwas, ymin = lc, ymax = uc), width = 0.5) + theme(plot.margin = margin(t = 0.5, b = 0.5))
+plLat
+```
+
+InUKBB  
+```{r}
+dfPlot <- dfAllOverlap %>% filter(contrasts %in%c("ENG-NI", "ENG-RoI", "ENG-SCT", "ENG-WAL", "NI-RoI", "NI-SCT", "NI-WAL", "RoI-SCT", "RoI-WAL", "SCT-WAL"))
+dfPlot$contrasts <- factor(dfPlot$contrasts, levels =c("ENG-NI", "ENG-RoI", "ENG-SCT", "ENG-WAL", "NI-RoI", "NI-SCT", "NI-WAL", "RoI-SCT", "RoI-WAL", "SCT-WAL"))  
+
+plInUKBB <- dfPlot %>% ggplot(aes(x =gwas, y =H, color = gwas))  + geom_point(size =1.5) + facet_wrap(~contrasts, nrow =1) + theme_bw(base_size = 12) + scale_color_manual(values = c("purple1", "darkorange", "skyblue2", "seagreen"), name= TeX("Sampling distance ($\\epsilon$)")) + theme( legend.position = "none", strip.background=element_rect(colour="black",fill="white"), axis.text.x = element_text(size = 8)) + ylab("") + scale_y_log10() + xlab("") +geom_segment(aes(x = as.numeric(gwas) - 0.4, xend = as.numeric(gwas) + 0.4, y = 1/L, yend = 1/L), color = "red") + geom_errorbar(aes(x = gwas, ymin = lc, ymax = uc), width = 0.6) + theme(plot.margin = margin(t = 0.5, b = 0.5))
+plInUKBB
+```
+
+aDNA  
+```{r}
+dfPlot <- dfAllOverlap %>% filter(contrasts %in%c("Historical", "BronzeAge", "EuropeanNeolithic"))
+  
+plaDNA <- dfPlot %>% ggplot(aes(x =gwas, y =H, color = gwas))  + geom_point(size =2.2) + facet_wrap(~contrasts, nrow =1) + theme_bw(base_size = 12) + scale_color_manual(values = c("purple1", "darkorange", "skyblue2", "seagreen"), name= TeX("Sampling distance ($\\epsilon$)")) + theme( legend.position = "none", strip.background=element_rect(colour="black",fill="white")) + ylab("") + scale_y_log10() + xlab("") +geom_segment(aes(x = as.numeric(gwas) - 0.4, xend = as.numeric(gwas) + 0.4, y = 1/L, yend = 1/L), color = "red") + geom_errorbar(aes(x = gwas, ymin = lc, ymax = uc), width = 0.4) + theme(plot.margin = margin(t = 0.5, b = 0.5))
+plaDNA
+```
+
+SDS 
+```{r}
+dfPlot <- dfAllOverlap %>% filter(contrasts %in%c("Han", "UK10K"))
+  
+plSDS <- dfPlot %>% ggplot(aes(x =gwas, y =H, color = gwas))  + geom_point(size =2.2) + facet_wrap(~contrasts, nrow =1) + theme_bw(base_size = 12) + scale_color_manual(values = c("purple1", "darkorange", "skyblue2", "seagreen"), name= TeX("Sampling distance ($\\epsilon$)")) + theme( legend.position = "none", strip.background=element_rect(colour="black",fill="white")) + ylab("") + scale_y_log10() + xlab("") +geom_segment(aes(x = as.numeric(gwas) - 0.4, xend = as.numeric(gwas) + 0.4, y = 1/L, yend = 1/L), color = "red") + geom_errorbar(aes(x = gwas, ymin = lc, ymax = uc), width = 0.4) + theme(plot.margin = margin(t = 0.5, b = 0.5))
+plSDS
+```
+
+Combine Figures
+```{r}
+pl <- grid.arrange(plCont, plLat, plInUKBB, plaDNA, plSDS, nrow = 5)
+ggsave("~/Desktop/OL.png", pl, height = 7, width = 9)
+```
+
+
+
+## Error Figure
+
+```{r}
+pl <- dfAllOverlap %>% ggplot(aes(x = H, y = error, color = gwas)) + geom_point(size = 2.5) + scale_x_log10() + scale_y_log10() + xlab("Proportion of variance explained (H)") + ylab(TeX("Error ($\\hat{e}_{F_{Gr}}$)"))  + theme_bw(base_size = 14) + scale_color_manual(values = c("purple1", "darkorange", "skyblue2", "seagreen"), name= TeX("Sampling distance ($\\epsilon$)"))  + theme(panel.grid.minor = element_line(linetype = "dashed"))
+pl
+#ggsave("~/Downloads/FGrError.png", pl, height = 5, width = 9)
+```
+

@@ -24,7 +24,7 @@ wildcard_constraints:
 
 rule all:
     input:
-        expand("endpoints/{dataset}/OverlapStats.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, nsnp=NSNP, pc=PC, phenotype=PHENOTYPE, covar=COVAR)
+        expand("endpoints/{dataset}/PCStats.txt", chr=CHR, dataset = DATASET, contrasts=CONTRASTS, gwas=GWAS, nsnp=NSNP, pc=PC, phenotype=PHENOTYPE, covar=COVAR)
 
 
 # Get sample variance of GWAS panel genotypes for all GWAS panels
