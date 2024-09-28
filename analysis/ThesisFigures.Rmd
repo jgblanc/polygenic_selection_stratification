@@ -89,6 +89,6 @@ ggsave("~/Desktop/OL.png", pl, height = 7, width = 9)
 ```{r}
 pl <- dfAllOverlap %>% ggplot(aes(x = H, y = error, color = gwas)) + geom_point(size = 2.5) + scale_x_log10() + scale_y_log10() + xlab("Proportion of variance explained (H)") + ylab(TeX("Error ($\\hat{e}_{F_{Gr}}$)"))  + theme_bw(base_size = 14) + scale_color_manual(values = c("purple1", "darkorange", "skyblue2", "seagreen"), name= TeX("Sampling distance ($\\epsilon$)"))  + theme(panel.grid.minor = element_line(linetype = "dashed"))
 pl
-#ggsave("~/Downloads/FGrError.png", pl, height = 5, width = 9)
+ggsave("~/Downloads/FGrError.png", pl, height = 5, width = 9)
 ```
 
