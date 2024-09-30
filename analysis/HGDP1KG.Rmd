@@ -22,7 +22,7 @@ library(latex2exp)
 df <- fread("../data/HGDP1KG/gnomad_meta_updated.tsv", sep = "\t")
 
 # Select relevant columns (for now)
-dfFilter <- df %>% select("s","project_meta.project_subpop" , "latitude" ,  "longitude",
+dfFilter <- df %>% dplyr::select("project_meta.project_subpop" , "latitude" ,  "longitude",
                    "population",  "region", "project_meta.project_pop")
 colnames(dfFilter)[1] <- "IID"
 
@@ -75,7 +75,7 @@ Similar to the analysis in [Berg et al](https://elifesciences.org/articles/39725
 ```{r}
 # Select Eurasian Sample
 dfEur <- dfFilter %>% filter(project_meta.project_pop %in% c("nfe"))
-dfEur <- dfEur %>% select("IID", "project_meta.project_pop", "population", "latitude", "longitude") %>% 
+dfEur <- dfEur %>% dplyr::select("IID", "project_meta.project_pop", "population", "latitude", "longitude") %>% 
   filter(population != "CEU")
 colnames(dfEur) <- c("IID","pop", "subpop", "lat", "long")
 dfEur <- dfEur %>% mutate(FID = 0) %>% select(FID, everything())
@@ -107,7 +107,7 @@ Similar to the analysis in [Chen et al](https://www.sciencedirect.com/science/ar
 dfEur <- dfFilter %>% filter(project_meta.project_pop %in% c("nfe"))
 dfEur <- dfEur %>% select("IID", "project_meta.project_pop", "population","latitude", "longitude") 
 colnames(dfEur) <- c("IID", "pop", "subpop", "lat", "long")
-dfEur <- dfEur %>% mutate(SDI = case_when(subpop == "Sardinian" ~ "sdi", TRUE ~ "eur")) %>% select(IID, SDI, everything())
+dfEur <- dfEur %>% mutate(SDI = case_when(subpop == "Sardinian" ~ "sdi", TRUE ~ "eur")) %>% dplyr::select(IID, SDI, everything())
 dfEur <- dfEur %>% mutate(FID = 0) %>% select(FID, everything())
 
 # Save IDs 
