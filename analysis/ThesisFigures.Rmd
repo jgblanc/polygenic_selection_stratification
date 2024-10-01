@@ -569,15 +569,31 @@ Manhattan Plot
 pl2 <- dfSDS %>% filter(pAjust <= 0.05) %>% filter(pc == 40) %>% ggplot(aes(x =Ratio, y = -log10(pval), color = gwas,shape = contrasts)) + geom_point(size = 3) + geom_hline(yintercept = -log10(0.05/17), color = "gray60", linetype = "dashed", size = 1) + scale_color_manual(values = c("purple1", "darkorange", "skyblue2", "seagreen"), name= TeX("Sampling distance ($\\epsilon$)")) + theme_classic(base_size =16) + xlab(TeX("$R^2_{40} / \\hat{\\gamma}_{F_{Gr}}$")) + theme(legend.position = "none") + geom_hline(yintercept = -log10(0.05/1020), color = "lightgoldenrod3", linetype = "dashed", size = 1) + ylim(c(0,5)) + theme(plot.margin = margin(r = 0.05)) + scale_shape_manual(values = c(16,17))
 pl2
 
-pl1 <- dfSDS %>% filter(pAjust > 0.05) %>% filter(pc == 40) %>% ggplot(aes(x =contrasts, y = -log10(pval), color = gwas, shape = contrasts)) + geom_point(size = 3) + geom_hline(yintercept = -log10(0.05/17), color = "gray60", linetype = "dashed", size = 1) + scale_color_manual(values = c("purple1", "darkorange", "skyblue2", "seagreen"), name= TeX("Sampling distance ($\\epsilon$)")) + theme_classic(base_size =16) + theme(legend.position = "none") + geom_hline(yintercept = -log10(0.05/1020), color = "lightgoldenrod3", linetype = "dashed", size = 1) + theme(axis.text.x = element_blank(), axis.title.x = element_text(size = 12), axis.ticks.x = element_blank(), axis.text.y = element_blank())+ ylab("") + xlab("") + ylim(c(0, 5)) + theme(plot.margin = margin(l = 0.1)) + scale_shape_manual(values = c(16,17))
+pl1 <- dfSDS %>% filter(pAjust > 0.05) %>% filter(pc == 40) %>% ggplot(aes(x =contrasts, y = -log10(pval), color = gwas, shape = contrasts)) + geom_point(size = 3) + geom_hline(yintercept = -log10(0.05/17), color = "gray60", linetype = "dashed", size = 1) + scale_color_manual(values = c("purple1", "darkorange", "skyblue2"), name= TeX("Sampling distance ($\\epsilon$)")) + theme_classic(base_size =16) + theme(legend.position = "none") + geom_hline(yintercept = -log10(0.05/1020), color = "lightgoldenrod3", linetype = "dashed", size = 1) + theme(axis.title.x = element_text(size = 12), axis.text.y = element_blank())+ ylab("") + xlab("") + ylim(c(0, 5)) + theme(plot.margin = margin(l = 0.1)) + scale_shape_manual(values = c(16, 17))
 pl1
 
 ```
 
 ```{r}
 pl <- egg::ggarrange(pl2, pl1, nrow = 1, widths = c(0.75, 0.25))
-ggsave("~/Desktop/HGDPQ.png", pl, height = 4, width = 9)
+ggsave("~/Desktop/SDSQ.png", pl, height = 4, width = 9)
+```
+```{r}
+dfLat <- dfSDS %>% filter(contrasts == "UK10K")
+levels(dfLat$gwas) <- c("5" = TeX("$5\\epsilon$"), "10" = TeX("$10\\epsilon$"), "50" = TeX("$50\\epsilon$"), "200" = TeX("$200\\epsilon$"))
+
+pl1 <- dfLat %>% filter(phenotype == "StandingHeight") %>% mutate(upper = q + 2.97, lower = q - 2.97) %>%  ggplot(aes(x = pc, y = q, color = pc)) + geom_point(size = 3) + facet_wrap(~gwas, nrow = 1,  labeller = labeller(gwas = label_parsed)) + geom_errorbar(aes(ymin = lower, ymax = upper)) + theme_bw(base_size = 16) + scale_color_manual(values = c("goldenrod", "darkred")) + theme(legend.position = "none", strip.background=element_rect(colour="black",fill="white")) + geom_hline(yintercept = 0, color = "red", linetype = "dashed") + ylab(TeX("$\\hat{q}$ (UK10K)")) + xlab("PCs")
+pl1
+ggsave("~/Desktop/heightSDS.png", pl1, width = 7, height = 2.5)
 ```
 
 
+```{r}
+dfLat <- dfSDS %>% filter(contrasts == "UK10K")
+levels(dfLat$gwas) <- c("5" = TeX("$5\\epsilon$"), "10" = TeX("$10\\epsilon$"), "50" = TeX("$50\\epsilon$"), "200" = TeX("$200\\epsilon$"))
+
+pl1 <- dfLat %>% filter(phenotype == "BasophillPercentage") %>% mutate(upper = q + 2.97, lower = q - 2.97) %>%  ggplot(aes(x = pc, y = q, color = pc)) + geom_point(size = 3) + facet_wrap(~gwas, nrow = 1,  labeller = labeller(gwas = label_parsed)) + geom_errorbar(aes(ymin = lower, ymax = upper)) + theme_bw(base_size = 16) + scale_color_manual(values = c("goldenrod", "darkred")) + theme(legend.position = "none", strip.background=element_rect(colour="black",fill="white")) + geom_hline(yintercept = 0, color = "red", linetype = "dashed") + ylab(TeX("$\\hat{q}$ (UK10K)")) + xlab("PCs")
+pl1
+ggsave("~/Desktop/BPSDS.png", pl1, width = 7, height = 2.5)
+```
 
